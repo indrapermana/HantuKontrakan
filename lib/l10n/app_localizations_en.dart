@@ -36,6 +36,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get roomLocked => 'Room locked';
+
+  @override
+  String get roomUnlockLater =>
+      'This room will become available through game progression.';
+
+  @override
   String happinessDetail(int happiness, String mood) {
     return 'Happiness: $happiness ($mood)';
   }

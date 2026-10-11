@@ -7,6 +7,8 @@
   "pendingComplaint": "Complaint: Pocong is bothered by Tuyul",
   "resolvedComplaint": "Complaint resolved and saved",
   "roomTitle": "ROOM {number}",
+  "roomLocked": "Room locked",
+  "roomUnlockLater": "This room will become available through game progression.",
   "happinessDetail": "Happiness: {happiness} ({mood})",
   "neighborCompatibility": "Neighbor compatibility: {modifier}",
   "swapTenant": "Swap room tenants",

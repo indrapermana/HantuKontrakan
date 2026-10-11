@@ -99,7 +99,37 @@ class HomeScreen extends StatelessWidget {
 
   Future<void> _showRoomDetails(BuildContext context, String roomId) async {
     final strings = AppLocalizations.of(context);
-    final room = controller.state.roomById(roomId);
+    final room = controller.state.rooms
+        .where((candidate) => candidate.id == roomId)
+        .firstOrNull;
+    if (room == null) {
+      await showModalBottomSheet<void>(
+        context: context,
+        showDragHandle: true,
+        builder: (context) => Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.roomTitle(_roomNumber(roomId)),
+                key: Key('selected-$roomId'),
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                strings.roomLocked,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(strings.roomUnlockLater),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
     final ghost = room.occupantId == null
         ? null
         : controller.state.ghostById(room.occupantId!);
@@ -113,7 +143,8 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              strings.roomTitle(room.id == 'room_01' ? '01' : '02'),
+              strings.roomTitle(_roomNumber(room.id)),
+              key: Key('selected-${room.id}'),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 12),
@@ -150,6 +181,8 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  String _roomNumber(String roomId) => roomId.split('_').last;
 
   Future<void> _showComplaint(BuildContext context) async {
     final strings = AppLocalizations.of(context);

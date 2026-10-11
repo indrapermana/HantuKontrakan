@@ -10,6 +10,8 @@
   "resolvedComplaint": "Keluhan selesai dan tersimpan",
   "roomTitle": "KAMAR {number}",
   "@roomTitle": {"placeholders": {"number": {"type": "String"}}},
+  "roomLocked": "Kamar terkunci",
+  "roomUnlockLater": "Kamar ini akan tersedia melalui progres permainan.",
   "happinessDetail": "Kebahagiaan: {happiness} ({mood})",
   "@happinessDetail": {"placeholders": {"happiness": {"type": "int"}, "mood": {"type": "String"}}},
   "neighborCompatibility": "Kompatibilitas tetangga: {modifier}",

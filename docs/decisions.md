@@ -19,3 +19,12 @@ Date: 2026-10-11
 - Theme construction lives in `AppTheme` instead of the root widget so later accessibility and visual variants have one configuration boundary.
 - Flutter's generated ARB localization is used with Indonesian and English resources. The device locale is honored automatically; tests inject a locale when validating exact copy.
 - Portrait mode is enforced twice: `SystemChrome` protects the running Flutter view, while Android and iOS manifests prevent platform-level landscape presentation during startup and lifecycle changes.
+
+## HK-002 building prototype decisions
+
+Date: 2026-10-11
+
+- The Flame camera retains its 360×360 fixed design resolution. Four 170×132 rooms fit in a 2×2 grid with the locked upper floor above the two occupied P0 rooms.
+- Rooms 03 and 04 are presentation-only locked placeholders for this ticket. They are not added to persisted simulation state, avoiding premature four-room economy, unlock, or migration behavior before HK-003/HK-010.
+- Each `RoomComponent` owns a stable room ID and funnels `TapCallbacks.onTapUp` through one `select()` path. This keeps pointer handling inside Flame while the selected-room sheet remains Flutter-owned.
+- Selecting a locked placeholder opens a read-only localized sheet containing its room ID. Unlock controls and costs remain deferred to HK-010.

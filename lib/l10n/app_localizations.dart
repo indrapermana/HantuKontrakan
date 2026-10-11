@@ -140,6 +140,18 @@ abstract class AppLocalizations {
   /// **'KAMAR {number}'**
   String roomTitle(String number);
 
+  /// No description provided for @roomLocked.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar terkunci'**
+  String get roomLocked;
+
+  /// No description provided for @roomUnlockLater.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar ini akan tersedia melalui progres permainan.'**
+  String get roomUnlockLater;
+
   /// No description provided for @happinessDetail.
   ///
   /// In id, this message translates to:

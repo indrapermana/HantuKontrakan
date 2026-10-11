@@ -36,6 +36,13 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String get roomLocked => 'Kamar terkunci';
+
+  @override
+  String get roomUnlockLater =>
+      'Kamar ini akan tersedia melalui progres permainan.';
+
+  @override
   String happinessDetail(int happiness, String mood) {
     return 'Kebahagiaan: $happiness ($mood)';
   }

@@ -32,9 +32,25 @@ Verification:
 - `flutter test`: all 12 tests passed, including 3 HK-001 foundation tests and all P0 regressions.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-002 — 2×2 cutaway building
+
+Status: implemented and verified on 2026-10-11.
+
+- Expanded the Flame world to the specified 2×2 cutaway: rooms 03/04 on the upper floor and rooms 01/02 on the ground floor.
+- Preserved Pocong and Tuyul in the existing lower rooms and added visibly locked presentation placeholders for the upper rooms.
+- Kept all four rooms as Flame `TapCallbacks` components and routed their stable IDs into Flutter room sheets; locked rooms show a localized read-only explanation.
+- Added a deterministic world test covering all four IDs, exact grid coordinates, locked-room state, and every selection callback.
+
+Verification:
+
+- Dart formatter completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test`: all 13 tests passed, including the new HK-002 layout/selection test and all prior regressions.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-002 and all later M1/M2 tickets beyond what P0 directly requires.
+- HK-003 and all later M1/M2 tickets beyond what P0 directly requires.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence
