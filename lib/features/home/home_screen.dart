@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../application/game_controller.dart';
 import '../../game/hantu_game.dart';
-import '../../simulation/models/room.dart';
+import '../../l10n/app_localizations.dart';
 import '../../simulation/systems/game_rules.dart';
 import '../../simulation/systems/happiness_system.dart';
 
@@ -17,6 +17,7 @@ class HomeScreen extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
+        final strings = AppLocalizations.of(context);
         if (!controller.isReady) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
@@ -26,7 +27,7 @@ class HomeScreen extends StatelessWidget {
         final pocongHappiness = controller.happinessFor('pocong_01');
         return Scaffold(
           appBar: AppBar(
-            title: const Text('HANTU KONTRAKAN'),
+            title: Text(strings.appTitleUppercase),
             centerTitle: true,
           ),
           body: SafeArea(
@@ -39,12 +40,17 @@ class HomeScreen extends StatelessWidget {
                       const Icon(Icons.monetization_on, color: Colors.amber),
                       const SizedBox(width: 6),
                       Text(
-                        '${state.walletCoins} Koin Arwah',
+                        strings.spiritCoins(state.walletCoins),
                         key: const Key('wallet-coins'),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       const Spacer(),
-                      Text('Pocong $pocongHappiness'),
+                      Text(
+                        strings.ghostHappinessSummary(
+                          'Pocong',
+                          pocongHappiness,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -77,8 +83,8 @@ class HomeScreen extends StatelessWidget {
                       ),
                       label: Text(
                         controller.hasPendingComplaint
-                            ? 'Keluhan: Pocong terganggu Tuyul'
-                            : 'Keluhan selesai dan tersimpan',
+                            ? strings.pendingComplaint
+                            : strings.resolvedComplaint,
                       ),
                     ),
                   ),
@@ -92,6 +98,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   Future<void> _showRoomDetails(BuildContext context, String roomId) async {
+    final strings = AppLocalizations.of(context);
     final room = controller.state.roomById(roomId);
     final ghost = room.occupantId == null
         ? null
@@ -106,7 +113,7 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _roomLabel(room),
+              strings.roomTitle(room.id == 'room_01' ? '01' : '02'),
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 12),
@@ -114,12 +121,15 @@ class HomeScreen extends StatelessWidget {
               Text('${ghost.kind.displayName} — ${ghost.kind.archetype}'),
               const SizedBox(height: 8),
               Text(
-                'Kebahagiaan: ${controller.happinessFor(ghost.id)} '
-                '(${HappinessSystem.moodFor(controller.happinessFor(ghost.id))})',
+                strings.happinessDetail(
+                  controller.happinessFor(ghost.id),
+                  _localizedMood(strings, controller.happinessFor(ghost.id)),
+                ),
               ),
               Text(
-                'Kompatibilitas tetangga: '
-                '${controller.compatibilityFor(ghost.id)}',
+                strings.neighborCompatibility(
+                  controller.compatibilityFor(ghost.id),
+                ),
               ),
               const SizedBox(height: 16),
               SizedBox(
@@ -131,7 +141,7 @@ class HomeScreen extends StatelessWidget {
                     await controller.swapFrom(room.id);
                   },
                   icon: const Icon(Icons.swap_horiz),
-                  label: const Text('Tukar penghuni kamar'),
+                  label: Text(strings.swapTenant),
                 ),
               ),
             ],
@@ -141,35 +151,30 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  String _roomLabel(RoomState room) =>
-      'KAMAR ${room.id == 'room_01' ? '01' : '02'}';
-
   Future<void> _showComplaint(BuildContext context) async {
+    final strings = AppLocalizations.of(context);
     final choice = await showDialog<ComplaintChoice>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('POCONG TIDAK BISA TIDUR!'),
-        content: const Text(
-          'Tuyul terus menghitung koin keras-keras di kamar sebelah. '
-          'Pocong sudah kesal. Apa yang harus dilakukan?',
-        ),
+        title: Text(strings.complaintTitle),
+        content: Text(strings.complaintBody),
         actions: [
           _ChoiceButton(
             key: const Key('choice-soundproof'),
-            title: 'Pasang peredam',
-            effect: '−50 koin, Pocong +20 bahagia',
+            title: strings.installSoundproofing,
+            effect: strings.soundproofingEffect,
             onPressed: () =>
                 Navigator.pop(context, ComplaintChoice.installSoundproofing),
           ),
           _ChoiceButton(
-            title: 'Minta Tuyul tenang',
-            effect: 'Pocong +10, Tuyul −10 bahagia',
+            title: strings.askTuyulCalm,
+            effect: strings.askTuyulCalmEffect,
             onPressed: () =>
                 Navigator.pop(context, ComplaintChoice.askTuyulToCalmDown),
           ),
           _ChoiceButton(
-            title: 'Kasih uang damai',
-            effect: '−25 koin, keduanya +5 bahagia',
+            title: strings.peaceOffering,
+            effect: strings.peaceOfferingEffect,
             onPressed: () =>
                 Navigator.pop(context, ComplaintChoice.peaceOffering),
           ),
@@ -182,11 +187,22 @@ class HomeScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Keluhan selesai. Pocong sekarang '
-          '${controller.happinessFor('pocong_01')} bahagia.',
+          strings.complaintResolvedMessage(
+            controller.happinessFor('pocong_01'),
+          ),
         ),
       ),
     );
+  }
+
+  String _localizedMood(AppLocalizations strings, int happiness) {
+    final mood = HappinessSystem.moodFor(happiness);
+    return switch (mood) {
+      'Senang' => strings.moodHappy,
+      'Nyaman' => strings.moodComfortable,
+      'Tidak senang' => strings.moodUnhappy,
+      _ => strings.moodAngry,
+    };
   }
 }
 

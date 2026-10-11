@@ -8,7 +8,9 @@ void main() {
     tester,
   ) async {
     final saves = MemorySaveService();
-    await tester.pumpWidget(HantuKontrakanApp(saveService: saves));
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('id')),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 

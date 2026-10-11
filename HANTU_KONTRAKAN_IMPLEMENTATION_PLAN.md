@@ -490,7 +490,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 
 ### Milestone M1 — Foundation & building prototype
 
-- [ ] **HK-001** Initialize Flutter/Flame app, portrait lock, routing, theme, localization scaffolding. **Accept:** boots on Android; no landscape reflow.
+- [x] **HK-001** Initialize Flutter/Flame app, portrait lock, routing, theme, localization scaffolding. **Accept:** boots on Android; no landscape reflow.
 - [ ] **HK-002** Create `HantuGame`, camera/world, 2×2 cutaway building, tappable room components. **Accept:** tap each room opens selected room ID.
 - [ ] **HK-003** Pure Dart immutable game state, commands, controller, balance constants. **Accept:** tests construct and update state without Flutter/Flame.
 - [ ] **HK-004** Save/load with schema versioning and safe fallback for corrupt saves. **Accept:** changes survive termination/relaunch; unsupported versions handled deliberately.
