@@ -419,7 +419,7 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-022 and all later tickets.
+- HK-023 and all later tickets.
 - Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
 
 ## Verification evidence
@@ -464,3 +464,33 @@ Verification:
 - Pure-Dart tests verify random incidents remain disabled during onboarding, the Pak RT event bypasses its chaos gate, choice resolution applies once, tutorial progress round-trips under schema version 13, and version-12 saves skip onboarding.
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; tutorial state and transitions remain independent from Flutter and Flame.
 - The implementation-plan HK-021 checkbox is synchronized with this tracker as requested.
+
+### HK-022 — Levels 1–10 and deterministic unlock definitions
+
+Status: implemented and verified on 2026-10-14.
+
+- Added immutable pure-Dart definitions for levels 1–10, cumulative XP thresholds, ghost unlocks, and room eligibility.
+- Added deterministic XP granting and level derivation with invalid grants ignored and XP capped at the level-10 threshold.
+- Added a typed `GrantExperience` command through the domain and application controllers so later mission rewards can use the same persisted transition.
+- Enforced ghost placement gates from the existing ghost unlock levels: Pocong 1, Kuntilanak 2, Tuyul 3, and Genderuwo 5.
+- Connected room 3 and room 4 purchase eligibility to the progression definitions at levels 3 and 5 while retaining their existing 400/800-coin costs.
+- Updated the HK-021 first-rent step to award level-2 XP before Kuntilanak placement, so tutorial placement obeys the normal progression gate.
+- Persisted `playerExperience` under save schema version 14. Older saves derive the minimum XP for their persisted level, preserving existing unlock access after migration.
+
+Implementation decisions and assumptions:
+
+- The plan specifies ten levels and exact unlock levels but leaves XP thresholds unresolved. HK-022 uses cumulative thresholds `0, 100, 250, 450, 700, 1000, 1400, 1900, 2500, 3200`; these are centralized tuning data rather than UI constants.
+- Level is derived only when XP is granted. XP grants are additive, accept positive integers only, and cap at 3200/level 10; they do not decrease levels or overflow beyond the current MVP range.
+- Levels 4 and 6–10 intentionally have no content unlocks yet. Inventing missions, rewards, currencies, or additional content remains outside HK-022 and belongs to HK-023 or later tuning work.
+- Ghost instances may exist in persisted state before they unlock, but unassigned locked ghosts cannot be placed. This keeps stable ghost IDs and save compatibility while making the actual gameplay gate deterministic.
+- Schema 13 and older saves receive the threshold floor for their saved level rather than being reset to level 1 or granted progress beyond what their level already represented.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test`: all 129 tests passed.
+- Progression tests cover all threshold boundaries, exact unlock definitions, chunk-independent XP grants, level-10 capping, invalid-grant no-ops, ghost/room gates, JSON continuation, schema-13 migration, and application-controller reload.
+- The HK-021 widget acceptance flow still passes with the new level-2 gate.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; progression remains pure Dart.
+- The implementation-plan HK-022 checkbox is synchronized with this tracker as requested.

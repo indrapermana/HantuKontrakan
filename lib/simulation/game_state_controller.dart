@@ -44,6 +44,10 @@ class GameStateController {
         claimId,
       ),
       ContinueTutorial() => GameRules.continueTutorial(_state),
+      GrantExperience(:final amount) => GameRules.grantExperience(
+        _state,
+        amount,
+      ),
       ResolveIncident(
         :final incidentId,
         :final choiceId,

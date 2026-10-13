@@ -8,6 +8,7 @@ import '../../game/hantu_game.dart';
 import '../../l10n/app_localizations.dart';
 import '../../simulation/constants/game_balance.dart';
 import '../../simulation/content/incident_definitions.dart';
+import '../../simulation/content/progression_definitions.dart';
 import '../../simulation/models/incident_definition.dart';
 import '../../simulation/systems/game_rules.dart';
 import '../tutorial/tutorial_panel.dart';
@@ -183,7 +184,7 @@ class HomeScreen extends StatelessWidget {
                     ? strings.roomUnlockLater
                     : strings.roomUnlockRequirement(
                         GameBalance.roomUnlockCosts[room.id]!,
-                        GameBalance.roomUnlockLevels[room.id]!,
+                        ProgressionDefinitions.requiredLevelForRoom(room.id),
                       ),
               ),
               if (room != null) ...[
@@ -194,7 +195,9 @@ class HomeScreen extends StatelessWidget {
                     key: Key('unlock-${room.id}'),
                     onPressed:
                         controller.state.playerLevel >=
-                                GameBalance.roomUnlockLevels[room.id]! &&
+                                ProgressionDefinitions.requiredLevelForRoom(
+                                  room.id,
+                                ) &&
                             controller.state.walletCoins >=
                                 GameBalance.roomUnlockCosts[room.id]!
                         ? () async {

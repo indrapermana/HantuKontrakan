@@ -1,4 +1,5 @@
 import '../constants/game_balance.dart';
+import '../content/progression_definitions.dart';
 import 'ghost.dart';
 import 'room.dart';
 import 'tutorial_step.dart';
@@ -10,6 +11,7 @@ class GameState {
     this.chaos = GameBalance.initialChaos,
     this.activeSimulationSeconds = 0,
     this.playerLevel = GameBalance.initialPlayerLevel,
+    this.playerExperience = 0,
     this.reputation = GameBalance.initialReputation,
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
@@ -45,6 +47,9 @@ class GameState {
     if (pendingRentMicrocoins < 0 ||
         rentAccrualRemainder < 0 ||
         rentAccrualRemainder >= GameBalance.secondsPerMinute ||
+        playerLevel < 1 ||
+        playerLevel > ProgressionDefinitions.levels.length ||
+        playerExperience < 0 ||
         reputation < 0 ||
         reputation > GameBalance.maximumReputation ||
         chaos < GameBalance.minimumChaos ||
@@ -66,13 +71,14 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 13;
+  static const int currentSchemaVersion = 14;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
   final int activeSimulationSeconds;
   final int playerLevel;
+  final int playerExperience;
   final int reputation;
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
@@ -199,6 +205,7 @@ class GameState {
     int? chaos,
     int? activeSimulationSeconds,
     int? playerLevel,
+    int? playerExperience,
     int? reputation,
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
@@ -226,6 +233,7 @@ class GameState {
     activeSimulationSeconds:
         activeSimulationSeconds ?? this.activeSimulationSeconds,
     playerLevel: playerLevel ?? this.playerLevel,
+    playerExperience: playerExperience ?? this.playerExperience,
     reputation: reputation ?? this.reputation,
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
@@ -269,6 +277,7 @@ class GameState {
     'chaos': chaos,
     'activeSimulationSeconds': activeSimulationSeconds,
     'playerLevel': playerLevel,
+    'playerExperience': playerExperience,
     'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
@@ -299,7 +308,7 @@ class GameState {
     if (schemaVersion is! int) {
       throw const FormatException('Save schemaVersion must be an integer.');
     }
-    return switch (schemaVersion) {
+    final state = switch (schemaVersion) {
       1 => GameState._fromVersion1Json(json),
       2 => GameState._fromVersion2Json(json),
       3 => GameState._fromVersion3Json(json),
@@ -312,9 +321,18 @@ class GameState {
       10 => GameState._fromVersion10Json(json),
       11 => GameState._fromVersion11Json(json),
       12 => GameState._fromVersion12Json(json),
-      currentSchemaVersion => GameState._fromVersion13Json(json),
+      13 => GameState._fromVersion13Json(json),
+      currentSchemaVersion => GameState._fromVersion14Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
+    if (schemaVersion < currentSchemaVersion) {
+      return state.copyWith(
+        playerExperience: ProgressionDefinitions.byLevel(
+          state.playerLevel,
+        ).requiredExperience,
+      );
+    }
+    return state;
   }
 
   factory GameState._fromVersion1Json(Map<String, Object?> json) {
@@ -494,6 +512,11 @@ class GameState {
           json['tutorialStep']! as String,
         ),
       );
+
+  factory GameState._fromVersion14Json(Map<String, Object?> json) =>
+      GameState._fromVersion13Json(
+        json,
+      ).copyWith(playerExperience: json['playerExperience']! as int);
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)

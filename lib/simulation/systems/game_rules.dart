@@ -7,6 +7,7 @@ import 'chaos_reputation_system.dart';
 import 'event_modifier_system.dart';
 import 'incident_system.dart';
 import 'offline_earnings_system.dart';
+import 'progression_system.dart';
 import 'rent_system.dart';
 import 'repair_system.dart';
 import 'tutorial_system.dart';
@@ -116,7 +117,11 @@ abstract final class GameRules {
       OfflineEarningsSystem.resume(state, timestampMillis);
 
   static GameState placeGhost(GameState state, String ghostId, String roomId) {
-    if (!state.ghosts.any((ghost) => ghost.id == ghostId) ||
+    final ghost = state.ghosts
+        .where((ghost) => ghost.id == ghostId)
+        .firstOrNull;
+    if (ghost == null ||
+        !ProgressionSystem.isGhostUnlocked(state, ghost.kind) ||
         state.roomForGhost(ghostId) != null) {
       return state;
     }
@@ -177,12 +182,10 @@ abstract final class GameRules {
   static GameState unlockRoom(GameState state, String roomId) {
     final room = state.rooms.where((room) => room.id == roomId).firstOrNull;
     final cost = GameBalance.roomUnlockCosts[roomId];
-    final requiredLevel = GameBalance.roomUnlockLevels[roomId];
     if (room == null ||
         room.unlocked ||
         cost == null ||
-        requiredLevel == null ||
-        state.playerLevel < requiredLevel ||
+        !ProgressionSystem.isRoomEligible(state, roomId) ||
         state.walletCoins < cost) {
       return state;
     }
@@ -200,6 +203,9 @@ abstract final class GameRules {
           .toList(growable: false),
     );
   }
+
+  static GameState grantExperience(GameState state, int amount) =>
+      ProgressionSystem.grantExperience(state, amount);
 
   static GameState upgradeRoom(
     GameState state,

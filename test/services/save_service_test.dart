@@ -22,6 +22,8 @@ void main() {
     final seed = GameState.seeded();
     final state = seed.copyWith(
       walletCoins: 123,
+      playerLevel: 5,
+      playerExperience: 800,
       reputation: 77,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
@@ -72,6 +74,8 @@ void main() {
     expect(result, isA<SaveLoaded>());
     final loaded = (result as SaveLoaded).state;
     expect(loaded.walletCoins, 123);
+    expect(loaded.playerLevel, 5);
+    expect(loaded.playerExperience, 800);
     expect(loaded.reputation, 77);
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
     expect(loaded.chaos, 40);
@@ -319,6 +323,22 @@ void main() {
     expect(migrated.schemaVersion, GameState.currentSchemaVersion);
     expect(migrated.completedRepairIds, isEmpty);
     expect(migrated.rooms.every((room) => !room.repairRequired), isTrue);
+  });
+
+  test('version 13 save derives experience from its persisted level', () async {
+    final version13 = GameState.seeded().copyWith(playerLevel: 5).toJson()
+      ..['schemaVersion'] = 13
+      ..remove('playerExperience');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version13),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(migrated.playerLevel, 5);
+    expect(migrated.playerExperience, 700);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

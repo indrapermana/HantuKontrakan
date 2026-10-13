@@ -24,6 +24,8 @@ void main() {
 
       state = GameRules.collectAllRent(state, 'tutorial-rent');
       expect(state.walletCoins, 210);
+      expect(state.playerExperience, 100);
+      expect(state.playerLevel, 2);
       expect(state.tutorialStep, TutorialStep.placeKuntilanak);
 
       state = GameRules.placeGhost(state, 'kuntilanak_01', 'room_02');

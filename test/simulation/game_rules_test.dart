@@ -107,6 +107,8 @@ void main() {
 GameState _placementState() => GameState(
   schemaVersion: GameState.currentSchemaVersion,
   walletCoins: 200,
+  playerLevel: 2,
+  playerExperience: 100,
   ghosts: const [
     GhostState(id: 'pocong_01', kind: GhostKind.pocong),
     GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),

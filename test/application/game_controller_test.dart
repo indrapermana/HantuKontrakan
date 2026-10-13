@@ -96,6 +96,21 @@ void main() {
     expect(reloaded.state.completedRentClaimIds, {'stable-claim'});
   });
 
+  test('experience level and unlock gates survive controller reload', () async {
+    final saves = MemorySaveService();
+    final first = GameController(saveService: saves);
+    await first.initialize();
+    await first.grantExperience(250);
+
+    final reloaded = GameController(saveService: saves);
+    await reloaded.initialize();
+
+    expect(reloaded.state.playerExperience, 250);
+    expect(reloaded.state.playerLevel, 3);
+    await reloaded.placeGhost('tuyul_01', 'room_02');
+    expect(reloaded.state.roomById('room_02').occupantId, 'tuyul_01');
+  });
+
   test('initialize credits persisted offline snapshot exactly once', () async {
     final pausedAt = DateTime.utc(2026, 10, 13, 8);
     final resumedAt = pausedAt.add(const Duration(hours: 2));

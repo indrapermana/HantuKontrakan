@@ -1,6 +1,8 @@
 import '../constants/game_balance.dart';
 import '../models/game_state.dart';
 import '../models/tutorial_step.dart';
+import '../content/progression_definitions.dart';
+import 'progression_system.dart';
 
 abstract final class TutorialSystem {
   static GameState continueTutorial(GameState state) {
@@ -44,7 +46,14 @@ abstract final class TutorialSystem {
 
   static GameState afterRentCollection(GameState state) {
     if (state.tutorialStep != TutorialStep.collectFirstRent) return state;
-    return state.copyWith(tutorialStep: TutorialStep.placeKuntilanak);
+    final next = state.copyWith(tutorialStep: TutorialStep.placeKuntilanak);
+    final levelTwoExperience = ProgressionDefinitions.byLevel(
+      2,
+    ).requiredExperience;
+    return ProgressionSystem.grantExperience(
+      next,
+      levelTwoExperience - next.playerExperience,
+    );
   }
 
   static GameState afterIncidentResolution(GameState state, String incidentId) {

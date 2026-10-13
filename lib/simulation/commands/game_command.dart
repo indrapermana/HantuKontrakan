@@ -72,6 +72,12 @@ final class ContinueTutorial extends GameCommand {
   const ContinueTutorial();
 }
 
+final class GrantExperience extends GameCommand {
+  const GrantExperience({required this.amount});
+
+  final int amount;
+}
+
 final class ResolveIncident extends GameCommand {
   const ResolveIncident({
     required this.incidentId,

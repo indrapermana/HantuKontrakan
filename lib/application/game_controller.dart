@@ -75,6 +75,10 @@ class GameController extends ChangeNotifier {
     await _dispatch(const ContinueTutorial());
   }
 
+  Future<void> grantExperience(int amount) async {
+    await _dispatch(GrantExperience(amount: amount));
+  }
+
   Future<void> moveGhost(
     String ghostId,
     String targetRoomId, {
