@@ -338,10 +338,31 @@ Verification:
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; the scheduler remains pure Dart.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-018 — Ten localized incidents and branching outcomes
+
+Status: implemented and verified on 2026-10-13.
+
+- Authored all ten planned incident concepts as immutable pure-Dart data with stable IDs.
+- Added Indonesian and English title, dialogue, choice label, and post-choice response text for every branch.
+- Added exactly documented coin, per-ghost-kind happiness, chaos, and reputation deltas for 20 deterministic choices.
+- Expanded scheduler eligibility for minimum happiness, reputation, occupied-room, and resident-room durability gates.
+- Added 180–300 active-second authored cooldowns and connected them to the HK-017 scheduler while preserving its three-minute minimum.
+- Added catalog validation and exact-effect snapshot tests covering every incident and choice.
+- Kept effect application, affordability handling, previews, dialogs, and outcome presentation deferred to HK-019.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused incident catalog and scheduler suite: all 12 tests passed.
+- `flutter test`: all 108 tests passed, including the complete bilingual catalog, exact effects for all 20 choices, expanded eligibility, and authored cooldown behavior.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; incident content and rules remain pure Dart.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-018 and all later tickets.
-- Furniture purchasing/inventory, localized incident content and presentation, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
+- HK-019 and all later tickets.
+- Furniture purchasing/inventory, incident decision UI, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
 
 ## Verification evidence
 

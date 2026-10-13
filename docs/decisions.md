@@ -203,3 +203,39 @@ Date: 2026-10-13
 - `unscriptedIncidentsEnabled` is persisted and defaults to true for the currently tutorial-free game and migrated saves. HK-021 will disable it during the opening tutorial and use scripted incidents that bypass this scheduler.
 - At boundaries shared with a chaos tick, chaos updates first and the incident chance uses the resulting chaos value. This matches the rule that incident risk follows current chaos.
 - Save schema advances to version 11 for pending incident identity, cooldown/cap/history timestamps, completed resolution IDs, the scheduler-enabled flag, and RNG state. Version-10 and older saves migrate to an empty scheduler with the canonical seed.
+
+## HK-018 localized incident content decisions
+
+Date: 2026-10-13
+
+- The ten planned concepts are immutable pure-Dart content definitions. Each has stable incident/choice IDs, Indonesian and English title/dialogue/choice/response text, 2 choices, explicit preconditions, and a 180–300 active-second cooldown.
+- HK-018 declares outcomes but does not apply them. HK-019 will consume the exact `IncidentEffects` values, validate affordability, apply happiness/coin/chaos/reputation atomically, and present previews/outcomes in Flutter.
+- Happiness effects target every resident of the listed ghost kind when HK-019 applies them. Four-kind entries mean all resident ghost kinds, not ghosts that have not been unlocked or placed.
+- Preconditions remain state-derived: Pocong requires happiness at most 39; Kuntilanak karaoke requires happiness at least 80; Genderuwo furniture damage requires durability level 0 in Genderuwo's room; Pak RT requires chaos 70; content creator/night market require level 2; ronda requires reputation 40; occupancy-gated events require at least one resident.
+- The catalog validates unique IDs, complete bilingual text, 2–3 choices, and cooldowns of at least the global 180-second minimum. Scheduler cooldown uses the resolved incident's authored cooldown while retaining that global floor.
+- Exact choice effects are locked by a snapshot-style unit test. In `coins / happiness / chaos / reputation` order they are:
+
+| Incident / choice | Exact effects |
+| --- | --- |
+| Pocong / reinforce floor | `-40 / Pocong +15 / -2 / 0` |
+| Pocong / set exercise hours | `0 / Pocong +8 / -4 / +1` |
+| Tuyul / buy sandals | `-20 / Tuyul +12 / -2 / 0` |
+| Tuyul / search rooms | `0 / Tuyul +5, Pocong -3 / +2 / 0` |
+| Pak RT / community fund | `-60 / 0 / -10 / +6` |
+| Pak RT / join patrol | `0 / 0 / -6 / +4` |
+| Outage / emergency lights | `-25 / all +5 / -3 / 0` |
+| Outage / wait | `0 / all -5 / +2 / 0` |
+| Karaoke / soundproofing | `-50 / Kuntilanak +10 / -3 / +2` |
+| Karaoke / encore | `0 / Kuntilanak +15 / +5 / -2` |
+| Genderuwo / carpenter | `-80 / Genderuwo +10 / -2 / +2` |
+| Genderuwo / help repair | `-20 / Genderuwo -5 / -1 / +1` |
+| Ronda / coffee | `-30 / 0 / -4 / +6` |
+| Ronda / hide ghosts | `0 / all -4 / -2 / +1` |
+| Creator / filming | `+50 / all -3 / +4 / -2` |
+| Creator / guided tour | `+30 / all +3 / +2 / +5` |
+| Clothesline / replace | `-35 / 0 / -3 / +4` |
+| Clothesline / follow pegs | `0 / Tuyul +5 / +2 / +2` |
+| Night market / stall | `+40 / all +5 / +5 / +2` |
+| Night market / quiet hours | `-10 / 0 / -4 / +3` |
+
+- No save-schema change is required because the authored catalog is static content and the HK-017 save already persists stable incident IDs.

@@ -2,9 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/simulation/constants/game_balance.dart';
+import 'package:hantu_kontrakan/simulation/content/incident_definitions.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/models/ghost.dart';
 import 'package:hantu_kontrakan/simulation/models/incident_definition.dart';
+import 'package:hantu_kontrakan/simulation/models/room.dart';
 import 'package:hantu_kontrakan/simulation/systems/game_rules.dart';
 import 'package:hantu_kontrakan/simulation/systems/incident_system.dart';
 
@@ -151,6 +153,78 @@ void main() {
     expect(resumed.activeIncidentId, isNull);
     expect(resumed.incidentRandomState, paused.incidentRandomState);
     expect(resumed.unscriptedIncidentSpawnTimes, isEmpty);
+  });
+
+  test('authored happiness and room durability preconditions are enforced', () {
+    final eligibleState = GameState(
+      schemaVersion: GameState.currentSchemaVersion,
+      walletCoins: 200,
+      chaos: 70,
+      playerLevel: 2,
+      ghosts: const [
+        GhostState(
+          id: 'kuntilanak_01',
+          kind: GhostKind.kuntilanak,
+          eventHappinessModifier: 20,
+        ),
+        GhostState(id: 'genderuwo_01', kind: GhostKind.genderuwo),
+      ],
+      rooms: [
+        RoomState(
+          id: 'room_01',
+          column: 0,
+          occupantId: 'kuntilanak_01',
+          roomTagLevels: const {'decorated': 1},
+        ),
+        RoomState(id: 'room_02', column: 3, occupantId: 'genderuwo_01'),
+      ],
+      complaintResolved: false,
+    );
+    final eligibleIds = IncidentSystem.eligibleDefinitions(
+      eligibleState,
+    ).map((definition) => definition.id);
+
+    expect(eligibleIds, contains('kuntilanak_karaoke'));
+    expect(eligibleIds, contains('genderuwo_breaks_furniture'));
+
+    final strengthened = eligibleState.copyWith(
+      rooms: [
+        eligibleState.roomById('room_01'),
+        RoomState(
+          id: 'room_02',
+          column: 3,
+          occupantId: 'genderuwo_01',
+          upgrades: const {RoomAttribute.durability: 1},
+        ),
+      ],
+    );
+    expect(
+      IncidentSystem.eligibleDefinitions(
+        strengthened,
+      ).map((definition) => definition.id),
+      isNot(contains('genderuwo_breaks_furniture')),
+    );
+  });
+
+  test('authored incident cooldown extends the global minimum', () {
+    const random = _AlwaysZeroRandom();
+    final coolingDown = GameState.seeded().copyWith(
+      chaos: 100,
+      activeSimulationSeconds: 180,
+      lastIncidentResolvedAtActiveSecond: 0,
+      recentIncidentIds: const ['pak_rt_complaint'],
+    );
+
+    expect(
+      IncidentSystem.check(coolingDown, randomSource: random).activeIncidentId,
+      isNull,
+    );
+    final allowed = IncidentSystem.check(
+      coolingDown.copyWith(activeSimulationSeconds: 240),
+      randomSource: random,
+    );
+    expect(allowed.activeIncidentId, isNotNull);
+    expect(IncidentDefinitions.byId('pak_rt_complaint')?.cooldownSeconds, 240);
   });
 }
 

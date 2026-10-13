@@ -2,6 +2,7 @@ import '../constants/game_balance.dart';
 import '../content/incident_definitions.dart';
 import '../models/game_state.dart';
 import '../models/incident_definition.dart';
+import '../models/room.dart';
 import 'happiness_system.dart';
 
 class IncidentRandomDraw {
@@ -48,23 +49,45 @@ abstract final class IncidentSystem {
   }) => definitions
       .where((definition) {
         if (state.playerLevel < (definition.minimumPlayerLevel ?? 0) ||
-            state.chaos < (definition.minimumChaos ?? 0)) {
+            state.chaos < (definition.minimumChaos ?? 0) ||
+            state.reputation < (definition.minimumReputation ?? 0)) {
+          return false;
+        }
+        final occupiedRooms = state.rooms
+            .where((room) => room.occupantId != null)
+            .toList(growable: false);
+        if (definition.requiresOccupiedRoom && occupiedRooms.isEmpty) {
           return false;
         }
         final requiredKind = definition.requiredGhostKind;
-        if (requiredKind == null) return true;
-        final residents = state.rooms
-            .where((room) => room.occupantId != null)
-            .map((room) => state.ghostById(room.occupantId!))
-            .where((ghost) => ghost.kind == requiredKind);
-        if (residents.isEmpty) return false;
+        final matchingRooms = requiredKind == null
+            ? occupiedRooms
+            : occupiedRooms
+                  .where(
+                    (room) =>
+                        state.ghostById(room.occupantId!).kind == requiredKind,
+                  )
+                  .toList(growable: false);
+        if (requiredKind != null && matchingRooms.isEmpty) return false;
+        final maximumDurability = definition.maximumResidentRoomDurabilityLevel;
+        if (maximumDurability != null &&
+            !matchingRooms.any(
+              (room) =>
+                  room.levelFor(RoomAttribute.durability) <= maximumDurability,
+            )) {
+          return false;
+        }
+        final residents = matchingRooms.map(
+          (room) => state.ghostById(room.occupantId!),
+        );
         final maximumHappiness = definition.maximumGhostHappiness;
-        return maximumHappiness == null ||
-            residents.any(
-              (ghost) =>
-                  HappinessSystem.happinessFor(state, ghost.id) <=
-                  maximumHappiness,
-            );
+        final minimumHappiness = definition.minimumGhostHappiness;
+        if (maximumHappiness == null && minimumHappiness == null) return true;
+        return residents.any((ghost) {
+          final happiness = HappinessSystem.happinessFor(state, ghost.id);
+          return happiness <= (maximumHappiness ?? 100) &&
+              happiness >= (minimumHappiness ?? 0);
+        });
       })
       .toList(growable: false);
 
@@ -77,9 +100,21 @@ abstract final class IncidentSystem {
       return state;
     }
     final resolvedAt = state.lastIncidentResolvedAtActiveSecond;
+    final lastIncident = state.recentIncidentIds.isEmpty
+        ? null
+        : definitions
+              .where(
+                (definition) => definition.id == state.recentIncidentIds.last,
+              )
+              .firstOrNull;
+    final requiredCooldown = lastIncident == null
+        ? GameBalance.incidentCooldownSeconds
+        : lastIncident.cooldownSeconds.clamp(
+            GameBalance.incidentCooldownSeconds,
+            1 << 31,
+          );
     if (resolvedAt != null &&
-        state.activeSimulationSeconds - resolvedAt <
-            GameBalance.incidentCooldownSeconds) {
+        state.activeSimulationSeconds - resolvedAt < requiredCooldown) {
       return state;
     }
     final windowStart =
