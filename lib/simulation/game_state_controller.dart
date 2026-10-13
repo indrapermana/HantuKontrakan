@@ -56,6 +56,10 @@ class GameStateController {
         _state,
         languageCode,
       ),
+      SetAnalyticsConsent(:final granted) => GameRules.setAnalyticsConsent(
+        _state,
+        granted,
+      ),
       ResolveIncident(
         :final incidentId,
         :final choiceId,

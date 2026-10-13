@@ -1,11 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 import '../services/save_service.dart';
+import '../services/analytics_service.dart';
 import '../simulation/commands/game_command.dart';
 import '../simulation/constants/game_balance.dart';
 import '../simulation/game_state_controller.dart';
 import '../simulation/models/game_state.dart';
 import '../simulation/models/room.dart';
+import '../simulation/models/tutorial_step.dart';
 import '../simulation/systems/game_rules.dart';
 import '../simulation/systems/happiness_system.dart';
 import '../simulation/systems/repair_system.dart';
@@ -14,13 +16,16 @@ import 'simulation_runtime.dart';
 class GameController extends ChangeNotifier {
   GameController({
     required SaveService saveService,
+    AnalyticsService analyticsService = const NoopAnalyticsService(),
     GameClock clock = const SystemGameClock(),
     int randomSeed = GameBalance.defaultRandomSeed,
   }) : _saveService = saveService,
+       _analyticsService = analyticsService,
        _clock = clock,
        _randomSource = SeededRandomSource(randomSeed);
 
   final SaveService _saveService;
+  final AnalyticsService _analyticsService;
   final GameClock _clock;
   final SeededRandomSource _randomSource;
   int _rentClaimSequence = 0;
@@ -59,12 +64,21 @@ class GameController extends ChangeNotifier {
       SaveNotFound() => GameState.newGame(),
       SaveRejected() => GameState.seeded(),
     });
+    final beforeResume = state;
     final resumed = _domainController.dispatch(
       ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
     );
     if (resumed) await _saveService.save(state);
     _isReady = true;
     notifyListeners();
+    if (resumed) {
+      await _recordTransition(
+        ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
+        beforeResume,
+        state,
+      );
+    }
+    await _record(GameplayAnalyticsEvent(GameplayAnalyticsEventName.appOpen));
   }
 
   Future<void> placeGhost(String ghostId, String roomId) async {
@@ -84,6 +98,9 @@ class GameController extends ChangeNotifier {
 
   Future<bool> setLanguageCode(String languageCode) =>
       _dispatch(SetLanguageCode(languageCode: languageCode));
+
+  Future<bool> setAnalyticsConsent(bool granted) =>
+      _dispatch(SetAnalyticsConsent(granted: granted));
 
   Future<void> moveGhost(
     String ghostId,
@@ -193,9 +210,113 @@ class GameController extends ChangeNotifier {
   }
 
   Future<bool> _dispatch(GameCommand command) async {
+    final before = state;
     if (!_domainController.dispatch(command)) return false;
     notifyListeners();
     await _saveService.save(state);
+    await _recordTransition(command, before, state);
     return true;
   }
+
+  Future<void> _recordTransition(
+    GameCommand command,
+    GameState before,
+    GameState after,
+  ) async {
+    final events = <GameplayAnalyticsEvent>[];
+
+    if (before.activeIncidentId == null && after.activeIncidentId != null) {
+      events.add(
+        GameplayAnalyticsEvent(GameplayAnalyticsEventName.incidentStarted, {
+          'incident_id': after.activeIncidentId!,
+          'scripted': !before.unscriptedIncidentsEnabled,
+        }),
+      );
+    }
+    if (!before.tutorialStep.isCompleted && after.tutorialStep.isCompleted) {
+      events.add(
+        GameplayAnalyticsEvent(GameplayAnalyticsEventName.tutorialCompleted),
+      );
+    }
+
+    switch (command) {
+      case ContinueTutorial()
+          when before.tutorialStep == TutorialStep.openingStory:
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.tutorialStarted),
+        );
+      case PlaceGhost(:final ghostId, :final roomId):
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.ghostPlaced, {
+            'ghost_kind': after.ghostById(ghostId).kind.name,
+            'room_id': roomId,
+          }),
+        );
+      case UpgradeRoom(:final roomId, :final attribute):
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.roomUpgraded, {
+            'room_id': roomId,
+            'attribute': attribute.name,
+            'level': after.roomById(roomId).levelFor(attribute),
+          }),
+        );
+      case UnlockRoom(:final roomId):
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.roomUnlocked, {
+            'room_id': roomId,
+            'cost': before.walletCoins - after.walletCoins,
+          }),
+        );
+      case CollectAllRent():
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.rentCollected, {
+            'coins': after.walletCoins - before.walletCoins,
+          }),
+        );
+      case ResolveIncident(:final incidentId, :final choiceId):
+        events
+          ..add(
+            GameplayAnalyticsEvent(
+              GameplayAnalyticsEventName.incidentChoiceSelected,
+              {'incident_id': incidentId, 'choice_id': choiceId},
+            ),
+          )
+          ..add(
+            GameplayAnalyticsEvent(
+              GameplayAnalyticsEventName.incidentResolved,
+              {'incident_id': incidentId, 'choice_id': choiceId},
+            ),
+          );
+      case ResumeFromOffline():
+        final earnedMicrocoins =
+            after.pendingRentMicrocoins - before.pendingRentMicrocoins;
+        if (earnedMicrocoins > 0) {
+          events.add(
+            GameplayAnalyticsEvent(
+              GameplayAnalyticsEventName.offlineEarningsClaimed,
+              {'coins': earnedMicrocoins ~/ GameBalance.microcoinsPerCoin},
+            ),
+          );
+        }
+      default:
+        break;
+    }
+
+    for (final event in events) {
+      await _record(event);
+    }
+  }
+
+  Future<void> _record(GameplayAnalyticsEvent event) async {
+    if (!state.analyticsConsentGranted) return;
+    try {
+      await _analyticsService.record(event);
+    } on Object {
+      // Analytics is best-effort and must never affect local gameplay.
+    }
+  }
+}
+
+extension on TutorialStep {
+  bool get isCompleted => this == TutorialStep.completed;
 }

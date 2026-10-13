@@ -14,6 +14,7 @@ class GameState {
     this.playerExperience = 0,
     this.mysticalCrystals = 0,
     this.languageCode,
+    this.analyticsConsentGranted = false,
     this.reputation = GameBalance.initialReputation,
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
@@ -79,7 +80,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 16;
+  static const int currentSchemaVersion = 17;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -89,6 +90,7 @@ class GameState {
   final int playerExperience;
   final int mysticalCrystals;
   final String? languageCode;
+  final bool analyticsConsentGranted;
   final int reputation;
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
@@ -219,6 +221,7 @@ class GameState {
     int? playerExperience,
     int? mysticalCrystals,
     Object? languageCode = _notProvided,
+    bool? analyticsConsentGranted,
     int? reputation,
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
@@ -252,6 +255,8 @@ class GameState {
     languageCode: identical(languageCode, _notProvided)
         ? this.languageCode
         : languageCode as String?,
+    analyticsConsentGranted:
+        analyticsConsentGranted ?? this.analyticsConsentGranted,
     reputation: reputation ?? this.reputation,
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
@@ -299,6 +304,7 @@ class GameState {
     'playerExperience': playerExperience,
     'mysticalCrystals': mysticalCrystals,
     'languageCode': languageCode,
+    'analyticsConsentGranted': analyticsConsentGranted,
     'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
@@ -346,7 +352,8 @@ class GameState {
       13 => GameState._fromVersion13Json(json),
       14 => GameState._fromVersion14Json(json),
       15 => GameState._fromVersion15Json(json),
-      currentSchemaVersion => GameState._fromVersion16Json(json),
+      16 => GameState._fromVersion16Json(json),
+      currentSchemaVersion => GameState._fromVersion17Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -554,6 +561,11 @@ class GameState {
       GameState._fromVersion15Json(
         json,
       ).copyWith(languageCode: json['languageCode'] as String?);
+
+  factory GameState._fromVersion17Json(Map<String, Object?> json) =>
+      GameState._fromVersion16Json(json).copyWith(
+        analyticsConsentGranted: json['analyticsConsentGranted']! as bool,
+      );
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)

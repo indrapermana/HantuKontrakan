@@ -107,6 +107,25 @@ void main() {
     },
   );
 
+  test('analytics consent is an explicit idempotent domain command', () {
+    final controller = GameStateController(GameState.seeded());
+
+    expect(
+      controller.dispatch(const SetAnalyticsConsent(granted: true)),
+      isTrue,
+    );
+    expect(controller.state.analyticsConsentGranted, isTrue);
+    expect(
+      controller.dispatch(const SetAnalyticsConsent(granted: true)),
+      isFalse,
+    );
+    expect(
+      controller.dispatch(const SetAnalyticsConsent(granted: false)),
+      isTrue,
+    );
+    expect(controller.state.analyticsConsentGranted, isFalse);
+  });
+
   test('game state rejects invalid one-to-one occupancy', () {
     expect(
       () => GameState(

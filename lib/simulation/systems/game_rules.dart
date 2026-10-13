@@ -219,6 +219,11 @@ abstract final class GameRules {
     return state.copyWith(languageCode: languageCode);
   }
 
+  static GameState setAnalyticsConsent(GameState state, bool granted) {
+    if (state.analyticsConsentGranted == granted) return state;
+    return state.copyWith(analyticsConsentGranted: granted);
+  }
+
   static GameState upgradeRoom(
     GameState state,
     String roomId,

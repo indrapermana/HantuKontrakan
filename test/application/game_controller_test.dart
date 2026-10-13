@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/application/game_controller.dart';
 import 'package:hantu_kontrakan/application/simulation_runtime.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
+import 'package:hantu_kontrakan/services/analytics_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/models/ghost.dart';
 import 'package:hantu_kontrakan/simulation/models/room.dart';
@@ -26,6 +27,110 @@ void main() {
       expect(reloaded.state.complaintResolved, isTrue);
       expect(reloaded.state.roomById('room_01').occupantId, 'tuyul_01');
       expect(reloaded.happinessFor('pocong_01'), 40);
+    },
+  );
+
+  test(
+    'analytics requires consent and revocation stops future events',
+    () async {
+      final analytics = _RecordingAnalyticsService();
+      final saves = MemorySaveService(
+        initialResult: SaveLoaded(
+          GameState.seeded().copyWith(pendingRentMicrocoins: 2000000),
+        ),
+      );
+      final controller = GameController(
+        saveService: saves,
+        analyticsService: analytics,
+      );
+
+      await controller.initialize();
+      await controller.collectAllRent(claimId: 'before-consent');
+      expect(analytics.events, isEmpty);
+
+      expect(await controller.setAnalyticsConsent(true), isTrue);
+      expect(saves.storedState?.analyticsConsentGranted, isTrue);
+      await controller.upgradeRoom('room_01', RoomAttribute.comfort);
+      expect(
+        analytics.events.single.name,
+        GameplayAnalyticsEventName.roomUpgraded,
+      );
+      expect(analytics.events.single.parameters, {
+        'room_id': 'room_01',
+        'attribute': 'comfort',
+        'level': 1,
+      });
+
+      expect(await controller.setAnalyticsConsent(false), isTrue);
+      await controller.upgradeRoom('room_01', RoomAttribute.silence);
+      expect(analytics.events, hasLength(1));
+      expect(saves.storedState?.analyticsConsentGranted, isFalse);
+    },
+  );
+
+  test('tutorial gameplay emits only approved content identifiers', () async {
+    final analytics = _RecordingAnalyticsService();
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(
+        GameState.newGame().copyWith(analyticsConsentGranted: true),
+      ),
+    );
+    final controller = GameController(
+      saveService: saves,
+      analyticsService: analytics,
+    );
+
+    await controller.initialize();
+    await controller.continueTutorial();
+    await controller.placeGhost('pocong_01', 'room_01');
+    await controller.collectAllRent(claimId: 'tutorial-rent');
+    await controller.placeGhost('kuntilanak_01', 'room_02');
+    await controller.resolveIncident(
+      'pak_rt_complaint',
+      'join_patrol',
+      resolutionId: 'analytics-resolution',
+    );
+    await controller.continueTutorial();
+
+    expect(analytics.events.map((event) => event.name), [
+      GameplayAnalyticsEventName.appOpen,
+      GameplayAnalyticsEventName.tutorialStarted,
+      GameplayAnalyticsEventName.ghostPlaced,
+      GameplayAnalyticsEventName.rentCollected,
+      GameplayAnalyticsEventName.incidentStarted,
+      GameplayAnalyticsEventName.ghostPlaced,
+      GameplayAnalyticsEventName.incidentChoiceSelected,
+      GameplayAnalyticsEventName.incidentResolved,
+      GameplayAnalyticsEventName.tutorialCompleted,
+    ]);
+    expect(
+      analytics.events.expand((event) => event.parameters.keys),
+      isNot(contains(anyOf('email', 'name', 'device_id', 'user_id'))),
+    );
+  });
+
+  test(
+    'analytics adapter failures never roll back gameplay or saves',
+    () async {
+      final saves = MemorySaveService(
+        initialResult: SaveLoaded(
+          GameState.seeded().copyWith(
+            analyticsConsentGranted: true,
+            pendingRentMicrocoins: 2000000,
+          ),
+        ),
+      );
+      final controller = GameController(
+        saveService: saves,
+        analyticsService: _FailingAnalyticsService(),
+      );
+
+      await controller.initialize();
+      await controller.collectAllRent(claimId: 'safe-claim');
+
+      expect(controller.state.walletCoins, 202);
+      expect(saves.storedState?.walletCoins, 202);
+      expect(saves.storedState?.completedRentClaimIds, {'safe-claim'});
     },
   );
 
@@ -296,5 +401,21 @@ class _ReorderingSaveService implements SaveService {
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
     storedState = state;
+  }
+}
+
+class _RecordingAnalyticsService implements AnalyticsService {
+  final List<GameplayAnalyticsEvent> events = [];
+
+  @override
+  Future<void> record(GameplayAnalyticsEvent event) async {
+    events.add(event);
+  }
+}
+
+class _FailingAnalyticsService implements AnalyticsService {
+  @override
+  Future<void> record(GameplayAnalyticsEvent event) async {
+    throw StateError('offline');
   }
 }

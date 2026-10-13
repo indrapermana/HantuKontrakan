@@ -26,6 +26,7 @@ void main() {
       playerExperience: 800,
       mysticalCrystals: 4,
       languageCode: 'en',
+      analyticsConsentGranted: true,
       reputation: 77,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
@@ -81,6 +82,7 @@ void main() {
     expect(loaded.playerExperience, 800);
     expect(loaded.mysticalCrystals, 4);
     expect(loaded.languageCode, 'en');
+    expect(loaded.analyticsConsentGranted, isTrue);
     expect(loaded.reputation, 77);
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
     expect(loaded.chaos, 40);
@@ -127,6 +129,19 @@ void main() {
     final result = await SharedPreferencesSaveService().load();
 
     expect((result as SaveLoaded).state.languageCode, isNull);
+  });
+
+  test('version 16 save migrates with analytics disabled', () async {
+    final version16 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 16
+      ..remove('analyticsConsentGranted');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version16),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    expect((result as SaveLoaded).state.analyticsConsentGranted, isFalse);
   });
 
   test('version 1 save migrates to current debug state defaults', () async {

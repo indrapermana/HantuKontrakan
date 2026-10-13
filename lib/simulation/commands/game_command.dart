@@ -90,6 +90,12 @@ final class SetLanguageCode extends GameCommand {
   final String languageCode;
 }
 
+final class SetAnalyticsConsent extends GameCommand {
+  const SetAnalyticsConsent({required this.granted});
+
+  final bool granted;
+}
+
 final class ResolveIncident extends GameCommand {
   const ResolveIncident({
     required this.incidentId,

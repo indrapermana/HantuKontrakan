@@ -419,7 +419,7 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-025 and all later tickets.
+- HK-026 and all later tickets.
 - Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, and final artwork.
 
 ## Verification evidence
@@ -553,3 +553,32 @@ Verification:
 - `flutter test`: all 143 tests passed, including catalog parity, exhaustive furniture/tag resolution, bilingual mission copy, language-command validation, schema-15 migration, schema-16 round trip, live dialogue switching, and reload persistence.
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; deterministic simulation and localization preference rules remain independent from rendering.
 - The implementation-plan HK-024 checkbox is synchronized with this tracker as requested.
+
+### HK-025 — Consent-aware gameplay analytics hooks
+
+Status: implemented and verified on 2026-10-14.
+
+- Added a platform-neutral analytics service boundary with a no-op default, so the game has no analytics SDK, network dependency, account identifier, or external transmission in this ticket.
+- Defined the plan's stable event catalog: app, tutorial, placement, room, rent, incident, offline earnings, future rewarded-ad, and future purchase events.
+- Added exact per-event payload schemas. Current hooks emit only aggregate numbers, booleans, enum values, and stable authored game-content IDs; arbitrary fields and collection/object payloads are rejected before reaching an adapter.
+- Added persisted explicit analytics consent under save schema version 17. Fresh and migrated saves default to denied, and revocation immediately prevents subsequent events.
+- Connected successful application-layer transitions for app open, tutorial start/completion, ghost placement, room upgrade/unlock, rent collection, incident start/choice/resolution, and offline earnings. Invalid or duplicate domain commands emit nothing.
+- Analytics recording happens only after the deterministic transition and save complete. Adapter failures are swallowed and cannot roll back rewards, state changes, or persistence.
+
+Implementation decisions and assumptions:
+
+- HK-025 supplies hooks and consent enforcement, not a vendor integration. Selecting/configuring an analytics provider and exposing the full localized privacy/consent settings UI remain HK-028 work.
+- Consent is a persisted pure-Dart boolean controlled through an idempotent command. There is no implicit opt-in, and enabling consent does not retroactively emit events that occurred while disabled.
+- Payloads intentionally exclude names, email addresses, user/device/account IDs, advertising IDs, free text, precise timestamps, locale, IP/location data, save contents, claim/resolution IDs, and raw currency values tied to purchases.
+- Room, incident, choice, product, placement, attribute, and ghost-kind identifiers are authored game catalog identifiers, not player identifiers. Future ad/purchase adapters must use the already declared schemas rather than add provider-specific personal fields.
+- `incident_choice_selected` and `incident_resolved` are separate hooks emitted after one successful atomic resolution. This preserves the plan's funnel names without creating a second gameplay mutation.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused analytics, application-controller, save migration, pure-domain, lifecycle, and widget suite: all 48 tests passed before the final full regression run.
+- `flutter test`: all 150 tests passed.
+- Tests prove default denial, explicit persisted opt-in, immediate revocation, exact event order through the tutorial/incident flow, stable payload fields, rejection of unapproved/complex fields, schema-16 migration to denied, schema-17 round trip, and failure isolation.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; consent state and commands remain independent from Flutter and Flame.
+- The implementation-plan HK-025 checkbox is synchronized with this tracker as requested.
