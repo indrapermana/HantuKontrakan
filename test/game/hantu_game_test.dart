@@ -6,11 +6,13 @@ import 'package:hantu_kontrakan/simulation/systems/happiness_system.dart';
 void main() {
   test('2x2 cutaway creates four selectable room IDs at fixed positions', () {
     final selectedRoomIds = <String>[];
+    final selectedGhostIds = <String>[];
     final state = GameState.seeded();
     final world = KontrakanWorld(
       state: state,
       happinessFor: (id) => HappinessSystem.happinessFor(state, id),
       onRoomTap: selectedRoomIds.add,
+      onGhostTap: selectedGhostIds.add,
     );
 
     final rooms = world.createRoomComponents();
@@ -43,5 +45,8 @@ void main() {
       room.select();
     }
     expect(selectedRoomIds, ['room_03', 'room_04', 'room_01', 'room_02']);
+
+    rooms.firstWhere((room) => room.roomId == 'room_01').onGhostTap!();
+    expect(selectedGhostIds, ['pocong_01']);
   });
 }

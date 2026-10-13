@@ -53,6 +53,100 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String tenantLabel(String name) {
+    return 'Penghuni: $name';
+  }
+
+  @override
+  String get vacantTenant => 'Penghuni: Kosong';
+
+  @override
+  String get happinessBreakdownTitle => 'Rincian kebahagiaan';
+
+  @override
+  String happinessComponent(String label, int value) {
+    return '$label: $value';
+  }
+
+  @override
+  String get baseHappinessLabel => 'Dasar';
+
+  @override
+  String get roomPreferenceLabel => 'Preferensi kamar';
+
+  @override
+  String get furniturePreferenceLabel => 'Furnitur';
+
+  @override
+  String get neighborLabel => 'Tetangga';
+
+  @override
+  String get eventLabel => 'Peristiwa';
+
+  @override
+  String get viewGhostProfile => 'Lihat profil hantu';
+
+  @override
+  String ghostProfileTitle(String name) {
+    return 'PROFIL $name';
+  }
+
+  @override
+  String currentRoom(String number) {
+    return 'Kamar saat ini: $number';
+  }
+
+  @override
+  String get unassignedGhost => 'Belum ditempatkan di kamar';
+
+  @override
+  String baseRent(int amount) {
+    return 'Sewa dasar: $amount / menit';
+  }
+
+  @override
+  String likes(String tags) {
+    return 'Suka: $tags';
+  }
+
+  @override
+  String dislikes(String name) {
+    return 'Tidak suka: $name';
+  }
+
+  @override
+  String ability(String description) {
+    return 'Kemampuan: $description';
+  }
+
+  @override
+  String get archetypePocong => 'Si Pelompat Gelisah';
+
+  @override
+  String get archetypeKuntilanak => 'Si Tetangga Dramatis';
+
+  @override
+  String get archetypeTuyul => 'Si Pengumpul Usil';
+
+  @override
+  String get archetypeGenderuwo => 'Si Raksasa Lembut';
+
+  @override
+  String get abilityLostCoins =>
+      'Menemukan 30 koin setiap 10 menit aktif saat kebahagiaan 80+';
+
+  @override
+  String get abilityNeighborhoodReputation =>
+      '+1 reputasi setiap 10 menit aktif saat kebahagiaan 80+';
+
+  @override
+  String get abilityBaseRentBonus => '+15% sewa dasar saat kebahagiaan 60+';
+
+  @override
+  String get abilityRepairDiscount =>
+      'Diskon perbaikan 25% saat kebahagiaan 60+';
+
+  @override
   String get moveTenant => 'Pindahkan penghuni';
 
   @override

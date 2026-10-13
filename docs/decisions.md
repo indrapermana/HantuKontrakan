@@ -92,3 +92,14 @@ Date: 2026-10-13
 - HK-008 resolves happiness scoring at the tag-and-level boundary. HK-010 will map named room attributes and individual furniture IDs to these inputs; it must not introduce new happiness point values in widgets or commands.
 - Happiness remains a deterministic derived value from base 50 plus room, furniture, compatibility, and event components, followed by a final `[0, 100]` clamp. Existing mood thresholds remain unchanged.
 - Persisting row and tag inputs advances the save schema to version 4. Version 3 and older saves migrate with row 0 and empty tag sets, retaining their prior horizontal adjacency and happiness.
+
+## HK-009 detail sheet decisions
+
+Date: 2026-10-13
+
+- Room and ghost taps are separate Flame callbacks. Tapping the room surface opens room details; tapping an occupied room's ghost opens that ghost's profile. Flutter continues to own both modal sheets.
+- `HappinessSystem.breakdownFor` is the single pure-Dart source for the displayed base, room, furniture, neighbor, event, and total values. The total calculation and presentation cannot drift into separate formulas.
+- Occupied room sheets show the tenant, localized mood, complete happiness breakdown, profile action, and move/swap action. Vacant rooms show vacancy and omit tenant-only actions; locked presentation rooms retain their read-only sheet.
+- Ghost profiles read immutable definition and state data for archetype, current room, total happiness, base rent, preferred tags, disliked neighbor, and ability. Assigned ghosts expose move/swap; unassigned ghosts do not.
+- Placeholder Material icons remain sufficient profile artwork for HK-009. Upgrade controls, furniture slots, unlock actions, and final illustrations stay deferred to HK-010 or later.
+- New player-facing detail copy is localized in Indonesian and English. Stable content IDs remain internal and are mapped to localized ability text in the Flutter presentation layer.

@@ -11,11 +11,13 @@ class KontrakanWorld extends World {
     required this.state,
     required this.happinessFor,
     required this.onRoomTap,
+    required this.onGhostTap,
   });
 
   final GameState state;
   final int Function(String ghostId) happinessFor;
   final void Function(String roomId) onRoomTap;
+  final void Function(String ghostId) onGhostTap;
 
   @override
   Future<void> onLoad() async {
@@ -40,6 +42,7 @@ class KontrakanWorld extends World {
       position: Vector2(8 + (layout.column * 174), 34 + (layout.row * 134)),
       locked: room.occupantId == null,
       onTap: () => onRoomTap(layout.id),
+      onGhostTap: ghost == null ? null : () => onGhostTap(ghost.id),
     );
   }
 

@@ -12,6 +12,7 @@ class RoomComponent extends PositionComponent with TapCallbacks {
     required this.happiness,
     required super.position,
     required this.onTap,
+    this.onGhostTap,
     this.locked = false,
   }) : super(size: Vector2(170, 132));
 
@@ -19,6 +20,7 @@ class RoomComponent extends PositionComponent with TapCallbacks {
   final GhostState? ghost;
   final int? happiness;
   final void Function() onTap;
+  final void Function()? onGhostTap;
   final bool locked;
   final Paint _wallPaint = Paint()..color = const Color(0xFF554572);
   final Paint _floorPaint = Paint()..color = const Color(0xFF8A6650);
@@ -41,7 +43,7 @@ class RoomComponent extends PositionComponent with TapCallbacks {
           ghost: ghost!,
           happiness: happiness!,
           position: Vector2(size.x / 2, 72),
-          onTap: onTap,
+          onTap: onGhostTap ?? onTap,
         )..scale = Vector2.all(0.72),
       );
     }

@@ -88,17 +88,32 @@ abstract final class HappinessSystem {
   }
 
   static int happinessFor(GameState state, String ghostId) {
+    return breakdownFor(state, ghostId).total;
+  }
+
+  static HappinessBreakdown breakdownFor(GameState state, String ghostId) {
     final ghost = state.ghostById(ghostId);
     final eventModifier = ghost.eventHappinessModifier.clamp(
       GameBalance.eventMinimum,
       GameBalance.eventMaximum,
     );
-    return (GameBalance.baseHappiness +
-            roomPreferenceFor(state, ghostId) +
-            furniturePreferenceFor(state, ghostId) +
-            compatibilityFor(state, ghostId) +
-            eventModifier)
-        .clamp(0, 100);
+    final roomPreference = roomPreferenceFor(state, ghostId);
+    final furniturePreference = furniturePreferenceFor(state, ghostId);
+    final compatibility = compatibilityFor(state, ghostId);
+    return HappinessBreakdown(
+      base: GameBalance.baseHappiness,
+      roomPreference: roomPreference,
+      furniturePreference: furniturePreference,
+      compatibility: compatibility,
+      event: eventModifier,
+      total:
+          (GameBalance.baseHappiness +
+                  roomPreference +
+                  furniturePreference +
+                  compatibility +
+                  eventModifier)
+              .clamp(0, 100),
+    );
   }
 
   static String moodFor(int happiness) {
@@ -107,4 +122,22 @@ abstract final class HappinessSystem {
     if (happiness >= 40) return 'Tidak senang';
     return 'Marah';
   }
+}
+
+class HappinessBreakdown {
+  const HappinessBreakdown({
+    required this.base,
+    required this.roomPreference,
+    required this.furniturePreference,
+    required this.compatibility,
+    required this.event,
+    required this.total,
+  });
+
+  final int base;
+  final int roomPreference;
+  final int furniturePreference;
+  final int compatibility;
+  final int event;
+  final int total;
 }

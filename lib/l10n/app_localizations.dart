@@ -164,6 +164,156 @@ abstract class AppLocalizations {
   /// **'Kompatibilitas tetangga: {modifier}'**
   String neighborCompatibility(int modifier);
 
+  /// No description provided for @tenantLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Penghuni: {name}'**
+  String tenantLabel(String name);
+
+  /// No description provided for @vacantTenant.
+  ///
+  /// In id, this message translates to:
+  /// **'Penghuni: Kosong'**
+  String get vacantTenant;
+
+  /// No description provided for @happinessBreakdownTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Rincian kebahagiaan'**
+  String get happinessBreakdownTitle;
+
+  /// No description provided for @happinessComponent.
+  ///
+  /// In id, this message translates to:
+  /// **'{label}: {value}'**
+  String happinessComponent(String label, int value);
+
+  /// No description provided for @baseHappinessLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Dasar'**
+  String get baseHappinessLabel;
+
+  /// No description provided for @roomPreferenceLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Preferensi kamar'**
+  String get roomPreferenceLabel;
+
+  /// No description provided for @furniturePreferenceLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Furnitur'**
+  String get furniturePreferenceLabel;
+
+  /// No description provided for @neighborLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Tetangga'**
+  String get neighborLabel;
+
+  /// No description provided for @eventLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Peristiwa'**
+  String get eventLabel;
+
+  /// No description provided for @viewGhostProfile.
+  ///
+  /// In id, this message translates to:
+  /// **'Lihat profil hantu'**
+  String get viewGhostProfile;
+
+  /// No description provided for @ghostProfileTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'PROFIL {name}'**
+  String ghostProfileTitle(String name);
+
+  /// No description provided for @currentRoom.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar saat ini: {number}'**
+  String currentRoom(String number);
+
+  /// No description provided for @unassignedGhost.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ditempatkan di kamar'**
+  String get unassignedGhost;
+
+  /// No description provided for @baseRent.
+  ///
+  /// In id, this message translates to:
+  /// **'Sewa dasar: {amount} / menit'**
+  String baseRent(int amount);
+
+  /// No description provided for @likes.
+  ///
+  /// In id, this message translates to:
+  /// **'Suka: {tags}'**
+  String likes(String tags);
+
+  /// No description provided for @dislikes.
+  ///
+  /// In id, this message translates to:
+  /// **'Tidak suka: {name}'**
+  String dislikes(String name);
+
+  /// No description provided for @ability.
+  ///
+  /// In id, this message translates to:
+  /// **'Kemampuan: {description}'**
+  String ability(String description);
+
+  /// No description provided for @archetypePocong.
+  ///
+  /// In id, this message translates to:
+  /// **'Si Pelompat Gelisah'**
+  String get archetypePocong;
+
+  /// No description provided for @archetypeKuntilanak.
+  ///
+  /// In id, this message translates to:
+  /// **'Si Tetangga Dramatis'**
+  String get archetypeKuntilanak;
+
+  /// No description provided for @archetypeTuyul.
+  ///
+  /// In id, this message translates to:
+  /// **'Si Pengumpul Usil'**
+  String get archetypeTuyul;
+
+  /// No description provided for @archetypeGenderuwo.
+  ///
+  /// In id, this message translates to:
+  /// **'Si Raksasa Lembut'**
+  String get archetypeGenderuwo;
+
+  /// No description provided for @abilityLostCoins.
+  ///
+  /// In id, this message translates to:
+  /// **'Menemukan 30 koin setiap 10 menit aktif saat kebahagiaan 80+'**
+  String get abilityLostCoins;
+
+  /// No description provided for @abilityNeighborhoodReputation.
+  ///
+  /// In id, this message translates to:
+  /// **'+1 reputasi setiap 10 menit aktif saat kebahagiaan 80+'**
+  String get abilityNeighborhoodReputation;
+
+  /// No description provided for @abilityBaseRentBonus.
+  ///
+  /// In id, this message translates to:
+  /// **'+15% sewa dasar saat kebahagiaan 60+'**
+  String get abilityBaseRentBonus;
+
+  /// No description provided for @abilityRepairDiscount.
+  ///
+  /// In id, this message translates to:
+  /// **'Diskon perbaikan 25% saat kebahagiaan 60+'**
+  String get abilityRepairDiscount;
+
   /// No description provided for @moveTenant.
   ///
   /// In id, this message translates to:

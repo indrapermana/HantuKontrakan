@@ -6,13 +6,17 @@ import '../simulation/systems/happiness_system.dart';
 import 'world/kontrakan_world.dart';
 
 class HantuGame extends FlameGame {
-  HantuGame({required this.state, required this.onRoomTap})
-    : super(
-        camera: CameraComponent.withFixedResolution(width: 360, height: 360),
-      );
+  HantuGame({
+    required this.state,
+    required this.onRoomTap,
+    required this.onGhostTap,
+  }) : super(
+         camera: CameraComponent.withFixedResolution(width: 360, height: 360),
+       );
 
   final GameState state;
   final void Function(String roomId) onRoomTap;
+  final void Function(String ghostId) onGhostTap;
 
   @override
   Future<void> onLoad() async {
@@ -22,6 +26,7 @@ class HantuGame extends FlameGame {
         state: state,
         happinessFor: (id) => HappinessSystem.happinessFor(state, id),
         onRoomTap: onRoomTap,
+        onGhostTap: onGhostTap,
       ),
     );
   }

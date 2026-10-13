@@ -7,7 +7,7 @@ import '../../features/debug/debug_hud.dart';
 import '../../game/hantu_game.dart';
 import '../../l10n/app_localizations.dart';
 import '../../simulation/systems/game_rules.dart';
-import '../../simulation/systems/happiness_system.dart';
+import 'detail_sheets.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({required this.controller, super.key});
@@ -66,6 +66,8 @@ class HomeScreen extends StatelessWidget {
                         state: state,
                         onRoomTap: (roomId) =>
                             _showRoomDetails(context, roomId),
+                        onGhostTap: (ghostId) =>
+                            _showGhostProfile(context, ghostId),
                       ),
                     ),
                   ),
@@ -139,48 +141,43 @@ class HomeScreen extends StatelessWidget {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              strings.roomTitle(_roomNumber(room.id)),
-              key: Key('selected-${room.id}'),
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
-            if (ghost != null) ...[
-              Text('${ghost.kind.displayName} — ${ghost.kind.archetype}'),
-              const SizedBox(height: 8),
-              Text(
-                strings.happinessDetail(
-                  controller.happinessFor(ghost.id),
-                  _localizedMood(strings, controller.happinessFor(ghost.id)),
-                ),
-              ),
-              Text(
-                strings.neighborCompatibility(
-                  controller.compatibilityFor(ghost.id),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  key: const Key('move-tenant'),
-                  onPressed: () async {
-                    Navigator.pop(context);
-                    await _chooseDestination(context, ghost.id, room.id);
-                  },
-                  icon: const Icon(Icons.swap_horiz),
-                  label: Text(strings.moveTenant),
-                ),
-              ),
-            ],
-          ],
-        ),
+      builder: (sheetContext) => RoomDetailsSheet(
+        state: controller.state,
+        room: room,
+        onViewGhost: ghost == null
+            ? () {}
+            : () async {
+                Navigator.pop(sheetContext);
+                await _showGhostProfile(context, ghost.id);
+              },
+        onMoveGhost: ghost == null
+            ? () {}
+            : () async {
+                Navigator.pop(sheetContext);
+                await _chooseDestination(context, ghost.id, room.id);
+              },
+      ),
+    );
+  }
+
+  Future<void> _showGhostProfile(BuildContext context, String ghostId) async {
+    final ghost = controller.state.ghosts
+        .where((candidate) => candidate.id == ghostId)
+        .firstOrNull;
+    if (ghost == null) return;
+    final room = controller.state.roomForGhost(ghostId);
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => GhostProfileSheet(
+        state: controller.state,
+        ghost: ghost,
+        onMoveGhost: room == null
+            ? () {}
+            : () async {
+                Navigator.pop(sheetContext);
+                await _chooseDestination(context, ghost.id, room.id);
+              },
       ),
     );
   }
@@ -288,16 +285,6 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _localizedMood(AppLocalizations strings, int happiness) {
-    final mood = HappinessSystem.moodFor(happiness);
-    return switch (mood) {
-      'Senang' => strings.moodHappy,
-      'Nyaman' => strings.moodComfortable,
-      'Tidak senang' => strings.moodUnhappy,
-      _ => strings.moodAngry,
-    };
   }
 }
 

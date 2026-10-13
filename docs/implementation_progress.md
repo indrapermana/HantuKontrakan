@@ -162,9 +162,28 @@ Verification:
 - `flutter test`: all 39 tests passed, including the full directional matrix, Pocong ← Tuyul = -15, horizontal/vertical/diagonal adjacency, room/furniture scoring and caps, neutral legacy environments, and v3 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-009 — Room and ghost detail sheets
+
+Status: implemented and verified on 2026-10-13.
+
+- Split Flame room-surface and ghost tap callbacks so each opens the correct Flutter-owned sheet.
+- Added a state-driven occupied/vacant room sheet with tenant, localized mood, complete happiness breakdown, profile action, and move/swap action.
+- Added a ghost profile sheet with localized archetype, current room, happiness, base rent, preferred tags, disliked neighbor, ability, breakdown, and valid move action.
+- Added a pure-Dart happiness breakdown value so UI totals and component rows share one calculation.
+- Added Indonesian and English detail/profile localization while retaining placeholder profile artwork.
+- Kept upgrades, furniture slots, unlock controls, and their economy outside HK-009.
+
+Verification:
+
+- Dart formatter and localization generation completed successfully.
+- `flutter analyze`: no issues found.
+- Focused detail-sheet, Flame callback, and happiness suite: all 11 tests passed.
+- `flutter test`: all 42 tests passed, including occupied/vacant action visibility, exact state-driven breakdown values, ghost definition/profile content, and distinct room/ghost selection callbacks.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-009 and all later M2 tickets.
+- HK-010 and all later tickets.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence
