@@ -68,6 +68,10 @@ final class CollectAllRent extends GameCommand {
   final String claimId;
 }
 
+final class ContinueTutorial extends GameCommand {
+  const ContinueTutorial();
+}
+
 final class ResolveIncident extends GameCommand {
   const ResolveIncident({
     required this.incidentId,

@@ -9,6 +9,7 @@ import 'incident_system.dart';
 import 'offline_earnings_system.dart';
 import 'rent_system.dart';
 import 'repair_system.dart';
+import 'tutorial_system.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
@@ -86,12 +87,13 @@ abstract final class GameRules {
     final wholeCoins =
         state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
     if (wholeCoins <= 0) return state;
-    return state.copyWith(
+    final collected = state.copyWith(
       walletCoins: state.walletCoins + wholeCoins,
       pendingRentMicrocoins:
           state.pendingRentMicrocoins % GameBalance.microcoinsPerCoin,
       completedRentClaimIds: {...state.completedRentClaimIds, claimId},
     );
+    return TutorialSystem.afterRentCollection(collected);
   }
 
   static GameState resolveIncident(
@@ -123,7 +125,7 @@ abstract final class GameRules {
       return state;
     }
 
-    return state.copyWith(
+    final placed = state.copyWith(
       rooms: state.rooms
           .map(
             (room) =>
@@ -131,7 +133,11 @@ abstract final class GameRules {
           )
           .toList(growable: false),
     );
+    return TutorialSystem.afterPlacement(placed, ghostId, roomId);
   }
+
+  static GameState continueTutorial(GameState state) =>
+      TutorialSystem.continueTutorial(state);
 
   static GameState moveGhost(
     GameState state,

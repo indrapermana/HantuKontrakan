@@ -1,6 +1,7 @@
 import '../constants/game_balance.dart';
 import 'ghost.dart';
 import 'room.dart';
+import 'tutorial_step.dart';
 
 class GameState {
   GameState({
@@ -24,6 +25,7 @@ class GameState {
     Set<String> completedIncidentResolutionIds = const {},
     this.incidentRandomState = GameBalance.defaultRandomSeed,
     Set<String> completedRepairIds = const {},
+    this.tutorialStep = TutorialStep.completed,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
     required this.complaintResolved,
@@ -64,7 +66,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 12;
+  static const int currentSchemaVersion = 13;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -86,6 +88,7 @@ class GameState {
   final Set<String> completedIncidentResolutionIds;
   final int incidentRandomState;
   final Set<String> completedRepairIds;
+  final TutorialStep tutorialStep;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
   final bool complaintResolved;
@@ -117,6 +120,29 @@ class GameState {
       RoomState(id: 'room_04', column: 1, row: 0, unlocked: false),
     ],
     complaintResolved: false,
+  );
+
+  factory GameState.newGame() => GameState(
+    schemaVersion: currentSchemaVersion,
+    walletCoins: GameBalance.initialCoins,
+    unscriptedIncidentsEnabled: false,
+    tutorialStep: TutorialStep.openingStory,
+    abilityCooldownSeconds: const {
+      'pocong_01': GameBalance.periodicAbilityIntervalSeconds,
+      'kuntilanak_01': GameBalance.periodicAbilityIntervalSeconds,
+    },
+    ghosts: const [
+      GhostState(id: 'pocong_01', kind: GhostKind.pocong),
+      GhostState(id: 'kuntilanak_01', kind: GhostKind.kuntilanak),
+      GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
+    ],
+    rooms: [
+      RoomState(id: 'room_01', column: 0, row: 1),
+      RoomState(id: 'room_02', column: 1, row: 1),
+      RoomState(id: 'room_03', column: 0, row: 0, unlocked: false),
+      RoomState(id: 'room_04', column: 1, row: 0, unlocked: false),
+    ],
+    complaintResolved: true,
   );
 
   GhostState ghostById(String id) => ghosts.firstWhere((g) => g.id == id);
@@ -188,6 +214,7 @@ class GameState {
     Set<String>? completedIncidentResolutionIds,
     int? incidentRandomState,
     Set<String>? completedRepairIds,
+    TutorialStep? tutorialStep,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
@@ -229,6 +256,7 @@ class GameState {
         completedIncidentResolutionIds ?? this.completedIncidentResolutionIds,
     incidentRandomState: incidentRandomState ?? this.incidentRandomState,
     completedRepairIds: completedRepairIds ?? this.completedRepairIds,
+    tutorialStep: tutorialStep ?? this.tutorialStep,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
     complaintResolved: complaintResolved ?? this.complaintResolved,
@@ -259,6 +287,7 @@ class GameState {
     ),
     'incidentRandomState': incidentRandomState,
     'completedRepairIds': completedRepairIds.toList(growable: false),
+    'tutorialStep': tutorialStep.name,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
     'complaintResolved': complaintResolved,
@@ -282,7 +311,8 @@ class GameState {
       9 => GameState._fromVersion9Json(json),
       10 => GameState._fromVersion10Json(json),
       11 => GameState._fromVersion11Json(json),
-      currentSchemaVersion => GameState._fromVersion12Json(json),
+      12 => GameState._fromVersion12Json(json),
+      currentSchemaVersion => GameState._fromVersion13Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -456,6 +486,13 @@ class GameState {
         completedRepairIds: (json['completedRepairIds']! as List<Object?>)
             .cast<String>()
             .toSet(),
+      );
+
+  factory GameState._fromVersion13Json(Map<String, Object?> json) =>
+      GameState._fromVersion12Json(json).copyWith(
+        tutorialStep: TutorialStep.values.byName(
+          json['tutorialStep']! as String,
+        ),
       );
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>

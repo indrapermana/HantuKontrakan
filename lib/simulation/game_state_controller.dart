@@ -43,6 +43,7 @@ class GameStateController {
         _state,
         claimId,
       ),
+      ContinueTutorial() => GameRules.continueTutorial(_state),
       ResolveIncident(
         :final incidentId,
         :final choiceId,

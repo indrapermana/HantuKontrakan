@@ -601,6 +601,96 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Perbaiki · {cost} koin'**
   String repairRoom(int cost);
+
+  /// No description provided for @tutorialOpeningTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'KONTRAKAN BARUMU'**
+  String get tutorialOpeningTitle;
+
+  /// No description provided for @tutorialOpeningBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamu mewarisi kontrakan yang kelihatannya terbengkalai. Pocong sudah tinggal gratis di sini—sekarang waktunya diresmikan.'**
+  String get tutorialOpeningBody;
+
+  /// No description provided for @tutorialPlacePocongTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'SIAPKAN KAMAR PERTAMA'**
+  String get tutorialPlacePocongTitle;
+
+  /// No description provided for @tutorialPlacePocongBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Koin Arwah membuat kontrakan tetap berjalan. Tempatkan Pocong di Kamar 1 untuk mulai menerima sewa.'**
+  String get tutorialPlacePocongBody;
+
+  /// No description provided for @tutorialPlacePocongAction.
+  ///
+  /// In id, this message translates to:
+  /// **'Tempatkan Pocong'**
+  String get tutorialPlacePocongAction;
+
+  /// No description provided for @tutorialCollectRentTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'AMBIL SEWA PERTAMA'**
+  String get tutorialCollectRentTitle;
+
+  /// No description provided for @tutorialCollectRentBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Sewa pertama Pocong sudah siap. Gunakan Ambil Semua di bawah.'**
+  String get tutorialCollectRentBody;
+
+  /// No description provided for @tutorialKuntilanakTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'KENALAN DENGAN KUNTILANAK'**
+  String get tutorialKuntilanakTitle;
+
+  /// No description provided for @tutorialKuntilanakBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Setiap hantu punya preferensi kamar dan tetangga. Tempatkan Kuntilanak di Kamar 2.'**
+  String get tutorialKuntilanakBody;
+
+  /// No description provided for @tutorialPlaceKuntilanakAction.
+  ///
+  /// In id, this message translates to:
+  /// **'Tempatkan Kuntilanak'**
+  String get tutorialPlaceKuntilanakAction;
+
+  /// No description provided for @tutorialIncidentTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'PAK RT DATANG'**
+  String get tutorialIncidentTitle;
+
+  /// No description provided for @tutorialIncidentBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Sebuah keluhan perlu keputusanmu. Buka insiden di bawah dan pilih konsekuensinya.'**
+  String get tutorialIncidentBody;
+
+  /// No description provided for @tutorialLockedRoomTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'MASIH ADA KAMAR LAIN'**
+  String get tutorialLockedRoomTitle;
+
+  /// No description provided for @tutorialLockedRoomBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar lantai atas akan terbuka lewat misi berikutnya. Kontrakanmu kini siap dimainkan.'**
+  String get tutorialLockedRoomBody;
+
+  /// No description provided for @tutorialFinish.
+  ///
+  /// In id, this message translates to:
+  /// **'Lanjut bermain'**
+  String get tutorialFinish;
 }
 
 class _AppLocalizationsDelegate

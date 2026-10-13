@@ -320,4 +320,55 @@ class AppLocalizationsId extends AppLocalizations {
   String repairRoom(int cost) {
     return 'Perbaiki · $cost koin';
   }
+
+  @override
+  String get tutorialOpeningTitle => 'KONTRAKAN BARUMU';
+
+  @override
+  String get tutorialOpeningBody =>
+      'Kamu mewarisi kontrakan yang kelihatannya terbengkalai. Pocong sudah tinggal gratis di sini—sekarang waktunya diresmikan.';
+
+  @override
+  String get tutorialPlacePocongTitle => 'SIAPKAN KAMAR PERTAMA';
+
+  @override
+  String get tutorialPlacePocongBody =>
+      'Koin Arwah membuat kontrakan tetap berjalan. Tempatkan Pocong di Kamar 1 untuk mulai menerima sewa.';
+
+  @override
+  String get tutorialPlacePocongAction => 'Tempatkan Pocong';
+
+  @override
+  String get tutorialCollectRentTitle => 'AMBIL SEWA PERTAMA';
+
+  @override
+  String get tutorialCollectRentBody =>
+      'Sewa pertama Pocong sudah siap. Gunakan Ambil Semua di bawah.';
+
+  @override
+  String get tutorialKuntilanakTitle => 'KENALAN DENGAN KUNTILANAK';
+
+  @override
+  String get tutorialKuntilanakBody =>
+      'Setiap hantu punya preferensi kamar dan tetangga. Tempatkan Kuntilanak di Kamar 2.';
+
+  @override
+  String get tutorialPlaceKuntilanakAction => 'Tempatkan Kuntilanak';
+
+  @override
+  String get tutorialIncidentTitle => 'PAK RT DATANG';
+
+  @override
+  String get tutorialIncidentBody =>
+      'Sebuah keluhan perlu keputusanmu. Buka insiden di bawah dan pilih konsekuensinya.';
+
+  @override
+  String get tutorialLockedRoomTitle => 'MASIH ADA KAMAR LAIN';
+
+  @override
+  String get tutorialLockedRoomBody =>
+      'Kamar lantai atas akan terbuka lewat misi berikutnya. Kontrakanmu kini siap dimainkan.';
+
+  @override
+  String get tutorialFinish => 'Lanjut bermain';
 }

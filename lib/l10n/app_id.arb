@@ -111,5 +111,20 @@
   "continueLabel": "Lanjut",
   "repairRequired": "Kamar perlu diperbaiki",
   "repairRoom": "Perbaiki · {cost} koin",
-  "@repairRoom": {"placeholders": {"cost": {"type": "int"}}}
+  "@repairRoom": {"placeholders": {"cost": {"type": "int"}}},
+  "tutorialOpeningTitle": "KONTRAKAN BARUMU",
+  "tutorialOpeningBody": "Kamu mewarisi kontrakan yang kelihatannya terbengkalai. Pocong sudah tinggal gratis di sini—sekarang waktunya diresmikan.",
+  "tutorialPlacePocongTitle": "SIAPKAN KAMAR PERTAMA",
+  "tutorialPlacePocongBody": "Koin Arwah membuat kontrakan tetap berjalan. Tempatkan Pocong di Kamar 1 untuk mulai menerima sewa.",
+  "tutorialPlacePocongAction": "Tempatkan Pocong",
+  "tutorialCollectRentTitle": "AMBIL SEWA PERTAMA",
+  "tutorialCollectRentBody": "Sewa pertama Pocong sudah siap. Gunakan Ambil Semua di bawah.",
+  "tutorialKuntilanakTitle": "KENALAN DENGAN KUNTILANAK",
+  "tutorialKuntilanakBody": "Setiap hantu punya preferensi kamar dan tetangga. Tempatkan Kuntilanak di Kamar 2.",
+  "tutorialPlaceKuntilanakAction": "Tempatkan Kuntilanak",
+  "tutorialIncidentTitle": "PAK RT DATANG",
+  "tutorialIncidentBody": "Sebuah keluhan perlu keputusanmu. Buka insiden di bawah dan pilih konsekuensinya.",
+  "tutorialLockedRoomTitle": "MASIH ADA KAMAR LAIN",
+  "tutorialLockedRoomBody": "Kamar lantai atas akan terbuka lewat misi berikutnya. Kontrakanmu kini siap dimainkan.",
+  "tutorialFinish": "Lanjut bermain"
 }

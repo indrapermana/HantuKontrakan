@@ -8,7 +8,9 @@ void main() {
   testWidgets('complaint resolution visibly updates and persists state', (
     tester,
   ) async {
-    final saves = MemorySaveService();
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
     await tester.pumpWidget(
       HantuKontrakanApp(saveService: saves, locale: const Locale('id')),
     );
@@ -54,6 +56,48 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  testWidgets('new player completes the HK-021 tutorial vertical slice', (
+    tester,
+  ) async {
+    final saves = MemorySaveService();
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('en')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('YOUR NEW KONTRAKAN'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('tutorial-openingStory-action')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('tutorial-placePocong-action')));
+    await tester.pump();
+
+    expect(saves.storedState?.roomById('room_01').occupantId, 'pocong_01');
+    expect(find.text('Collect All · 10 coins'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('collect-rent')));
+    await tester.pump();
+    expect(saves.storedState?.walletCoins, 210);
+
+    await tester.tap(find.byKey(const Key('tutorial-placeKuntilanak-action')));
+    await tester.pump();
+    expect(saves.storedState?.activeIncidentId, 'pak_rt_complaint');
+
+    await tester.tap(find.byKey(const Key('incident-button')));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const Key('incident-choice-join_patrol')));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const Key('incident-outcome-continue')));
+    await tester.pump();
+
+    expect(find.text('MORE ROOMS AWAIT'), findsOneWidget);
+    await tester.tap(
+      find.byKey(const Key('tutorial-inspectLockedRoom-action')),
+    );
+    await tester.pump();
+    expect(find.byKey(const Key('tutorial-panel')), findsNothing);
+    expect(saves.storedState?.unscriptedIncidentsEnabled, isTrue);
   });
 
   testWidgets('app lifecycle persists and consumes one offline snapshot', (

@@ -29,7 +29,7 @@ void main() {
     await pumpApp(tester, locale: const Locale('en'));
 
     expect(find.text('200 Spirit Coins'), findsOneWidget);
-    expect(find.text('Complaint: Pocong is bothered by Tuyul'), findsOneWidget);
+    expect(find.text('YOUR NEW KONTRAKAN'), findsOneWidget);
   });
 
   test('platform manifests declare portrait-only presentation', () {
@@ -49,7 +49,7 @@ void main() {
 
     expect(find.byKey(const Key('debug-hud')), findsOneWidget);
     expect(find.textContaining('Coins 200  Chaos 40  Tick 0'), findsOneWidget);
-    expect(find.textContaining('P 35  T 45  Seed 20261011'), findsOneWidget);
+    expect(find.textContaining('P 50  T 50  Seed 20261011'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('debug-special')));
     await tester.pump(const Duration(milliseconds: 100));

@@ -4,6 +4,7 @@ import '../models/game_state.dart';
 import '../models/incident_definition.dart';
 import '../models/room.dart';
 import 'happiness_system.dart';
+import 'tutorial_system.dart';
 
 class IncidentRandomDraw {
   const IncidentRandomDraw({required this.value, required this.nextState});
@@ -211,7 +212,7 @@ abstract final class IncidentSystem {
           );
         })
         .toList(growable: false);
-    return state.copyWith(
+    final resolved = state.copyWith(
       walletCoins: state.walletCoins + effects.coinDelta,
       chaos: (state.chaos + effects.chaosDelta).clamp(
         GameBalance.minimumChaos,
@@ -229,5 +230,6 @@ abstract final class IncidentSystem {
         resolutionId,
       },
     );
+    return TutorialSystem.afterIncidentResolution(resolved, incidentId);
   }
 }

@@ -10,6 +10,7 @@ import '../../simulation/constants/game_balance.dart';
 import '../../simulation/content/incident_definitions.dart';
 import '../../simulation/models/incident_definition.dart';
 import '../../simulation/systems/game_rules.dart';
+import '../tutorial/tutorial_panel.dart';
 import 'detail_sheets.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -63,6 +64,14 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
                 if (kDebugMode) DebugHud(controller: controller),
+                TutorialPanel(
+                  step: state.tutorialStep,
+                  onContinue: controller.continueTutorial,
+                  onPlacePocong: () =>
+                      controller.placeGhost('pocong_01', 'room_01'),
+                  onPlaceKuntilanak: () =>
+                      controller.placeGhost('kuntilanak_01', 'room_02'),
+                ),
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),

@@ -11,7 +11,9 @@ void main() {
   test(
     'resolved complaint and swapped rooms survive controller reload',
     () async {
-      final saves = MemorySaveService();
+      final saves = MemorySaveService(
+        initialResult: SaveLoaded(GameState.seeded()),
+      );
       final first = GameController(saveService: saves);
       await first.initialize();
       await first.moveGhost('pocong_01', 'room_02', allowSwap: true);
@@ -48,7 +50,9 @@ void main() {
 
   test('debug clock, seed, tick and reset are deterministic', () async {
     final clock = _FixedClock(DateTime.utc(2026, 10, 13, 12));
-    final saves = MemorySaveService();
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
     final controller = GameController(
       saveService: saves,
       clock: clock,
@@ -116,7 +120,9 @@ void main() {
 
   test('pause persists one rate snapshot for lifecycle resume', () async {
     final clock = _MutableClock(DateTime.utc(2026, 10, 13, 8));
-    final saves = MemorySaveService();
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
     final controller = GameController(saveService: saves, clock: clock);
     await controller.initialize();
 
@@ -247,7 +253,7 @@ class _ReorderingSaveService implements SaveService {
   GameState? storedState;
 
   @override
-  Future<SaveLoadResult> load() async => const SaveNotFound();
+  Future<SaveLoadResult> load() async => SaveLoaded(GameState.seeded());
 
   @override
   Future<void> save(GameState state) async {

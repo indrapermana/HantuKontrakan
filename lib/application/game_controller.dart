@@ -56,7 +56,8 @@ class GameController extends ChangeNotifier {
     _loadResult = await _saveService.load();
     _domainController = GameStateController(switch (_loadResult) {
       SaveLoaded(:final state) => state,
-      SaveNotFound() || SaveRejected() => GameState.seeded(),
+      SaveNotFound() => GameState.newGame(),
+      SaveRejected() => GameState.seeded(),
     });
     final resumed = _domainController.dispatch(
       ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
@@ -68,6 +69,10 @@ class GameController extends ChangeNotifier {
 
   Future<void> placeGhost(String ghostId, String roomId) async {
     await _dispatch(PlaceGhost(ghostId: ghostId, roomId: roomId));
+  }
+
+  Future<void> continueTutorial() async {
+    await _dispatch(const ContinueTutorial());
   }
 
   Future<void> moveGhost(

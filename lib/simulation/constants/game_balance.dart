@@ -52,6 +52,8 @@ abstract final class GameBalance {
   static const int eventMinimum = -20;
   static const int eventMaximum = 20;
   static const int maximumRoomUpgradeLevel = 2;
+  static const int tutorialFirstRentCoins = 10;
+  static const String tutorialIncidentId = 'pak_rt_complaint';
   static const Map<int, int> roomUpgradeCosts = {0: 100, 1: 200};
   static const Map<String, int> roomUnlockCosts = {
     'room_03': 400,

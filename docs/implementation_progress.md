@@ -419,7 +419,7 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-021 and all later tickets.
+- HK-022 and all later tickets.
 - Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
 
 ## Verification evidence
@@ -434,3 +434,33 @@ Verification:
 
 - No emulator or physical-device session was attached, so touch interaction and cold restart were validated through automated tests and the Android build rather than a manual device run.
 - A physical-device launch remains pending; Android bootability is currently evidenced by the successful debug APK build and automated widget tests.
+
+### HK-021 — Opening story, guided tutorial, and scripted incident
+
+Status: implemented and verified on 2026-10-13.
+
+- Added a persisted pure-Dart tutorial state machine covering the inheritance story, Pocong placement, first-rent collection, Kuntilanak placement, scripted Pak RT incident, locked-room preview, and unrestricted handoff.
+- New saves begin with both available rooms vacant and unscripted incidents disabled. Existing schema-version-12 saves migrate as tutorial-complete so established players are not forced through onboarding.
+- Placing Pocong in Room 1 makes an immediate 10-coin tutorial rent claim available through the existing atomic Collect All path.
+- Placing Kuntilanak in Room 2 injects the authored Pak RT incident directly, bypassing its normal chaos gate and all scheduler RNG. Choice resolution still uses HK-019's validated, idempotent incident command and exact authored effects.
+- Added a compact localized Flutter tutorial panel in Indonesian and English. Flame remains responsible only for the cutaway world; no tutorial rules were added to rendering components.
+- Completing the locked-room handoff re-enables unscripted incidents and removes the tutorial panel without locking normal play.
+- Advanced saves to schema version 13 for `tutorialStep`, including persistence/reload coverage and explicit version-12 migration behavior.
+
+Implementation decisions and assumptions:
+
+- The narrative describes Pocong as an informal rent-free occupant, while the actionable room assignment begins vacant so the player performs the required placement themselves.
+- Room 2 is already structurally available; the tutorial introduces it together with Kuntilanak instead of inventing a room-unlock rule ahead of HK-022.
+- The first rent is a deterministic 10-coin tutorial grant, matching Pocong's base rent and avoiding wall-clock waiting during onboarding. It is stored as pending microcoins and collected by the normal idempotent rent command.
+- The scripted incident uses the existing `pak_rt_complaint` definition at initial chaos 40 even though its unscripted eligibility requires chaos 70. This is intentional evidence that scripted tutorial incidents bypass random eligibility checks while retaining normal choice validation and effects.
+- The legacy P0 Pocong/Tuyul complaint remains available in the established seeded sandbox but is already resolved in the new-player tutorial state, preventing two competing complaint flows.
+- Tutorial skip remains deferred because the plan marks it as optional after initial testing. HK-021 adds no level, mission, analytics, ads, purchase, cloud, or network behavior.
+
+Verification:
+
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test`: all 123 tests passed, including the complete new-player widget flow from story through ghost placement, rent collection, scripted choice, locked-room handoff, and persisted completion.
+- Pure-Dart tests verify random incidents remain disabled during onboarding, the Pak RT event bypasses its chaos gate, choice resolution applies once, tutorial progress round-trips under schema version 13, and version-12 saves skip onboarding.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; tutorial state and transitions remain independent from Flutter and Flame.
+- The implementation-plan HK-021 checkbox is synchronized with this tracker as requested.

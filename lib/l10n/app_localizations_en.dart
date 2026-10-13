@@ -319,4 +319,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String repairRoom(int cost) {
     return 'Repair · $cost coins';
   }
+
+  @override
+  String get tutorialOpeningTitle => 'YOUR NEW KONTRAKAN';
+
+  @override
+  String get tutorialOpeningBody =>
+      'You inherited an apparently abandoned kontrakan. Pocong has already been staying here rent-free—time to make it official.';
+
+  @override
+  String get tutorialPlacePocongTitle => 'PREPARE THE FIRST ROOM';
+
+  @override
+  String get tutorialPlacePocongBody =>
+      'Koin Arwah keeps the kontrakan running. Place Pocong in Room 1 to start earning rent.';
+
+  @override
+  String get tutorialPlacePocongAction => 'Place Pocong';
+
+  @override
+  String get tutorialCollectRentTitle => 'COLLECT YOUR FIRST RENT';
+
+  @override
+  String get tutorialCollectRentBody =>
+      'Pocong\'s first rent is ready. Use Collect All below.';
+
+  @override
+  String get tutorialKuntilanakTitle => 'MEET KUNTILANAK';
+
+  @override
+  String get tutorialKuntilanakBody =>
+      'Every ghost prefers different rooms and neighbors. Place Kuntilanak in Room 2.';
+
+  @override
+  String get tutorialPlaceKuntilanakAction => 'Place Kuntilanak';
+
+  @override
+  String get tutorialIncidentTitle => 'PAK RT IS HERE';
+
+  @override
+  String get tutorialIncidentBody =>
+      'A complaint needs your decision. Open the incident below and choose a consequence.';
+
+  @override
+  String get tutorialLockedRoomTitle => 'MORE ROOMS AWAIT';
+
+  @override
+  String get tutorialLockedRoomBody =>
+      'The upstairs rooms unlock through future missions. Your kontrakan is now open for play.';
+
+  @override
+  String get tutorialFinish => 'Continue playing';
 }

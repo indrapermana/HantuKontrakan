@@ -83,5 +83,20 @@
   "incidentResolvedTitle": "INCIDENT RESOLVED",
   "continueLabel": "Continue",
   "repairRequired": "Room needs repair",
-  "repairRoom": "Repair · {cost} coins"
+  "repairRoom": "Repair · {cost} coins",
+  "tutorialOpeningTitle": "YOUR NEW KONTRAKAN",
+  "tutorialOpeningBody": "You inherited an apparently abandoned kontrakan. Pocong has already been staying here rent-free—time to make it official.",
+  "tutorialPlacePocongTitle": "PREPARE THE FIRST ROOM",
+  "tutorialPlacePocongBody": "Koin Arwah keeps the kontrakan running. Place Pocong in Room 1 to start earning rent.",
+  "tutorialPlacePocongAction": "Place Pocong",
+  "tutorialCollectRentTitle": "COLLECT YOUR FIRST RENT",
+  "tutorialCollectRentBody": "Pocong's first rent is ready. Use Collect All below.",
+  "tutorialKuntilanakTitle": "MEET KUNTILANAK",
+  "tutorialKuntilanakBody": "Every ghost prefers different rooms and neighbors. Place Kuntilanak in Room 2.",
+  "tutorialPlaceKuntilanakAction": "Place Kuntilanak",
+  "tutorialIncidentTitle": "PAK RT IS HERE",
+  "tutorialIncidentBody": "A complaint needs your decision. Open the incident below and choose a consequence.",
+  "tutorialLockedRoomTitle": "MORE ROOMS AWAIT",
+  "tutorialLockedRoomBody": "The upstairs rooms unlock through future missions. Your kontrakan is now open for play.",
+  "tutorialFinish": "Continue playing"
 }
