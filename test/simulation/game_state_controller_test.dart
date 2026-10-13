@@ -13,7 +13,7 @@ void main() {
       const GhostState(id: 'pocong_01', kind: GhostKind.pocong),
     ];
     final rooms = <RoomState>[
-      const RoomState(id: 'room_01', column: 0, occupantId: 'pocong_01'),
+      RoomState(id: 'room_01', column: 0, occupantId: 'pocong_01'),
     ];
     final state = GameState(
       schemaVersion: GameState.currentSchemaVersion,
@@ -35,7 +35,7 @@ void main() {
       throwsUnsupportedError,
     );
     expect(
-      () => state.rooms.add(const RoomState(id: 'room_02', column: 1)),
+      () => state.rooms.add(RoomState(id: 'room_02', column: 1)),
       throwsUnsupportedError,
     );
   });
@@ -89,7 +89,7 @@ void main() {
         schemaVersion: GameState.currentSchemaVersion,
         walletCoins: 200,
         ghosts: const [GhostState(id: 'pocong_01', kind: GhostKind.pocong)],
-        rooms: const [
+        rooms: [
           RoomState(id: 'room_01', column: 0, occupantId: 'pocong_01'),
           RoomState(id: 'room_02', column: 1, occupantId: 'pocong_01'),
         ],
@@ -102,9 +102,7 @@ void main() {
         schemaVersion: GameState.currentSchemaVersion,
         walletCoins: 200,
         ghosts: const [GhostState(id: 'pocong_01', kind: GhostKind.pocong)],
-        rooms: const [
-          RoomState(id: 'room_01', column: 0, occupantId: 'missing'),
-        ],
+        rooms: [RoomState(id: 'room_01', column: 0, occupantId: 'missing')],
         complaintResolved: false,
       ),
       throwsArgumentError,

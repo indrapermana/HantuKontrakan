@@ -143,9 +143,28 @@ Verification:
 - `flutter test`: all 34 tests passed, including vacancy placement/moves, authorized atomic swaps, invalid no-ops, invariant rejection, typed dispatch, and persisted swaps.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-008 — Happiness, preferences, and directional compatibility
+
+Status: implemented and verified on 2026-10-13.
+
+- Completed all twelve non-self entries in the four-ghost directional compatibility matrix.
+- Replaced column-only adjacency with coordinate-based Manhattan adjacency, including vertical neighbors and diagonal exclusion.
+- Added immutable room tag-level and furniture-tag inputs plus explicit match/mismatch balance constants and normative subtotal caps.
+- Extended happiness to combine base, room, furniture, compatibility, and event components deterministically with the final 0–100 clamp.
+- Advanced saves to schema version 4 and added explicit version-3 migration defaults for row and tag fields.
+- Kept upgrade actions, furniture inventory/slots, and individual item-to-tag mapping deferred to HK-010.
+
+Verification:
+
+- Dart formatter completed successfully.
+- `flutter analyze`: no issues found.
+- Focused happiness, persistence, placement, and controller suite: all 26 tests passed.
+- `flutter test`: all 39 tests passed, including the full directional matrix, Pocong ← Tuyul = -15, horizontal/vertical/diagonal adjacency, room/furniture scoring and caps, neutral legacy environments, and v3 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-008 and all later M2 tickets.
+- HK-009 and all later M2 tickets.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

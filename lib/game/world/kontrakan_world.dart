@@ -48,7 +48,7 @@ class KontrakanWorld extends World {
       if (room.id == roomId) return room;
     }
     final layout = _roomLayouts.firstWhere((room) => room.id == roomId);
-    return RoomState(id: roomId, column: layout.column);
+    return RoomState(id: roomId, column: layout.column, row: layout.row);
   }
 }
 

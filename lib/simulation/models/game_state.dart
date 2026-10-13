@@ -17,7 +17,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 3;
+  static const int currentSchemaVersion = 4;
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
@@ -36,9 +36,9 @@ class GameState {
       GhostState(id: 'pocong_01', kind: GhostKind.pocong),
       GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
     ],
-    rooms: const [
-      RoomState(id: 'room_01', column: 0, occupantId: 'pocong_01'),
-      RoomState(id: 'room_02', column: 1, occupantId: 'tuyul_01'),
+    rooms: [
+      RoomState(id: 'room_01', column: 0, row: 1, occupantId: 'pocong_01'),
+      RoomState(id: 'room_02', column: 1, row: 1, occupantId: 'tuyul_01'),
     ],
     complaintResolved: false,
   );
@@ -124,7 +124,8 @@ class GameState {
     return switch (schemaVersion) {
       1 => GameState._fromVersion1Json(json),
       2 => GameState._fromVersion2Json(json),
-      currentSchemaVersion => GameState._fromVersion3Json(json),
+      3 => GameState._fromVersion3Json(json),
+      currentSchemaVersion => GameState._fromVersion4Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -156,6 +157,9 @@ class GameState {
   }
 
   factory GameState._fromVersion3Json(Map<String, Object?> json) =>
+      GameState._fromVersion2Json(json);
+
+  factory GameState._fromVersion4Json(Map<String, Object?> json) =>
       GameState._fromVersion2Json(json);
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>

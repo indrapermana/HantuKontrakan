@@ -79,3 +79,16 @@ Date: 2026-10-13
 - The Flutter room sheet asks for a concrete destination. Occupied destinations require a separate confirmation before dispatching an authorized swap; vacant destinations move directly.
 - Only rooms already present in simulation state are eligible destinations. The locked presentation-only upper rooms remain unavailable until HK-010, and HK-007 does not add the four-room economy or roster unlock behavior.
 - Occupancy has not changed shape, so save schema version 3 remains valid. Previously valid saves load unchanged, while invalid duplicate or dangling occupancy is rejected through the existing corrupt-save recovery path.
+
+## HK-008 happiness and compatibility decisions
+
+Date: 2026-10-13
+
+- Adjacency now uses persisted `(column, row)` coordinates and Manhattan distance 1. Horizontal and vertical shared edges count; diagonals and gaps do not. This aligns simulation with the plan's 2×2 cutaway rather than Flame pixel geometry.
+- The complete directional compatibility matrix lives in the pure-Dart happiness system. Values are summed across adjacent occupied rooms and then clamped to `[-20, +15]`; symmetry is never inferred.
+- Room environment tag levels and equipped-furniture tags are separate immutable values on `RoomState`. Empty values are neutral, preserving existing P0 happiness until HK-010 introduces upgrade and furniture commands.
+- A level-1/level-2 room tag matching a resident preference contributes +10/+15; a configured nonpreferred room tag contributes -5/-10. The room subtotal is clamped to `[-20, +20]`.
+- A furniture tag matching a preferred tag contributes +5; a configured nonpreferred furniture tag contributes -2. The furniture subtotal is clamped to `[-10, +10]`. Duplicate tags are collapsed by the set representation.
+- HK-008 resolves happiness scoring at the tag-and-level boundary. HK-010 will map named room attributes and individual furniture IDs to these inputs; it must not introduce new happiness point values in widgets or commands.
+- Happiness remains a deterministic derived value from base 50 plus room, furniture, compatibility, and event components, followed by a final `[0, 100]` clamp. Existing mood thresholds remain unchanged.
+- Persisting row and tag inputs advances the save schema to version 4. Version 3 and older saves migrate with row 0 and empty tag sets, retaining their prior horizontal adjacency and happiness.

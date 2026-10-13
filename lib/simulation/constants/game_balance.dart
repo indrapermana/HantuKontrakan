@@ -4,6 +4,14 @@ abstract final class GameBalance {
   static const int defaultRandomSeed = 20261011;
   static const int debugTickSeconds = 1;
   static const int baseHappiness = 50;
+  static const Map<int, int> roomTagMatchHappinessByLevel = {1: 10, 2: 15};
+  static const Map<int, int> roomTagMismatchHappinessByLevel = {1: -5, 2: -10};
+  static const int roomPreferenceMinimum = -20;
+  static const int roomPreferenceMaximum = 20;
+  static const int furnitureTagMatchHappiness = 5;
+  static const int furnitureTagMismatchHappiness = -2;
+  static const int furniturePreferenceMinimum = -10;
+  static const int furniturePreferenceMaximum = 10;
   static const int compatibilityMinimum = -20;
   static const int compatibilityMaximum = 15;
   static const int eventMinimum = -20;

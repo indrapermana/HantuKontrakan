@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
+import 'package:hantu_kontrakan/simulation/models/room.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -27,6 +28,17 @@ void main() {
                 : ghost,
           )
           .toList(growable: false),
+      rooms: [
+        RoomState(
+          id: 'room_01',
+          column: 0,
+          row: 1,
+          occupantId: 'pocong_01',
+          roomTagLevels: const {'quiet': 2},
+          furnitureTags: const ['quiet', 'decorated'],
+        ),
+        seed.roomById('room_02'),
+      ],
     );
 
     await saves.save(state);
@@ -39,6 +51,9 @@ void main() {
     expect(loaded.chaos, 40);
     expect(loaded.activeSimulationSeconds, 0);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
+    expect(loaded.roomById('room_01').row, 1);
+    expect(loaded.roomById('room_01').roomTagLevels, {'quiet': 2});
+    expect(loaded.roomById('room_01').furnitureTags, {'quiet', 'decorated'});
   });
 
   test('version 1 save migrates to current debug state defaults', () async {
@@ -76,6 +91,27 @@ void main() {
       migrated.ghosts.every((ghost) => !ghost.specialActionActive),
       isTrue,
     );
+  });
+
+  test('version 3 save migrates room environment fields to defaults', () async {
+    final version3 = GameState.seeded().toJson()..['schemaVersion'] = 3;
+    for (final room in version3['rooms']! as List<Object?>) {
+      final json = room! as Map<String, Object?>;
+      json.remove('row');
+      json.remove('roomTagLevels');
+      json.remove('furnitureTags');
+    }
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version3),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    final migrated = (result as SaveLoaded).state;
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(migrated.rooms.every((room) => room.row == 0), isTrue);
+    expect(migrated.rooms.every((room) => room.roomTagLevels.isEmpty), isTrue);
+    expect(migrated.rooms.every((room) => room.furnitureTags.isEmpty), isTrue);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

@@ -112,7 +112,7 @@ GameState _placementState() => GameState(
     GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
     GhostState(id: 'kuntilanak_01', kind: GhostKind.kuntilanak),
   ],
-  rooms: const [
+  rooms: [
     RoomState(id: 'room_01', column: 0, occupantId: 'pocong_01'),
     RoomState(id: 'room_02', column: 1, occupantId: 'tuyul_01'),
     RoomState(id: 'room_03', column: 2),
