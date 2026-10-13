@@ -164,11 +164,53 @@ abstract class AppLocalizations {
   /// **'Kompatibilitas tetangga: {modifier}'**
   String neighborCompatibility(int modifier);
 
-  /// No description provided for @swapTenant.
+  /// No description provided for @moveTenant.
   ///
   /// In id, this message translates to:
-  /// **'Tukar penghuni kamar'**
-  String get swapTenant;
+  /// **'Pindahkan penghuni'**
+  String get moveTenant;
+
+  /// No description provided for @chooseDestination.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih kamar tujuan'**
+  String get chooseDestination;
+
+  /// No description provided for @vacantRoom.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar {number} — kosong'**
+  String vacantRoom(String number);
+
+  /// No description provided for @occupiedRoom.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar {number} — terisi'**
+  String occupiedRoom(String number);
+
+  /// No description provided for @confirmSwapTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Tukar penghuni kamar?'**
+  String get confirmSwapTitle;
+
+  /// No description provided for @confirmSwapBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar {number} sudah terisi. Tukar kedua penghuni?'**
+  String confirmSwapBody(String number);
+
+  /// No description provided for @cancel.
+  ///
+  /// In id, this message translates to:
+  /// **'Batal'**
+  String get cancel;
+
+  /// No description provided for @confirmSwap.
+  ///
+  /// In id, this message translates to:
+  /// **'Tukar penghuni'**
+  String get confirmSwap;
 
   /// No description provided for @moodHappy.
   ///

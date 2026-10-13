@@ -11,7 +11,7 @@ void main() {
       final saves = MemorySaveService();
       final first = GameController(saveService: saves);
       await first.initialize();
-      await first.swapFrom('room_01');
+      await first.moveGhost('pocong_01', 'room_02', allowSwap: true);
       await first.resolveComplaint(ComplaintChoice.peaceOffering);
 
       final reloaded = GameController(saveService: saves);

@@ -68,3 +68,14 @@ Date: 2026-10-13
 - `specialActionActive` belongs to the ghost instance state and changes through a typed command. This lets simulation state drive Flame rendering and makes the debug toggle useful for visual verification.
 - Persisting special-action state advances the save schema to version 3. Version-1 and version-2 saves migrate with special actions inactive; current saves round-trip the flag.
 - Ability effects and cooldown execution remain deferred to HK-014. HK-006 stores only stable ability identifiers in definitions.
+
+## HK-007 tenant placement decisions
+
+Date: 2026-10-13
+
+- `GameState` validates unique ghost IDs, unique room IDs, existing occupant references, and one room per ghost. This makes one-to-one occupancy an invariant at construction and save-load boundaries instead of relying only on individual commands.
+- Placement and movement are separate pure-Dart rules. Placement requires an existing unassigned ghost and vacant room; movement requires an assigned ghost and valid different destination.
+- An occupied destination is an identity-preserving no-op unless the command explicitly sets `allowSwap`. Authorized swaps update both rooms in one immutable transition; malformed IDs, same-room moves, and unassigned-ghost swaps are no-ops.
+- The Flutter room sheet asks for a concrete destination. Occupied destinations require a separate confirmation before dispatching an authorized swap; vacant destinations move directly.
+- Only rooms already present in simulation state are eligible destinations. The locked presentation-only upper rooms remain unavailable until HK-010, and HK-007 does not add the four-room economy or roster unlock behavior.
+- Occupancy has not changed shape, so save schema version 3 remains valid. Previously valid saves load unchanged, while invalid duplicate or dangling occupancy is rejected through the existing corrupt-save recovery path.

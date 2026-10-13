@@ -54,8 +54,22 @@ class GameController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> swapFrom(String roomId) async {
-    await _dispatch(SwapOccupants(roomId: roomId));
+  Future<void> placeGhost(String ghostId, String roomId) async {
+    await _dispatch(PlaceGhost(ghostId: ghostId, roomId: roomId));
+  }
+
+  Future<void> moveGhost(
+    String ghostId,
+    String targetRoomId, {
+    bool allowSwap = false,
+  }) async {
+    await _dispatch(
+      MoveGhost(
+        ghostId: ghostId,
+        targetRoomId: targetRoomId,
+        allowSwap: allowSwap,
+      ),
+    );
   }
 
   Future<void> resolveComplaint(ComplaintChoice choice) async {

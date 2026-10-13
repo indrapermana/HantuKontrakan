@@ -13,7 +13,9 @@ class GameState {
     required this.complaintResolved,
     this.resolutionId,
   }) : ghosts = List.unmodifiable(ghosts),
-       rooms = List.unmodifiable(rooms);
+       rooms = List.unmodifiable(rooms) {
+    _validateOccupancy();
+  }
 
   static const int currentSchemaVersion = 3;
   final int schemaVersion;
@@ -49,6 +51,38 @@ class GameState {
       if (room.occupantId == ghostId) return room;
     }
     return null;
+  }
+
+  void _validateOccupancy() {
+    final ghostIds = ghosts.map((ghost) => ghost.id).toSet();
+    if (ghostIds.length != ghosts.length) {
+      throw ArgumentError.value(ghosts, 'ghosts', 'Ghost IDs must be unique.');
+    }
+
+    final roomIds = rooms.map((room) => room.id).toSet();
+    if (roomIds.length != rooms.length) {
+      throw ArgumentError.value(rooms, 'rooms', 'Room IDs must be unique.');
+    }
+
+    final occupants = <String>{};
+    for (final room in rooms) {
+      final occupantId = room.occupantId;
+      if (occupantId == null) continue;
+      if (!ghostIds.contains(occupantId)) {
+        throw ArgumentError.value(
+          occupantId,
+          'rooms',
+          'Every room occupant must reference an existing ghost.',
+        );
+      }
+      if (!occupants.add(occupantId)) {
+        throw ArgumentError.value(
+          occupantId,
+          'rooms',
+          'A ghost can occupy only one room.',
+        );
+      }
+    }
   }
 
   GameState copyWith({

@@ -30,21 +30,52 @@ abstract final class GameRules {
     );
   }
 
-  static GameState swapOccupants(GameState state, String firstRoomId) {
-    final first = state.roomById(firstRoomId);
-    if (first.occupantId == null || state.rooms.length != 2) return state;
-    final second = state.rooms.firstWhere((room) => room.id != firstRoomId);
-    if (second.occupantId == null) return state;
+  static GameState placeGhost(GameState state, String ghostId, String roomId) {
+    if (!state.ghosts.any((ghost) => ghost.id == ghostId) ||
+        state.roomForGhost(ghostId) != null) {
+      return state;
+    }
+    final target = state.rooms.where((room) => room.id == roomId).firstOrNull;
+    if (target == null || target.occupantId != null) return state;
 
-    final occupied = state.rooms.map((room) => room.occupantId).toSet();
-    if (occupied.length != state.rooms.length) return state;
     return state.copyWith(
       rooms: state.rooms
           .map(
-            (room) => room.id == first.id
-                ? room.copyWith(occupantId: second.occupantId)
-                : room.copyWith(occupantId: first.occupantId),
+            (room) =>
+                room.id == roomId ? room.copyWith(occupantId: ghostId) : room,
           )
+          .toList(growable: false),
+    );
+  }
+
+  static GameState moveGhost(
+    GameState state,
+    String ghostId,
+    String targetRoomId, {
+    bool allowSwap = false,
+  }) {
+    final source = state.roomForGhost(ghostId);
+    final target = state.rooms
+        .where((room) => room.id == targetRoomId)
+        .firstOrNull;
+    if (source == null || target == null || source.id == target.id) {
+      return state;
+    }
+
+    final targetOccupantId = target.occupantId;
+    if (targetOccupantId != null && !allowSwap) return state;
+
+    return state.copyWith(
+      rooms: state.rooms
+          .map((room) {
+            if (room.id == source.id) {
+              return room.copyWith(occupantId: targetOccupantId);
+            }
+            if (room.id == target.id) {
+              return room.copyWith(occupantId: ghostId);
+            }
+            return room;
+          })
           .toList(growable: false),
     );
   }

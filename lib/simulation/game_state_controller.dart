@@ -13,7 +13,18 @@ class GameStateController {
 
   bool dispatch(GameCommand command) {
     final nextState = switch (command) {
-      SwapOccupants(:final roomId) => GameRules.swapOccupants(_state, roomId),
+      PlaceGhost(:final ghostId, :final roomId) => GameRules.placeGhost(
+        _state,
+        ghostId,
+        roomId,
+      ),
+      MoveGhost(:final ghostId, :final targetRoomId, :final allowSwap) =>
+        GameRules.moveGhost(
+          _state,
+          ghostId,
+          targetRoomId,
+          allowSwap: allowSwap,
+        ),
       ResolveComplaint(:final choice, :final resolutionId) =>
         GameRules.resolveComplaint(_state, choice, resolutionId),
       DebugTick(:final seconds) => GameRules.advanceDebugTick(_state, seconds),

@@ -124,9 +124,28 @@ Verification:
 - `flutter test`: all 29 tests passed, including exact four-definition data, state-to-animation selection, every ghost kind, command targeting, debug activation, persistence, and v2 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-007 — Tenant placement, moves, swaps, and vacancy validation
+
+Status: implemented and verified on 2026-10-13.
+
+- Added pure-Dart placement and move commands with explicit swap authorization.
+- Added state-boundary validation for unique IDs, valid occupant references, and one-room-per-ghost occupancy.
+- Vacant placement and vacant moves are atomic; occupied moves without authorization and all malformed moves remain identity-preserving no-ops.
+- Replaced the implicit two-room swap button with a destination picker and an explicit occupied-room swap confirmation.
+- Kept eligible destinations limited to simulation rooms; locked upper-room economy and unlocks remain deferred to HK-010.
+- Confirmed authorized swaps and complaint outcomes survive save/reload without a schema change.
+
+Verification:
+
+- Dart formatter completed successfully.
+- `flutter analyze`: no issues found.
+- Focused rule, domain-controller, and application reload suite: all 14 tests passed.
+- `flutter test`: all 34 tests passed, including vacancy placement/moves, authorized atomic swaps, invalid no-ops, invariant rejection, typed dispatch, and persisted swaps.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-007 and all later M2 tickets.
+- HK-008 and all later M2 tickets.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

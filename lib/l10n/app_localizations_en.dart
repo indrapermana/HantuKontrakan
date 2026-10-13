@@ -53,7 +53,34 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get swapTenant => 'Swap room tenants';
+  String get moveTenant => 'Move tenant';
+
+  @override
+  String get chooseDestination => 'Choose destination room';
+
+  @override
+  String vacantRoom(String number) {
+    return 'Room $number — vacant';
+  }
+
+  @override
+  String occupiedRoom(String number) {
+    return 'Room $number — occupied';
+  }
+
+  @override
+  String get confirmSwapTitle => 'Swap room tenants?';
+
+  @override
+  String confirmSwapBody(String number) {
+    return 'Room $number is occupied. Swap both tenants?';
+  }
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirmSwap => 'Swap tenants';
 
   @override
   String get moodHappy => 'Happy';

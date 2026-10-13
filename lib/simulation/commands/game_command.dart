@@ -4,10 +4,23 @@ sealed class GameCommand {
   const GameCommand();
 }
 
-final class SwapOccupants extends GameCommand {
-  const SwapOccupants({required this.roomId});
+final class PlaceGhost extends GameCommand {
+  const PlaceGhost({required this.ghostId, required this.roomId});
 
+  final String ghostId;
   final String roomId;
+}
+
+final class MoveGhost extends GameCommand {
+  const MoveGhost({
+    required this.ghostId,
+    required this.targetRoomId,
+    this.allowSwap = false,
+  });
+
+  final String ghostId;
+  final String targetRoomId;
+  final bool allowSwap;
 }
 
 final class ResolveComplaint extends GameCommand {

@@ -169,13 +169,13 @@ class HomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  key: const Key('swap-tenants'),
+                  key: const Key('move-tenant'),
                   onPressed: () async {
                     Navigator.pop(context);
-                    await controller.swapFrom(room.id);
+                    await _chooseDestination(context, ghost.id, room.id);
                   },
                   icon: const Icon(Icons.swap_horiz),
-                  label: Text(strings.swapTenant),
+                  label: Text(strings.moveTenant),
                 ),
               ),
             ],
@@ -183,6 +183,65 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _chooseDestination(
+    BuildContext context,
+    String ghostId,
+    String sourceRoomId,
+  ) async {
+    final strings = AppLocalizations.of(context);
+    final destinations = controller.state.rooms
+        .where((room) => room.id != sourceRoomId)
+        .toList(growable: false);
+    if (destinations.isEmpty) return;
+
+    final targetRoomId = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: Text(strings.chooseDestination),
+        children: [
+          for (final room in destinations)
+            SimpleDialogOption(
+              key: Key('destination-${room.id}'),
+              onPressed: () => Navigator.pop(context, room.id),
+              child: Text(
+                room.occupantId == null
+                    ? strings.vacantRoom(_roomNumber(room.id))
+                    : strings.occupiedRoom(_roomNumber(room.id)),
+              ),
+            ),
+        ],
+      ),
+    );
+    if (targetRoomId == null || !context.mounted) return;
+
+    final target = controller.state.roomById(targetRoomId);
+    if (target.occupantId == null) {
+      await controller.moveGhost(ghostId, targetRoomId);
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(strings.confirmSwapTitle),
+        content: Text(strings.confirmSwapBody(_roomNumber(targetRoomId))),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(strings.cancel),
+          ),
+          FilledButton(
+            key: const Key('confirm-swap'),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(strings.confirmSwap),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    await controller.moveGhost(ghostId, targetRoomId, allowSwap: true);
   }
 
   String _roomNumber(String roomId) => roomId.split('_').last;

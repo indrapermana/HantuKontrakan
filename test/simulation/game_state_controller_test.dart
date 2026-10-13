@@ -44,7 +44,16 @@ void main() {
     final initial = GameState.seeded();
     final controller = GameStateController(initial);
 
-    expect(controller.dispatch(const SwapOccupants(roomId: 'room_01')), isTrue);
+    expect(
+      controller.dispatch(
+        const MoveGhost(
+          ghostId: 'pocong_01',
+          targetRoomId: 'room_02',
+          allowSwap: true,
+        ),
+      ),
+      isTrue,
+    );
     expect(controller.revision, 1);
     expect(controller.state.roomById('room_01').occupantId, 'tuyul_01');
     expect(initial.roomById('room_01').occupantId, 'pocong_01');
@@ -72,6 +81,34 @@ void main() {
     );
     expect(controller.revision, 2);
     expect(controller.state.walletCoins, 150);
+  });
+
+  test('game state rejects invalid one-to-one occupancy', () {
+    expect(
+      () => GameState(
+        schemaVersion: GameState.currentSchemaVersion,
+        walletCoins: 200,
+        ghosts: const [GhostState(id: 'pocong_01', kind: GhostKind.pocong)],
+        rooms: const [
+          RoomState(id: 'room_01', column: 0, occupantId: 'pocong_01'),
+          RoomState(id: 'room_02', column: 1, occupantId: 'pocong_01'),
+        ],
+        complaintResolved: false,
+      ),
+      throwsArgumentError,
+    );
+    expect(
+      () => GameState(
+        schemaVersion: GameState.currentSchemaVersion,
+        walletCoins: 200,
+        ghosts: const [GhostState(id: 'pocong_01', kind: GhostKind.pocong)],
+        rooms: const [
+          RoomState(id: 'room_01', column: 0, occupantId: 'missing'),
+        ],
+        complaintResolved: false,
+      ),
+      throwsArgumentError,
+    );
   });
 
   test('debug tick validates elapsed time and reset restores seed state', () {
