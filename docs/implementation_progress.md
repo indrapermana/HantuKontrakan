@@ -48,9 +48,28 @@ Verification:
 - `flutter test`: all 13 tests passed, including the new HK-002 layout/selection test and all prior regressions.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-003 — Pure Dart domain foundation
+
+Status: implemented and verified on 2026-10-11.
+
+- Hardened `GameState` so ghost and room collections are defensively copied and unmodifiable.
+- Added sealed `SwapOccupants` and `ResolveComplaint` commands.
+- Added a pure Dart `GameStateController` with deterministic dispatch, identity-preserving no-ops, and revision tracking.
+- Updated the Flutter application controller to delegate transitions through typed commands while retaining notification and save behavior.
+- Consolidated the established P0 complaint costs/effects and resolution ID in `GameBalance`.
+
+Verification:
+
+- Dart formatter completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test test/simulation test/application`: all 8 focused tests passed.
+- `flutter test`: all 15 tests passed, including immutable-state and typed-command coverage plus all previous regressions.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; the simulation layer has no Flutter or Flame imports.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-003 and all later M1/M2 tickets beyond what P0 directly requires.
+- HK-004 and all later M1/M2 tickets beyond what P0 directly requires.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

@@ -28,3 +28,13 @@ Date: 2026-10-11
 - Rooms 03 and 04 are presentation-only locked placeholders for this ticket. They are not added to persisted simulation state, avoiding premature four-room economy, unlock, or migration behavior before HK-003/HK-010.
 - Each `RoomComponent` owns a stable room ID and funnels `TapCallbacks.onTapUp` through one `select()` path. This keeps pointer handling inside Flame while the selected-room sheet remains Flutter-owned.
 - Selecting a locked placeholder opens a read-only localized sheet containing its room ID. Unlock controls and costs remain deferred to HK-010.
+
+## HK-003 domain foundation decisions
+
+Date: 2026-10-11
+
+- `GameState` remains composed of simple value objects, but now defensively copies its ghost and room inputs into unmodifiable lists. Callers cannot mutate current or previous state through retained list references.
+- Domain changes enter through sealed commands and a pure Dart `GameStateController`. It applies deterministic rules, advances its revision only for a real transition, and returns whether a command changed state.
+- The existing Flutter `GameController` remains the application adapter for `ChangeNotifier` and persistence. It delegates state transitions to the pure controller, then notifies and saves only when dispatch succeeds.
+- Existing P0 complaint costs, happiness effects, and the stable resolution ID moved into `GameBalance`; this is organization of established behavior, not a balance change.
+- Equality/value-generation packages were not added. Identity-preserving no-ops plus immutable state are sufficient for the current command surface; structural equality can be reconsidered if later state tooling requires it.

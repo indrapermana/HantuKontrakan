@@ -3,14 +3,15 @@ import 'ghost.dart';
 import 'room.dart';
 
 class GameState {
-  const GameState({
+  GameState({
     required this.schemaVersion,
     required this.walletCoins,
-    required this.ghosts,
-    required this.rooms,
+    required List<GhostState> ghosts,
+    required List<RoomState> rooms,
     required this.complaintResolved,
     this.resolutionId,
-  });
+  }) : ghosts = List.unmodifiable(ghosts),
+       rooms = List.unmodifiable(rooms);
 
   static const int currentSchemaVersion = 1;
   final int schemaVersion;
@@ -20,14 +21,14 @@ class GameState {
   final bool complaintResolved;
   final String? resolutionId;
 
-  factory GameState.seeded() => const GameState(
+  factory GameState.seeded() => GameState(
     schemaVersion: currentSchemaVersion,
     walletCoins: GameBalance.initialCoins,
-    ghosts: [
+    ghosts: const [
       GhostState(id: 'pocong_01', kind: GhostKind.pocong),
       GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
     ],
-    rooms: [
+    rooms: const [
       RoomState(id: 'room_01', column: 0, occupantId: 'pocong_01'),
       RoomState(id: 'room_02', column: 1, occupantId: 'tuyul_01'),
     ],

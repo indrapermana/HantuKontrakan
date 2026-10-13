@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 
 import '../services/save_service.dart';
+import '../simulation/commands/game_command.dart';
+import '../simulation/constants/game_balance.dart';
+import '../simulation/game_state_controller.dart';
 import '../simulation/models/game_state.dart';
 import '../simulation/systems/game_rules.dart';
 import '../simulation/systems/happiness_system.dart';
@@ -10,41 +13,45 @@ class GameController extends ChangeNotifier {
     : _saveService = saveService;
 
   final SaveService _saveService;
-  GameState _state = GameState.seeded();
+  GameStateController _domainController = GameStateController(
+    GameState.seeded(),
+  );
   bool _isReady = false;
-  int _revision = 0;
 
-  GameState get state => _state;
+  GameState get state => _domainController.state;
   bool get isReady => _isReady;
-  int get revision => _revision;
-  bool get hasPendingComplaint => !_state.complaintResolved;
+  int get revision => _domainController.revision;
+  bool get hasPendingComplaint => !state.complaintResolved;
 
   int happinessFor(String ghostId) =>
-      HappinessSystem.happinessFor(_state, ghostId);
+      HappinessSystem.happinessFor(state, ghostId);
   int compatibilityFor(String ghostId) =>
-      HappinessSystem.compatibilityFor(_state, ghostId);
+      HappinessSystem.compatibilityFor(state, ghostId);
 
   Future<void> initialize() async {
-    _state = await _saveService.load() ?? GameState.seeded();
+    _domainController = GameStateController(
+      await _saveService.load() ?? GameState.seeded(),
+    );
     _isReady = true;
     notifyListeners();
   }
 
   Future<void> swapFrom(String roomId) async {
-    await _commit(GameRules.swapOccupants(_state, roomId));
+    await _dispatch(SwapOccupants(roomId: roomId));
   }
 
   Future<void> resolveComplaint(ComplaintChoice choice) async {
-    await _commit(
-      GameRules.resolveComplaint(_state, choice, 'p0_complaint_resolution'),
+    await _dispatch(
+      ResolveComplaint(
+        choice: choice,
+        resolutionId: GameBalance.p0ComplaintResolutionId,
+      ),
     );
   }
 
-  Future<void> _commit(GameState nextState) async {
-    if (identical(nextState, _state)) return;
-    _state = nextState;
-    _revision += 1;
+  Future<void> _dispatch(GameCommand command) async {
+    if (!_domainController.dispatch(command)) return;
     notifyListeners();
-    await _saveService.save(_state);
+    await _saveService.save(state);
   }
 }

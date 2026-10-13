@@ -1,3 +1,4 @@
+import '../constants/game_balance.dart';
 import '../models/game_state.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
@@ -32,21 +33,23 @@ abstract final class GameRules {
     }
 
     final coinCost = switch (choice) {
-      ComplaintChoice.installSoundproofing => 50,
+      ComplaintChoice.installSoundproofing => GameBalance.soundproofingCoinCost,
       ComplaintChoice.askTuyulToCalmDown => 0,
-      ComplaintChoice.peaceOffering => 25,
+      ComplaintChoice.peaceOffering => GameBalance.peaceOfferingCoinCost,
     };
     if (state.walletCoins < coinCost) return state;
 
     final pocongDelta = switch (choice) {
-      ComplaintChoice.installSoundproofing => 20,
-      ComplaintChoice.askTuyulToCalmDown => 10,
-      ComplaintChoice.peaceOffering => 5,
+      ComplaintChoice.installSoundproofing =>
+        GameBalance.soundproofingPocongHappiness,
+      ComplaintChoice.askTuyulToCalmDown =>
+        GameBalance.calmTuyulPocongHappiness,
+      ComplaintChoice.peaceOffering => GameBalance.peaceOfferingHappiness,
     };
     final tuyulDelta = switch (choice) {
       ComplaintChoice.installSoundproofing => 0,
-      ComplaintChoice.askTuyulToCalmDown => -10,
-      ComplaintChoice.peaceOffering => 5,
+      ComplaintChoice.askTuyulToCalmDown => GameBalance.calmTuyulTuyulHappiness,
+      ComplaintChoice.peaceOffering => GameBalance.peaceOfferingHappiness,
     };
     final ghosts = state.ghosts
         .map((ghost) {
