@@ -81,5 +81,7 @@
   "incidentEffectReputation": "{value} reputation",
   "incidentNotEnoughCoins": "Not enough coins",
   "incidentResolvedTitle": "INCIDENT RESOLVED",
-  "continueLabel": "Continue"
+  "continueLabel": "Continue",
+  "repairRequired": "Room needs repair",
+  "repairRoom": "Repair · {cost} coins"
 }

@@ -80,6 +80,13 @@ final class ResolveIncident extends GameCommand {
   final String resolutionId;
 }
 
+final class RepairRoom extends GameCommand {
+  const RepairRoom({required this.roomId, required this.repairId});
+
+  final String roomId;
+  final String repairId;
+}
+
 final class PauseForOffline extends GameCommand {
   const PauseForOffline({required this.timestampMillis});
 

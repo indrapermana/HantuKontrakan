@@ -8,6 +8,7 @@ import 'event_modifier_system.dart';
 import 'incident_system.dart';
 import 'offline_earnings_system.dart';
 import 'rent_system.dart';
+import 'repair_system.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
@@ -99,6 +100,12 @@ abstract final class GameRules {
     String choiceId,
     String resolutionId,
   ) => IncidentSystem.resolve(state, incidentId, choiceId, resolutionId);
+
+  static GameState repairRoom(
+    GameState state,
+    String roomId,
+    String repairId,
+  ) => RepairSystem.repair(state, roomId, repairId);
 
   static GameState pauseForOffline(GameState state, int timestampMillis) =>
       OfflineEarningsSystem.pause(state, timestampMillis);

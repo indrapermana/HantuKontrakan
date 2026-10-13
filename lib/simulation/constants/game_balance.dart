@@ -31,6 +31,12 @@ abstract final class GameBalance {
   static const int kuntilanakAbilityReputationReward = 1;
   static const int conditionalAbilityMinimumHappiness = 60;
   static const int genderuwoRepairCostPercent = 75;
+  static const int roomRepairBaseCost = 100;
+  static const Map<int, int> roomRepairCostPercentByDurability = {
+    0: 100,
+    1: 80,
+    2: 60,
+  };
   static const int tuyulBaseRentBonusPercent = 15;
   static const int baseHappiness = 50;
   static const Map<int, int> roomTagMatchHappinessByLevel = {1: 10, 2: 15};

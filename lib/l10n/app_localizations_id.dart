@@ -312,4 +312,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get continueLabel => 'Lanjut';
+
+  @override
+  String get repairRequired => 'Kamar perlu diperbaiki';
+
+  @override
+  String repairRoom(int cost) {
+    return 'Perbaiki · $cost koin';
+  }
 }

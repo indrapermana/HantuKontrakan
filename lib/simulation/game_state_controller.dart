@@ -49,6 +49,11 @@ class GameStateController {
         :final resolutionId,
       ) =>
         GameRules.resolveIncident(_state, incidentId, choiceId, resolutionId),
+      RepairRoom(:final roomId, :final repairId) => GameRules.repairRoom(
+        _state,
+        roomId,
+        repairId,
+      ),
       PauseForOffline(:final timestampMillis) => GameRules.pauseForOffline(
         _state,
         timestampMillis,

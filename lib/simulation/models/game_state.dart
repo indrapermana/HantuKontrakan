@@ -23,6 +23,7 @@ class GameState {
     List<String> recentIncidentIds = const [],
     Set<String> completedIncidentResolutionIds = const {},
     this.incidentRandomState = GameBalance.defaultRandomSeed,
+    Set<String> completedRepairIds = const {},
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
     required this.complaintResolved,
@@ -36,6 +37,7 @@ class GameState {
        completedIncidentResolutionIds = Set.unmodifiable(
          completedIncidentResolutionIds,
        ),
+       completedRepairIds = Set.unmodifiable(completedRepairIds),
        ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
@@ -62,7 +64,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 11;
+  static const int currentSchemaVersion = 12;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -83,6 +85,7 @@ class GameState {
   final List<String> recentIncidentIds;
   final Set<String> completedIncidentResolutionIds;
   final int incidentRandomState;
+  final Set<String> completedRepairIds;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
   final bool complaintResolved;
@@ -184,6 +187,7 @@ class GameState {
     List<String>? recentIncidentIds,
     Set<String>? completedIncidentResolutionIds,
     int? incidentRandomState,
+    Set<String>? completedRepairIds,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
@@ -224,6 +228,7 @@ class GameState {
     completedIncidentResolutionIds:
         completedIncidentResolutionIds ?? this.completedIncidentResolutionIds,
     incidentRandomState: incidentRandomState ?? this.incidentRandomState,
+    completedRepairIds: completedRepairIds ?? this.completedRepairIds,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
     complaintResolved: complaintResolved ?? this.complaintResolved,
@@ -253,6 +258,7 @@ class GameState {
       growable: false,
     ),
     'incidentRandomState': incidentRandomState,
+    'completedRepairIds': completedRepairIds.toList(growable: false),
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
     'complaintResolved': complaintResolved,
@@ -275,7 +281,8 @@ class GameState {
       8 => GameState._fromVersion8Json(json),
       9 => GameState._fromVersion9Json(json),
       10 => GameState._fromVersion10Json(json),
-      currentSchemaVersion => GameState._fromVersion11Json(json),
+      11 => GameState._fromVersion11Json(json),
+      currentSchemaVersion => GameState._fromVersion12Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -443,6 +450,13 @@ class GameState {
     complaintResolved: json['complaintResolved']! as bool,
     resolutionId: json['resolutionId'] as String?,
   );
+
+  factory GameState._fromVersion12Json(Map<String, Object?> json) =>
+      GameState._fromVersion11Json(json).copyWith(
+        completedRepairIds: (json['completedRepairIds']! as List<Object?>)
+            .cast<String>()
+            .toSet(),
+      );
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)

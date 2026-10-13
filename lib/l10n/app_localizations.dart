@@ -589,6 +589,18 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Lanjut'**
   String get continueLabel;
+
+  /// No description provided for @repairRequired.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar perlu diperbaiki'**
+  String get repairRequired;
+
+  /// No description provided for @repairRoom.
+  ///
+  /// In id, this message translates to:
+  /// **'Perbaiki · {cost} koin'**
+  String repairRoom(int cost);
 }
 
 class _AppLocalizationsDelegate

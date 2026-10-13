@@ -232,6 +232,10 @@ class HomeScreen extends StatelessWidget {
           Navigator.pop(sheetContext);
           await controller.equipFurniture(room.id, furnitureId, slot);
         },
+        onRepair: () async {
+          Navigator.pop(sheetContext);
+          await controller.repairRoom(room.id);
+        },
       ),
     );
   }

@@ -139,6 +139,43 @@ void main() {
     );
   });
 
+  testWidgets('damaged room shows persisted repair cost and action', (
+    tester,
+  ) async {
+    final seed = _detailState();
+    final room = seed
+        .roomById('room_01')
+        .copyWith(
+          occupantId: 'pocong_01',
+          repairRequired: true,
+          upgrades: const {RoomAttribute.durability: 1},
+        );
+    final state = seed.copyWith(
+      rooms: [room, seed.roomById('room_02'), seed.roomById('room_03')],
+    );
+    var repairRequested = false;
+
+    await tester.pumpWidget(
+      _LocalizedHarness(
+        child: RoomDetailsSheet(
+          state: state,
+          room: room,
+          onViewGhost: () {},
+          onMoveGhost: () {},
+          onUpgrade: (_) {},
+          onEquipFurniture: (_, _) {},
+          onRepair: () => repairRequested = true,
+        ),
+      ),
+    );
+
+    expect(find.text('Kamar perlu diperbaiki'), findsOneWidget);
+    expect(find.text('Perbaiki · 80 koin'), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('repair-room')));
+    await tester.tap(find.byKey(const Key('repair-room')));
+    expect(repairRequested, isTrue);
+  });
+
   testWidgets('ghost profile shows definition, room, happiness and move', (
     tester,
   ) async {

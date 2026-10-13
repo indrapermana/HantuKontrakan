@@ -9,6 +9,7 @@ class RoomState {
     this.row = 0,
     this.unlocked = true,
     this.occupantId,
+    this.repairRequired = false,
     Map<RoomAttribute, int> upgrades = const {},
     Map<String, int> roomTagLevels = const {},
     Map<FurnitureSlot, String> furnitureIds = const {},
@@ -34,6 +35,7 @@ class RoomState {
   final int row;
   final bool unlocked;
   final String? occupantId;
+  final bool repairRequired;
   final Map<RoomAttribute, int> upgrades;
   final Map<String, int> roomTagLevels;
   final Map<FurnitureSlot, String> furnitureIds;
@@ -45,6 +47,7 @@ class RoomState {
   RoomState copyWith({
     required String? occupantId,
     bool? unlocked,
+    bool? repairRequired,
     Map<RoomAttribute, int>? upgrades,
     Map<String, int>? roomTagLevels,
     Map<FurnitureSlot, String>? furnitureIds,
@@ -55,6 +58,7 @@ class RoomState {
     row: row,
     unlocked: unlocked ?? this.unlocked,
     occupantId: occupantId,
+    repairRequired: repairRequired ?? this.repairRequired,
     upgrades: upgrades ?? this.upgrades,
     roomTagLevels: roomTagLevels ?? this.roomTagLevels,
     furnitureIds: furnitureIds ?? this.furnitureIds,
@@ -67,6 +71,7 @@ class RoomState {
     'row': row,
     'unlocked': unlocked,
     'occupantId': occupantId,
+    'repairRequired': repairRequired,
     'upgrades': upgrades.map(
       (attribute, level) => MapEntry(attribute.name, level),
     ),
@@ -83,6 +88,7 @@ class RoomState {
     row: json['row'] as int? ?? 0,
     unlocked: json['unlocked'] as bool? ?? true,
     occupantId: json['occupantId'] as String?,
+    repairRequired: json['repairRequired'] as bool? ?? false,
     upgrades: (json['upgrades'] as Map<String, Object?>? ?? const {}).map(
       (attribute, level) => MapEntry(
         RoomAttribute.values.firstWhere((value) => value.name == attribute),

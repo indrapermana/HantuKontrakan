@@ -184,6 +184,45 @@ void main() {
     expect(reloaded.state.walletCoins, 30);
     expect(reloaded.state.abilityCooldownSeconds['pocong_01'], 600);
   });
+
+  test(
+    'repair persists and duplicate controller request cannot charge twice',
+    () async {
+      final seed = GameState.seeded();
+      final damaged = seed.copyWith(
+        rooms: seed.rooms
+            .map(
+              (room) => room.id == 'room_01'
+                  ? room.copyWith(
+                      occupantId: room.occupantId,
+                      repairRequired: true,
+                      upgrades: const {RoomAttribute.durability: 1},
+                    )
+                  : room,
+            )
+            .toList(growable: false),
+      );
+      final saves = MemorySaveService(initialResult: SaveLoaded(damaged));
+      final first = GameController(saveService: saves);
+      await first.initialize();
+
+      expect(first.repairCostFor('room_01'), 80);
+      expect(
+        await first.repairRoom('room_01', repairId: 'stable-repair'),
+        isTrue,
+      );
+      expect(
+        await first.repairRoom('room_01', repairId: 'stable-repair'),
+        isFalse,
+      );
+
+      final reloaded = GameController(saveService: saves);
+      await reloaded.initialize();
+      expect(reloaded.state.walletCoins, 120);
+      expect(reloaded.state.roomById('room_01').repairRequired, isFalse);
+      expect(reloaded.state.completedRepairIds, {'stable-repair'});
+    },
+  );
 }
 
 class _FixedClock implements GameClock {

@@ -108,5 +108,8 @@
   "@incidentEffectReputation": {"placeholders": {"value": {"type": "String"}}},
   "incidentNotEnoughCoins": "Koin tidak cukup",
   "incidentResolvedTitle": "INSIDEN SELESAI",
-  "continueLabel": "Lanjut"
+  "continueLabel": "Lanjut",
+  "repairRequired": "Kamar perlu diperbaiki",
+  "repairRoom": "Perbaiki · {cost} koin",
+  "@repairRoom": {"placeholders": {"cost": {"type": "int"}}}
 }

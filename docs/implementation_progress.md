@@ -1,6 +1,6 @@
 # Implementation progress
 
-This is the single canonical progress tracker. `HANTU_KONTRAKAN_IMPLEMENTATION_PLAN.md` remains the immutable product specification and acceptance-criteria source; milestone status, verification evidence, implementation decisions, and remaining work are recorded only here.
+This is the single detailed progress tracker. `HANTU_KONTRAKAN_IMPLEMENTATION_PLAN.md` remains the product specification and acceptance-criteria source, with its ticket checkboxes updated to mirror verified completion. Detailed status, evidence, decisions, and remaining work are recorded only here.
 
 ## P0 vertical slice
 
@@ -390,10 +390,37 @@ Verification:
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; effect application remains pure Dart.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-020 — Repair costs, durability discounts, and persistence
+
+Status: implemented and verified on 2026-10-13. Milestone M4 is complete.
+
+- Added persisted per-room repair-required state and a persisted completed-repair ID set under save schema version 12, with explicit version-11 migration defaults.
+- Added pure-Dart `RepairSystem` cost calculation and a typed `RepairRoom(roomId, repairId)` command routed through both controllers.
+- Added atomic repair behavior: validate room/damage/token/funds, deduct the exact cost, clear damage, and record the repair ID in one immutable transition.
+- Added localized repair state, exact cost, affordability disabling, and repair action to the Flutter room detail sheet.
+- Confirmed repair state and replay protection survive JSON, save-service, and application-controller reloads; offline resume never repairs or charges a room.
+
+Implementation decisions:
+
+- The plan defines durability and Genderuwo discounts but not a base price. HK-020 therefore establishes a 100-coin base repair cost and durability-level percentages of 100%, 80%, and 60%, producing costs of 100/80/60 at levels 0/1/2.
+- A Genderuwo occupying the damaged room at happiness 60+ applies the existing 25% ability discount after durability, producing exact costs of 75/60/45.
+- A repair ID is recorded only after a successful charge. Blank IDs, completed IDs, unknown/locked/undamaged rooms, zero costs, and insufficient funds are identity-preserving no-ops.
+- Damage generation and tenant departure are not invented in HK-020 because the plan defines neither timing nor thresholds. The persisted repair-required state is ready for later incident/tutorial/content triggers, while offline time explicitly cannot create or resolve damage.
+- The implementation plan checkboxes for verified HK-017 through HK-020 are synchronized with this tracker as requested; detailed progress remains in this file.
+
+Verification:
+
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused repair, persistence, controller, room-sheet, and Genderuwo-ability suite: all 44 tests passed.
+- `flutter test`: all 120 tests passed, including exact durability/Genderuwo discounts, atomic payment, replay rejection, save migration, reload persistence, UI affordability, and offline exclusion.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; repair rules remain pure Dart.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-020 and all later tickets.
-- Furniture purchasing/inventory, room repairs/departures, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
+- HK-021 and all later tickets.
+- Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
 
 ## Verification evidence
 

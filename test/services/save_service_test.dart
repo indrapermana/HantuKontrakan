@@ -35,6 +35,7 @@ void main() {
       recentIncidentIds: const ['electricity_outage'],
       completedIncidentResolutionIds: const {'incident-resolution-1'},
       incidentRandomState: 12345,
+      completedRepairIds: const {'repair-1'},
       ghosts: seed.ghosts
           .map(
             (ghost) => ghost.id == 'pocong_01'
@@ -52,6 +53,7 @@ void main() {
           column: 0,
           row: 1,
           occupantId: 'pocong_01',
+          repairRequired: true,
           upgrades: const {RoomAttribute.silence: 2},
           roomTagLevels: const {'quiet': 2},
           furnitureIds: const {
@@ -86,6 +88,8 @@ void main() {
     expect(loaded.recentIncidentIds, ['electricity_outage']);
     expect(loaded.completedIncidentResolutionIds, {'incident-resolution-1'});
     expect(loaded.incidentRandomState, 12345);
+    expect(loaded.completedRepairIds, {'repair-1'});
+    expect(loaded.roomById('room_01').repairRequired, isTrue);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
     expect(loaded.ghostById('pocong_01').eventHappinessModifier, 12);
     expect(
@@ -296,6 +300,25 @@ void main() {
     expect(migrated.unscriptedIncidentSpawnTimes, isEmpty);
     expect(migrated.completedIncidentResolutionIds, isEmpty);
     expect(migrated.incidentRandomState, GameBalance.defaultRandomSeed);
+  });
+
+  test('version 11 save migrates repair state defaults', () async {
+    final version11 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 11
+      ..remove('completedRepairIds');
+    for (final room in version11['rooms']! as List<Object?>) {
+      (room! as Map<String, Object?>).remove('repairRequired');
+    }
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version11),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(migrated.completedRepairIds, isEmpty);
+    expect(migrated.rooms.every((room) => !room.repairRequired), isTrue);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

@@ -8,6 +8,7 @@ import '../simulation/models/game_state.dart';
 import '../simulation/models/room.dart';
 import '../simulation/systems/game_rules.dart';
 import '../simulation/systems/happiness_system.dart';
+import '../simulation/systems/repair_system.dart';
 import 'simulation_runtime.dart';
 
 class GameController extends ChangeNotifier {
@@ -23,6 +24,7 @@ class GameController extends ChangeNotifier {
   final GameClock _clock;
   final SeededRandomSource _randomSource;
   int _rentClaimSequence = 0;
+  int _repairSequence = 0;
   Future<void> _lifecycleOperation = Future<void>.value();
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
@@ -48,6 +50,7 @@ class GameController extends ChangeNotifier {
       HappinessSystem.compatibilityFor(state, ghostId);
   int get pendingRentCoins =>
       state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
+  int repairCostFor(String roomId) => RepairSystem.costFor(state, roomId);
 
   Future<void> initialize() async {
     _loadResult = await _saveService.load();
@@ -138,6 +141,13 @@ class GameController extends ChangeNotifier {
         resolutionId: resolvedId,
       ),
     );
+  }
+
+  Future<bool> repairRoom(String roomId, {String? repairId}) async {
+    final resolvedRepairId =
+        repairId ??
+        'repair-$roomId-${_clock.now().microsecondsSinceEpoch}-$revision-${_repairSequence++}';
+    return _dispatch(RepairRoom(roomId: roomId, repairId: resolvedRepairId));
   }
 
   Future<void> pauseForOffline() async {

@@ -8,6 +8,7 @@ import '../../simulation/models/game_state.dart';
 import '../../simulation/models/ghost.dart';
 import '../../simulation/models/room.dart';
 import '../../simulation/systems/happiness_system.dart';
+import '../../simulation/systems/repair_system.dart';
 
 class RoomDetailsSheet extends StatelessWidget {
   const RoomDetailsSheet({
@@ -17,6 +18,7 @@ class RoomDetailsSheet extends StatelessWidget {
     required this.onMoveGhost,
     required this.onUpgrade,
     required this.onEquipFurniture,
+    this.onRepair,
     super.key,
   });
 
@@ -26,6 +28,7 @@ class RoomDetailsSheet extends StatelessWidget {
   final VoidCallback onMoveGhost;
   final ValueChanged<RoomAttribute> onUpgrade;
   final void Function(FurnitureSlot slot, String furnitureId) onEquipFurniture;
+  final VoidCallback? onRepair;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +38,7 @@ class RoomDetailsSheet extends StatelessWidget {
     final breakdown = occupantId == null
         ? null
         : HappinessSystem.breakdownFor(state, occupantId);
+    final repairCost = RepairSystem.costFor(state, room.id);
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
@@ -83,6 +87,26 @@ class RoomDetailsSheet extends StatelessWidget {
                 walletCoins: state.walletCoins,
                 onUpgrade: onUpgrade,
               ),
+            if (room.repairRequired) ...[
+              const SizedBox(height: 12),
+              Text(
+                strings.repairRequired,
+                key: const Key('repair-required'),
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const Key('repair-room'),
+                  onPressed: onRepair != null && state.walletCoins >= repairCost
+                      ? onRepair
+                      : null,
+                  icon: const Icon(Icons.handyman),
+                  label: Text(strings.repairRoom(repairCost)),
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
             Text(
               strings.furnitureSlots,

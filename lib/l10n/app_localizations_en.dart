@@ -311,4 +311,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueLabel => 'Continue';
+
+  @override
+  String get repairRequired => 'Room needs repair';
+
+  @override
+  String repairRoom(int cost) {
+    return 'Repair · $cost coins';
+  }
 }
