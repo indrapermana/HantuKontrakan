@@ -17,6 +17,15 @@ abstract final class GameBalance {
   static const int chaosIntervalSeconds = 600;
   static const int chaosNaturalReductionPerInterval = 4;
   static const int eventModifierDurationSeconds = 600;
+  static const int incidentCheckIntervalSeconds = 60;
+  static const int incidentCooldownSeconds = 180;
+  static const int incidentRollingWindowSeconds = 600;
+  static const int maximumIncidentsPerRollingWindow = 3;
+  static const int incidentChanceScale = 10000;
+  static const int incidentBaseChance = 400;
+  static const int incidentChancePerChaos = 20;
+  static const int maximumIncidentChance = 3500;
+  static const int incidentRecentHistoryLength = 2;
   static const int periodicAbilityMinimumHappiness = 80;
   static const int pocongAbilityCoinReward = 30;
   static const int kuntilanakAbilityReputationReward = 1;

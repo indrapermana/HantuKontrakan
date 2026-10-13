@@ -188,3 +188,18 @@ Date: 2026-10-13
 - Active advancement is segmented at the next chaos tick, periodic-ability trigger, or modifier expiry. Rent uses the pre-boundary state, then due modifiers expire, abilities evaluate, and chaos updates for subsequent time. This keeps large elapsed updates equivalent to one-second chunks across changing happiness and chaos bands.
 - Save schema advances to version 10 for event modifier expiry timestamps. Version-9 and older saves migrate existing modifiers with no automatic expiry.
 - The debug HUD now includes persisted reputation alongside coins, chaos, active time, and pending rent.
+
+## HK-017 deterministic incident scheduler decisions
+
+Date: 2026-10-13
+
+- Unscripted eligibility is evaluated only at cumulative 60-active-second boundaries inside `AdvanceSimulation`. Incident time is therefore chunk independent and is never advanced by the offline earnings path.
+- Chance uses integer basis points: `min(3500, 400 + 20 × chaos)` out of 10,000. This preserves the documented 12% chance at chaos 40 and 20% at chaos 80 without floating-point simulation state.
+- The incident RNG is an injectable pure-Dart source whose 32-bit state is persisted. The production linear-congruential implementation and test sources consume that state explicitly, so save/reload and elapsed-time chunking continue the same sequence.
+- A pending incident blocks all later checks without consuming RNG. Resolution requires the current incident ID plus a non-empty unique resolution ID, clears the pending incident atomically, records its active-second timestamp, and is an identity-preserving no-op when replayed.
+- The three-minute post-resolution cooldown and the maximum of three unscripted incidents in a rolling ten-active-minute window use persisted active-second timestamps. A timestamp exactly ten minutes old has left the rolling window.
+- A two-ID recent history is persisted. When more than one definition is eligible, the immediately previous incident is removed from selection to avoid back-to-back repetition; a sole eligible definition remains selectable.
+- HK-017 includes only four metadata-only scheduler entries needed to exercise general, resident, happiness, and chaos gates. Localized dialogue, the complete ten-incident catalog, choices, effects, and Flutter presentation remain HK-018/HK-019.
+- `unscriptedIncidentsEnabled` is persisted and defaults to true for the currently tutorial-free game and migrated saves. HK-021 will disable it during the opening tutorial and use scripted incidents that bypass this scheduler.
+- At boundaries shared with a chaos tick, chaos updates first and the incident chance uses the resulting chaos value. This matches the rule that incident risk follows current chaos.
+- Save schema advances to version 11 for pending incident identity, cooldown/cap/history timestamps, completed resolution IDs, the scheduler-enabled flag, and RNG state. Version-10 and older saves migrate to an empty scheduler with the canonical seed.

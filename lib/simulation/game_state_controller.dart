@@ -43,6 +43,8 @@ class GameStateController {
         _state,
         claimId,
       ),
+      ResolveIncident(:final incidentId, :final resolutionId) =>
+        GameRules.resolveIncident(_state, incidentId, resolutionId),
       PauseForOffline(:final timestampMillis) => GameRules.pauseForOffline(
         _state,
         timestampMillis,

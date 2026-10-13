@@ -317,10 +317,31 @@ Verification:
 - `flutter test`: all 95 tests passed, including exact chaos contributions, both bounds, chunk equivalence, active expiry, offline exclusion, and v9 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-017 — Seeded incident scheduler, gating, cooldowns, and rolling cap
+
+Status: implemented and verified on 2026-10-13.
+
+- Added pure-Dart incident definition metadata and eligibility checks for general, resident, happiness, player-level, and chaos gates.
+- Added deterministic checks at each 60 active seconds using the exact chaos probability formula and an injectable seeded RNG with persisted continuation state.
+- Enforced one unresolved incident, a three-active-minute post-resolution cooldown, and at most three unscripted incidents per rolling ten active minutes.
+- Added short persisted incident history to prevent immediate repeats when alternatives are eligible.
+- Added typed idempotent incident resolution and persisted pending incident, spawn history, completed resolution IDs, and scheduler state.
+- Advanced saves to schema version 11 with explicit version-10 migration defaults; offline resume remains unable to run or advance the scheduler.
+- Kept the complete ten localized incidents, choice effects, and incident Flutter presentation in HK-018/HK-019.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused scheduler, persistence, rules, and controller suite: all 33 tests passed.
+- `flutter test`: all 103 tests passed, including probability, eligibility, overlap prevention, cooldown, rolling cap, idempotency, chunk/reload determinism, migration, and offline exclusion.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; the scheduler remains pure Dart.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-017 and all later tickets.
-- Furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
+- HK-018 and all later tickets.
+- Furniture purchasing/inventory, localized incident content and presentation, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence
 

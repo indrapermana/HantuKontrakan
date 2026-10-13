@@ -5,6 +5,7 @@ import '../models/room.dart';
 import 'ability_system.dart';
 import 'chaos_reputation_system.dart';
 import 'event_modifier_system.dart';
+import 'incident_system.dart';
 import 'offline_earnings_system.dart';
 import 'rent_system.dart';
 
@@ -30,7 +31,12 @@ abstract final class GameRules {
     );
   }
 
-  static GameState advanceSimulation(GameState state, int seconds) {
+  static GameState advanceSimulation(
+    GameState state,
+    int seconds, {
+    IncidentRandomSource incidentRandomSource =
+        const SeededIncidentRandomSource(),
+  }) {
     if (seconds <= 0) return state;
     var current = EventModifierSystem.expireDueModifiers(state);
     var remaining = seconds;
@@ -42,11 +48,13 @@ abstract final class GameRules {
           AbilitySystem.secondsUntilNextTrigger(current) ?? remaining;
       final untilExpiry =
           EventModifierSystem.secondsUntilNextExpiry(current) ?? remaining;
+      final untilIncidentCheck = IncidentSystem.secondsUntilNextCheck(current);
       final step = [
         remaining,
         untilChaosTick,
         untilAbility,
         untilExpiry,
+        untilIncidentCheck,
       ].reduce((left, right) => left < right ? left : right);
       final previousActiveSeconds = current.activeSimulationSeconds;
       current = RentSystem.accrue(current, step);
@@ -56,6 +64,14 @@ abstract final class GameRules {
         current,
         previousActiveSeconds,
       );
+      if (current.activeSimulationSeconds %
+              GameBalance.incidentCheckIntervalSeconds ==
+          0) {
+        current = IncidentSystem.check(
+          current,
+          randomSource: incidentRandomSource,
+        );
+      }
       remaining -= step;
     }
     return current;
@@ -76,6 +92,12 @@ abstract final class GameRules {
       completedRentClaimIds: {...state.completedRentClaimIds, claimId},
     );
   }
+
+  static GameState resolveIncident(
+    GameState state,
+    String incidentId,
+    String resolutionId,
+  ) => IncidentSystem.resolve(state, incidentId, resolutionId);
 
   static GameState pauseForOffline(GameState state, int timestampMillis) =>
       OfflineEarningsSystem.pause(state, timestampMillis);

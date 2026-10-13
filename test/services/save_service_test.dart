@@ -29,6 +29,12 @@ void main() {
       abilityCooldownSeconds: const {'pocong_01': 123},
       offlineRateSnapshotMicrocoinsPerMinute: 42000000,
       lastOfflineAccrualTimestampMillis: 1791864000000,
+      activeIncidentId: 'electricity_outage',
+      lastIncidentResolvedAtActiveSecond: 0,
+      unscriptedIncidentSpawnTimes: const [0],
+      recentIncidentIds: const ['electricity_outage'],
+      completedIncidentResolutionIds: const {'incident-resolution-1'},
+      incidentRandomState: 12345,
       ghosts: seed.ghosts
           .map(
             (ghost) => ghost.id == 'pocong_01'
@@ -74,6 +80,12 @@ void main() {
     expect(loaded.abilityCooldownSeconds, {'pocong_01': 123});
     expect(loaded.offlineRateSnapshotMicrocoinsPerMinute, 42000000);
     expect(loaded.lastOfflineAccrualTimestampMillis, 1791864000000);
+    expect(loaded.activeIncidentId, 'electricity_outage');
+    expect(loaded.lastIncidentResolvedAtActiveSecond, 0);
+    expect(loaded.unscriptedIncidentSpawnTimes, [0]);
+    expect(loaded.recentIncidentIds, ['electricity_outage']);
+    expect(loaded.completedIncidentResolutionIds, {'incident-resolution-1'});
+    expect(loaded.incidentRandomState, 12345);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
     expect(loaded.ghostById('pocong_01').eventHappinessModifier, 12);
     expect(
@@ -259,6 +271,31 @@ void main() {
       ),
       isTrue,
     );
+  });
+
+  test('version 10 save migrates incident scheduler defaults', () async {
+    final version10 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 10
+      ..remove('unscriptedIncidentsEnabled')
+      ..remove('activeIncidentId')
+      ..remove('lastIncidentResolvedAtActiveSecond')
+      ..remove('unscriptedIncidentSpawnTimes')
+      ..remove('recentIncidentIds')
+      ..remove('completedIncidentResolutionIds')
+      ..remove('incidentRandomState');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version10),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(migrated.unscriptedIncidentsEnabled, isTrue);
+    expect(migrated.activeIncidentId, isNull);
+    expect(migrated.unscriptedIncidentSpawnTimes, isEmpty);
+    expect(migrated.completedIncidentResolutionIds, isEmpty);
+    expect(migrated.incidentRandomState, GameBalance.defaultRandomSeed);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

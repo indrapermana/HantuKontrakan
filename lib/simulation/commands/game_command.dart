@@ -68,6 +68,13 @@ final class CollectAllRent extends GameCommand {
   final String claimId;
 }
 
+final class ResolveIncident extends GameCommand {
+  const ResolveIncident({required this.incidentId, required this.resolutionId});
+
+  final String incidentId;
+  final String resolutionId;
+}
+
 final class PauseForOffline extends GameCommand {
   const PauseForOffline({required this.timestampMillis});
 
