@@ -50,6 +50,20 @@ class DebugHud extends StatelessWidget {
               icon: const Icon(Icons.skip_next),
             ),
             IconButton(
+              key: const Key('debug-special'),
+              tooltip: 'Toggle Pocong special animation',
+              visualDensity: VisualDensity.compact,
+              onPressed: () => controller.setGhostSpecialAction(
+                'pocong_01',
+                !state.ghostById('pocong_01').specialActionActive,
+              ),
+              icon: Icon(
+                state.ghostById('pocong_01').specialActionActive
+                    ? Icons.auto_awesome
+                    : Icons.auto_awesome_outlined,
+              ),
+            ),
+            IconButton(
               key: const Key('debug-reset'),
               tooltip: 'Reset seeded state',
               visualDensity: VisualDensity.compact,

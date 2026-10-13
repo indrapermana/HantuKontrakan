@@ -103,9 +103,30 @@ Verification:
 - `flutter test`: all 24 tests passed, including deterministic clock/seed, RNG reset, tick/reset persistence, debug HUD, and v1 migration coverage.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+## M2 — Ghosts and room management
+
+### HK-006 — Ghost definitions and placeholder animations
+
+Status: implemented and verified on 2026-10-13.
+
+- Added plan-accurate immutable definitions for Pocong, Kuntilanak, Tuyul, and Genderuwo, including economy, unlock, preference, neighbor, chaos, and ability metadata.
+- Expanded placeholder rendering to support all four ghost kinds with distinct colors.
+- Added state-driven idle, happy, angry, and special procedural animation modes; special action overrides the happiness-derived mode.
+- Added a typed special-action command and debug toggle so the rendered special mode can be activated and persisted.
+- Advanced saves to schema version 3 and added version-2 migration with inactive special actions.
+- Kept Kuntilanak/Genderuwo instantiation, tenant placement, abilities, and final sprite artwork outside HK-006.
+
+Verification:
+
+- Dart formatter completed successfully.
+- `flutter analyze`: no issues found.
+- Focused ghost definition, animation, migration, simulation, and UI suite: all 24 tests passed.
+- `flutter test`: all 29 tests passed, including exact four-definition data, state-to-animation selection, every ghost kind, command targeting, debug activation, persistence, and v2 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-006 and all later M2 tickets.
+- HK-007 and all later M2 tickets.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

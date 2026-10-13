@@ -58,3 +58,13 @@ Date: 2026-10-13
 - Adding persisted chaos and active seconds advances the save schema to version 2. Version-1 saves migrate explicitly with chaos 40 and zero active seconds, preserving all prior wallet, ghost, room, and complaint fields.
 - `GameClock` and `SeededRandomSource` are injectable application-runtime dependencies. Production uses system time and seed `20261011`; tests inject fixed time/seed, and reset rewinds the random source.
 - Debug reset dispatches through the same pure command controller and save path as other changes. It restores the seeded state and persists it rather than mutating UI-only values.
+
+## HK-006 ghost definitions and animation decisions
+
+Date: 2026-10-13
+
+- Four immutable definition records now contain the plan's base rent, unlock level, ten-minute chaos contribution, preferred tags, positive/disliked neighbors, and stable ability ID. Only Pocong and Tuyul remain instantiated; roster unlocks and placement are deferred.
+- Placeholder animation selection is deterministic: special-action state overrides happiness; otherwise happiness 80+ is happy, below 40 is angry, and 40–79 uses idle. The four modes use distinct procedural motion/facial effects without adding provisional sprite assets.
+- `specialActionActive` belongs to the ghost instance state and changes through a typed command. This lets simulation state drive Flame rendering and makes the debug toggle useful for visual verification.
+- Persisting special-action state advances the save schema to version 3. Version-1 and version-2 saves migrate with special actions inactive; current saves round-trip the flag.
+- Ability effects and cooldown execution remain deferred to HK-014. HK-006 stores only stable ability identifiers in definitions.

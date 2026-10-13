@@ -87,4 +87,23 @@ void main() {
     expect(controller.state.chaos, GameBalance.initialChaos);
     expect(controller.state.walletCoins, GameBalance.initialCoins);
   });
+
+  test('special animation command updates only the requested ghost', () {
+    final controller = GameStateController(GameState.seeded());
+
+    expect(
+      controller.dispatch(
+        const SetGhostSpecialAction(ghostId: 'pocong_01', active: true),
+      ),
+      isTrue,
+    );
+    expect(controller.state.ghostById('pocong_01').specialActionActive, isTrue);
+    expect(controller.state.ghostById('tuyul_01').specialActionActive, isFalse);
+    expect(
+      controller.dispatch(
+        const SetGhostSpecialAction(ghostId: 'missing', active: true),
+      ),
+      isFalse,
+    );
+  });
 }

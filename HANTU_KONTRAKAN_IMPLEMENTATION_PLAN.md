@@ -498,7 +498,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 
 ### Milestone M2 — Ghosts and room management
 
-- [ ] **HK-006** Four ghost definitions and idle/happy/angry/special animations (placeholders acceptable). **Accept:** state drives displayed animation.
+- [x] **HK-006** Four ghost definitions and idle/happy/angry/special animations (placeholders acceptable). **Accept:** state drives displayed animation.
 - [ ] **HK-007** Tenant placement, moves, swaps and vacancy validation. **Accept:** occupancy is always one-to-one; invalid swaps are no-ops.
 - [ ] **HK-008** Happiness, room preferences, directional neighbor compatibility. **Accept:** Pocong + Tuyul adjacent gives Pocong -15 compatibility before clamps.
 - [ ] **HK-009** Room and ghost detail sheets with state-driven content. **Accept:** correct profile, room, happiness, and available actions.

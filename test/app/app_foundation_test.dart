@@ -51,6 +51,10 @@ void main() {
     expect(find.textContaining('Coins 200  Chaos 40  Tick 0'), findsOneWidget);
     expect(find.textContaining('P 35  T 45  Seed 20261011'), findsOneWidget);
 
+    await tester.tap(find.byKey(const Key('debug-special')));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
+
     await tester.tap(find.byKey(const Key('debug-tick')));
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.textContaining('Tick 1'), findsOneWidget);

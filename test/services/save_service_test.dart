@@ -17,7 +17,17 @@ void main() {
   test('shared preferences save round-trips schema state', () async {
     SharedPreferences.setMockInitialValues({});
     final saves = SharedPreferencesSaveService();
-    final state = GameState.seeded().copyWith(walletCoins: 123);
+    final seed = GameState.seeded();
+    final state = seed.copyWith(
+      walletCoins: 123,
+      ghosts: seed.ghosts
+          .map(
+            (ghost) => ghost.id == 'pocong_01'
+                ? ghost.copyWith(specialActionActive: true)
+                : ghost,
+          )
+          .toList(growable: false),
+    );
 
     await saves.save(state);
     final result = await saves.load();
@@ -28,6 +38,7 @@ void main() {
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
     expect(loaded.chaos, 40);
     expect(loaded.activeSimulationSeconds, 0);
+    expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
   });
 
   test('version 1 save migrates to current debug state defaults', () async {
@@ -46,6 +57,25 @@ void main() {
     expect(migrated.schemaVersion, GameState.currentSchemaVersion);
     expect(migrated.chaos, 40);
     expect(migrated.activeSimulationSeconds, 0);
+  });
+
+  test('version 2 save migrates ghost special state to inactive', () async {
+    final version2 = GameState.seeded().toJson()..['schemaVersion'] = 2;
+    for (final ghost in version2['ghosts']! as List<Object?>) {
+      (ghost! as Map<String, Object?>).remove('specialActionActive');
+    }
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version2),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    final migrated = (result as SaveLoaded).state;
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(
+      migrated.ghosts.every((ghost) => !ghost.specialActionActive),
+      isTrue,
+    );
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

@@ -4,6 +4,25 @@ import '../models/game_state.dart';
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
 abstract final class GameRules {
+  static GameState setGhostSpecialAction(
+    GameState state,
+    String ghostId,
+    bool active,
+  ) {
+    if (!state.ghosts.any((ghost) => ghost.id == ghostId)) return state;
+    final current = state.ghostById(ghostId);
+    if (current.specialActionActive == active) return state;
+    return state.copyWith(
+      ghosts: state.ghosts
+          .map(
+            (ghost) => ghost.id == ghostId
+                ? ghost.copyWith(specialActionActive: active)
+                : ghost,
+          )
+          .toList(growable: false),
+    );
+  }
+
   static GameState advanceDebugTick(GameState state, int seconds) {
     if (seconds <= 0) return state;
     return state.copyWith(

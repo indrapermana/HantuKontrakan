@@ -18,6 +18,8 @@ class GameStateController {
         GameRules.resolveComplaint(_state, choice, resolutionId),
       DebugTick(:final seconds) => GameRules.advanceDebugTick(_state, seconds),
       ResetGame() => GameState.seeded(),
+      SetGhostSpecialAction(:final ghostId, :final active) =>
+        GameRules.setGhostSpecialAction(_state, ghostId, active),
     };
     if (identical(nextState, _state)) return false;
 

@@ -76,6 +76,10 @@ class GameController extends ChangeNotifier {
     await _dispatch(const ResetGame());
   }
 
+  Future<void> setGhostSpecialAction(String ghostId, bool active) async {
+    await _dispatch(SetGhostSpecialAction(ghostId: ghostId, active: active));
+  }
+
   Future<void> _dispatch(GameCommand command) async {
     if (!_domainController.dispatch(command)) return;
     notifyListeners();

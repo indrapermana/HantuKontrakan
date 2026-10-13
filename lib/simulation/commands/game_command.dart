@@ -26,3 +26,10 @@ final class DebugTick extends GameCommand {
 final class ResetGame extends GameCommand {
   const ResetGame();
 }
+
+final class SetGhostSpecialAction extends GameCommand {
+  const SetGhostSpecialAction({required this.ghostId, required this.active});
+
+  final String ghostId;
+  final bool active;
+}

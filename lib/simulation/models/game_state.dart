@@ -15,7 +15,7 @@ class GameState {
   }) : ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms);
 
-  static const int currentSchemaVersion = 2;
+  static const int currentSchemaVersion = 3;
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
@@ -89,7 +89,8 @@ class GameState {
     }
     return switch (schemaVersion) {
       1 => GameState._fromVersion1Json(json),
-      currentSchemaVersion => GameState._fromVersion2Json(json),
+      2 => GameState._fromVersion2Json(json),
+      currentSchemaVersion => GameState._fromVersion3Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -119,6 +120,9 @@ class GameState {
       resolutionId: json['resolutionId'] as String?,
     );
   }
+
+  factory GameState._fromVersion3Json(Map<String, Object?> json) =>
+      GameState._fromVersion2Json(json);
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)
