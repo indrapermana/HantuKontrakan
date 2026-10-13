@@ -12,6 +12,8 @@ class GameState {
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
     Set<String> completedRentClaimIds = const {},
+    this.offlineRateSnapshotMicrocoinsPerMinute,
+    this.lastOfflineAccrualTimestampMillis,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
     required this.complaintResolved,
@@ -21,13 +23,16 @@ class GameState {
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
         rentAccrualRemainder < 0 ||
-        rentAccrualRemainder >= GameBalance.secondsPerMinute) {
+        rentAccrualRemainder >= GameBalance.secondsPerMinute ||
+        (offlineRateSnapshotMicrocoinsPerMinute != null &&
+            offlineRateSnapshotMicrocoinsPerMinute! < 0)) {
       throw ArgumentError('Rent accumulation values are out of range.');
     }
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 7;
+  static const int currentSchemaVersion = 8;
+  static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
@@ -36,6 +41,8 @@ class GameState {
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
   final Set<String> completedRentClaimIds;
+  final int? offlineRateSnapshotMicrocoinsPerMinute;
+  final int? lastOfflineAccrualTimestampMillis;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
   final bool complaintResolved;
@@ -50,6 +57,8 @@ class GameState {
     pendingRentMicrocoins: 0,
     rentAccrualRemainder: 0,
     completedRentClaimIds: const {},
+    offlineRateSnapshotMicrocoinsPerMinute: null,
+    lastOfflineAccrualTimestampMillis: null,
     ghosts: const [
       GhostState(id: 'pocong_01', kind: GhostKind.pocong),
       GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
@@ -120,6 +129,8 @@ class GameState {
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
     Set<String>? completedRentClaimIds,
+    Object? offlineRateSnapshotMicrocoinsPerMinute = _notProvided,
+    Object? lastOfflineAccrualTimestampMillis = _notProvided,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
@@ -134,6 +145,14 @@ class GameState {
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
     completedRentClaimIds: completedRentClaimIds ?? this.completedRentClaimIds,
+    offlineRateSnapshotMicrocoinsPerMinute:
+        identical(offlineRateSnapshotMicrocoinsPerMinute, _notProvided)
+        ? this.offlineRateSnapshotMicrocoinsPerMinute
+        : offlineRateSnapshotMicrocoinsPerMinute as int?,
+    lastOfflineAccrualTimestampMillis:
+        identical(lastOfflineAccrualTimestampMillis, _notProvided)
+        ? this.lastOfflineAccrualTimestampMillis
+        : lastOfflineAccrualTimestampMillis as int?,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
     complaintResolved: complaintResolved ?? this.complaintResolved,
@@ -149,6 +168,9 @@ class GameState {
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
     'completedRentClaimIds': completedRentClaimIds.toList(growable: false),
+    'offlineRateSnapshotMicrocoinsPerMinute':
+        offlineRateSnapshotMicrocoinsPerMinute,
+    'lastOfflineAccrualTimestampMillis': lastOfflineAccrualTimestampMillis,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
     'complaintResolved': complaintResolved,
@@ -167,7 +189,8 @@ class GameState {
       4 => GameState._fromVersion4Json(json),
       5 => GameState._fromVersion5Json(json),
       6 => GameState._fromVersion6Json(json),
-      currentSchemaVersion => GameState._fromVersion7Json(json),
+      7 => GameState._fromVersion7Json(json),
+      currentSchemaVersion => GameState._fromVersion8Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -241,6 +264,27 @@ class GameState {
     completedRentClaimIds: (json['completedRentClaimIds']! as List<Object?>)
         .cast<String>()
         .toSet(),
+    ghosts: _ghostsFromJson(json),
+    rooms: _roomsFromJson(json),
+    complaintResolved: json['complaintResolved']! as bool,
+    resolutionId: json['resolutionId'] as String?,
+  );
+
+  factory GameState._fromVersion8Json(Map<String, Object?> json) => GameState(
+    schemaVersion: currentSchemaVersion,
+    walletCoins: json['walletCoins']! as int,
+    chaos: json['chaos']! as int,
+    activeSimulationSeconds: json['activeSimulationSeconds']! as int,
+    playerLevel: json['playerLevel']! as int,
+    pendingRentMicrocoins: json['pendingRentMicrocoins']! as int,
+    rentAccrualRemainder: json['rentAccrualRemainder']! as int,
+    completedRentClaimIds: (json['completedRentClaimIds']! as List<Object?>)
+        .cast<String>()
+        .toSet(),
+    offlineRateSnapshotMicrocoinsPerMinute:
+        json['offlineRateSnapshotMicrocoinsPerMinute'] as int?,
+    lastOfflineAccrualTimestampMillis:
+        json['lastOfflineAccrualTimestampMillis'] as int?,
     ghosts: _ghostsFromJson(json),
     rooms: _roomsFromJson(json),
     complaintResolved: json['complaintResolved']! as bool,

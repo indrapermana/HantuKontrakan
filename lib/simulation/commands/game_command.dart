@@ -68,6 +68,18 @@ final class CollectAllRent extends GameCommand {
   final String claimId;
 }
 
+final class PauseForOffline extends GameCommand {
+  const PauseForOffline({required this.timestampMillis});
+
+  final int timestampMillis;
+}
+
+final class ResumeFromOffline extends GameCommand {
+  const ResumeFromOffline({required this.timestampMillis});
+
+  final int timestampMillis;
+}
+
 final class ResetGame extends GameCommand {
   const ResetGame();
 }

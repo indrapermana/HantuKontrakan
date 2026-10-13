@@ -43,6 +43,14 @@ class GameStateController {
         _state,
         claimId,
       ),
+      PauseForOffline(:final timestampMillis) => GameRules.pauseForOffline(
+        _state,
+        timestampMillis,
+      ),
+      ResumeFromOffline(:final timestampMillis) => GameRules.resumeFromOffline(
+        _state,
+        timestampMillis,
+      ),
       ResetGame() => GameState.seeded(),
       SetGhostSpecialAction(:final ghostId, :final active) =>
         GameRules.setGhostSpecialAction(_state, ghostId, active),

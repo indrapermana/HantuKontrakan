@@ -89,6 +89,64 @@ void main() {
     expect(reloaded.state.pendingRentMicrocoins, 250000);
     expect(reloaded.state.completedRentClaimIds, {'stable-claim'});
   });
+
+  test('initialize credits persisted offline snapshot exactly once', () async {
+    final pausedAt = DateTime.utc(2026, 10, 13, 8);
+    final resumedAt = pausedAt.add(const Duration(hours: 2));
+    final initial = GameState.seeded().copyWith(
+      offlineRateSnapshotMicrocoinsPerMinute: 40000000,
+      lastOfflineAccrualTimestampMillis: pausedAt.millisecondsSinceEpoch,
+    );
+    final saves = MemorySaveService(initialResult: SaveLoaded(initial));
+    final clock = _MutableClock(resumedAt);
+
+    final first = GameController(saveService: saves, clock: clock);
+    await first.initialize();
+    final credited = first.state.pendingRentMicrocoins;
+
+    final reloaded = GameController(saveService: saves, clock: clock);
+    await reloaded.initialize();
+
+    expect(credited, 2400000000);
+    expect(reloaded.state.pendingRentMicrocoins, credited);
+    expect(reloaded.state.offlineRateSnapshotMicrocoinsPerMinute, isNull);
+  });
+
+  test('pause persists one rate snapshot for lifecycle resume', () async {
+    final clock = _MutableClock(DateTime.utc(2026, 10, 13, 8));
+    final saves = MemorySaveService();
+    final controller = GameController(saveService: saves, clock: clock);
+    await controller.initialize();
+
+    await controller.pauseForOffline();
+    final firstTimestamp = saves.storedState?.lastOfflineAccrualTimestampMillis;
+    clock.value = clock.value.add(const Duration(minutes: 10));
+    await controller.pauseForOffline();
+
+    expect(
+      saves.storedState?.offlineRateSnapshotMicrocoinsPerMinute,
+      greaterThan(0),
+    );
+    expect(
+      saves.storedState?.lastOfflineAccrualTimestampMillis,
+      firstTimestamp,
+    );
+  });
+
+  test('overlapping lifecycle saves remain ordered', () async {
+    final clock = _MutableClock(DateTime.utc(2026, 10, 13, 8));
+    final saves = _ReorderingSaveService();
+    final controller = GameController(saveService: saves, clock: clock);
+    await controller.initialize();
+
+    final pause = controller.pauseForOffline();
+    clock.value = clock.value.add(const Duration(hours: 2));
+    final resume = controller.resumeFromOffline();
+    await Future.wait([pause, resume]);
+
+    expect(saves.storedState?.offlineRateSnapshotMicrocoinsPerMinute, isNull);
+    expect(saves.storedState?.pendingRentMicrocoins, greaterThan(0));
+  });
 }
 
 class _FixedClock implements GameClock {
@@ -98,4 +156,28 @@ class _FixedClock implements GameClock {
 
   @override
   DateTime now() => value;
+}
+
+class _MutableClock implements GameClock {
+  _MutableClock(this.value);
+
+  DateTime value;
+
+  @override
+  DateTime now() => value;
+}
+
+class _ReorderingSaveService implements SaveService {
+  GameState? storedState;
+
+  @override
+  Future<SaveLoadResult> load() async => const SaveNotFound();
+
+  @override
+  Future<void> save(GameState state) async {
+    if (state.offlineRateSnapshotMicrocoinsPerMinute != null) {
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+    storedState = state;
+  }
 }

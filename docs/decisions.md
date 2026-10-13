@@ -141,3 +141,17 @@ Date: 2026-10-13
 - The application controller generates claim IDs from the injected clock, current revision, and a local sequence unless a stable ID is supplied by a test or retrying caller. Domain correctness does not depend on the generator.
 - The Flutter Collect All control displays floored whole coins and is disabled at zero. It never displays or discards fractional microcoins.
 - Save schema advances to version 7 for completed rent claim IDs. Version-6 and older saves migrate with an empty completed set.
+
+## HK-013 offline earnings decisions
+
+Date: 2026-10-13
+
+- Backgrounding snapshots the current `RentSystem.totalRentPerMinuteMicrocoins` value, so room, happiness, chaos, and Tuyul's base-rent bonus are frozen for that absence. Later state changes cannot rewrite the earned rate retroactively.
+- Offline elapsed time is calculated from integer epoch milliseconds and clamped to 0–240 minutes. Earnings use integer microcoins at 50%, preserving partial-minute precision without floating-point drift.
+- Offline earnings are added to pending rent rather than directly to the wallet, preserving HK-012's explicit Collect All transaction.
+- Resume atomically adds the capped earnings, clears the rate snapshot, and stores the observed resume timestamp. Clearing the snapshot makes repeated resume/load calls identity-preserving even when time advances again.
+- A clock rollback clamps elapsed time to zero but still consumes the snapshot. This prevents a rolled-back timestamp from being retried later for income.
+- Repeated background notifications do not replace an existing snapshot or timestamp. Flutter lifecycle handling snapshots on hidden/paused/detached and consumes on resumed; initialization also consumes a persisted snapshot for cold launches.
+- Lifecycle pause/resume operations are serialized through the application controller so asynchronous persistence writes retain event order during rapid background/foreground transitions.
+- No incidents, chaos changes, reputation changes, repairs, departures, or active-only abilities run through the offline path.
+- Save schema advances to version 8 for the nullable offline rate snapshot and last-accrual timestamp. Version-7 and older saves migrate with no pending offline absence.

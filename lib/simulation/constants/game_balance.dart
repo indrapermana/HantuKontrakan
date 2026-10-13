@@ -6,6 +6,9 @@ abstract final class GameBalance {
   static const int debugTickSeconds = 1;
   static const int microcoinsPerCoin = 1000000;
   static const int secondsPerMinute = 60;
+  static const int millisecondsPerMinute = 60000;
+  static const int offlineEarningsPercent = 50;
+  static const int maximumOfflineMinutes = 240;
   static const int tuyulBaseRentBonusPercent = 15;
   static const int baseHappiness = 50;
   static const Map<int, int> roomTagMatchHappinessByLevel = {1: 10, 2: 15};

@@ -243,9 +243,27 @@ Verification:
 - `flutter test`: all 64 tests passed, including atomic whole-coin payout, fractional preservation, duplicate replay before/after reload, early-claim retry behavior, visible wallet updates, disabled zero balance, save round-trip, and v6 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-013 — Offline snapshot and capped earnings
+
+Status: implemented and verified on 2026-10-13.
+
+- Added pure-Dart pause/resume rules that snapshot the complete current rent rate and credit elapsed offline time at 50%, capped at four hours.
+- Added atomic snapshot consumption so repeated resume or reload calls cannot credit the same absence twice; negative elapsed time credits zero and is still consumed.
+- Routed background and resume lifecycle events through typed domain commands, including cold-launch consumption of a persisted snapshot.
+- Added pending-rent integration without running active simulation, incidents, chaos, reputation, or ability logic offline.
+- Advanced saves to schema version 8 with explicit version-7 migration and offline snapshot round-trip coverage.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused offline-rule, lifecycle-controller, persistence, and widget coverage: all 27 tests passed.
+- `flutter test`: all 74 tests passed, including 2-hour and 5-hour worked examples, four-hour capping, 50% earnings, snapshot-rate capture, repeated resume/load protection, clock rollback, ordered lifecycle persistence, and v7 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-013 and all later tickets.
+- HK-014 and all later tickets.
 - Rent accrual, furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

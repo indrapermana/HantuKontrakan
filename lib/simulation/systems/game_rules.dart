@@ -3,6 +3,7 @@ import '../content/furniture_definitions.dart';
 import '../models/game_state.dart';
 import '../models/room.dart';
 import 'rent_system.dart';
+import 'offline_earnings_system.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
@@ -45,6 +46,12 @@ abstract final class GameRules {
       completedRentClaimIds: {...state.completedRentClaimIds, claimId},
     );
   }
+
+  static GameState pauseForOffline(GameState state, int timestampMillis) =>
+      OfflineEarningsSystem.pause(state, timestampMillis);
+
+  static GameState resumeFromOffline(GameState state, int timestampMillis) =>
+      OfflineEarningsSystem.resume(state, timestampMillis);
 
   static GameState placeGhost(GameState state, String ghostId, String roomId) {
     if (!state.ghosts.any((ghost) => ghost.id == ghostId) ||

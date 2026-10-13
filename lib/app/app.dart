@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -17,17 +19,34 @@ class HantuKontrakanApp extends StatefulWidget {
   State<HantuKontrakanApp> createState() => _HantuKontrakanAppState();
 }
 
-class _HantuKontrakanAppState extends State<HantuKontrakanApp> {
+class _HantuKontrakanAppState extends State<HantuKontrakanApp>
+    with WidgetsBindingObserver {
   late final GameController controller;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     controller = GameController(saveService: widget.saveService)..initialize();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        unawaited(controller.resumeFromOffline());
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        unawaited(controller.pauseForOffline());
+      case AppLifecycleState.inactive:
+        break;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     controller.dispose();
     super.dispose();
   }

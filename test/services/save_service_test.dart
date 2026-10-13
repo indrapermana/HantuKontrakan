@@ -25,6 +25,8 @@ void main() {
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
       completedRentClaimIds: const {'rent-claim-1'},
+      offlineRateSnapshotMicrocoinsPerMinute: 42000000,
+      lastOfflineAccrualTimestampMillis: 1791864000000,
       ghosts: seed.ghosts
           .map(
             (ghost) => ghost.id == 'pocong_01'
@@ -62,6 +64,8 @@ void main() {
     expect(loaded.pendingRentMicrocoins, 12345678);
     expect(loaded.rentAccrualRemainder, 37);
     expect(loaded.completedRentClaimIds, {'rent-claim-1'});
+    expect(loaded.offlineRateSnapshotMicrocoinsPerMinute, 42000000);
+    expect(loaded.lastOfflineAccrualTimestampMillis, 1791864000000);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
     expect(loaded.roomById('room_01').row, 1);
     expect(loaded.roomById('room_01').levelFor(RoomAttribute.silence), 2);
@@ -188,6 +192,22 @@ void main() {
 
     final migrated = (result as SaveLoaded).state;
     expect(migrated.completedRentClaimIds, isEmpty);
+  });
+
+  test('version 7 save migrates offline snapshot to empty', () async {
+    final version7 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 7
+      ..remove('offlineRateSnapshotMicrocoinsPerMinute')
+      ..remove('lastOfflineAccrualTimestampMillis');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version7),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    final migrated = (result as SaveLoaded).state;
+    expect(migrated.offlineRateSnapshotMicrocoinsPerMinute, isNull);
+    expect(migrated.lastOfflineAccrualTimestampMillis, isNull);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

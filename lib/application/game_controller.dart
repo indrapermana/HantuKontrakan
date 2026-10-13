@@ -23,6 +23,7 @@ class GameController extends ChangeNotifier {
   final GameClock _clock;
   final SeededRandomSource _randomSource;
   int _rentClaimSequence = 0;
+  Future<void> _lifecycleOperation = Future<void>.value();
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
   );
@@ -54,6 +55,10 @@ class GameController extends ChangeNotifier {
       SaveLoaded(:final state) => state,
       SaveNotFound() || SaveRejected() => GameState.seeded(),
     });
+    final resumed = _domainController.dispatch(
+      ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
+    );
+    if (resumed) await _saveService.save(state);
     _isReady = true;
     notifyListeners();
   }
@@ -116,6 +121,24 @@ class GameController extends ChangeNotifier {
         claimId ??
         'rent-${_clock.now().microsecondsSinceEpoch}-$revision-${_rentClaimSequence++}';
     await _dispatch(CollectAllRent(claimId: resolvedClaimId));
+  }
+
+  Future<void> pauseForOffline() async {
+    if (!_isReady) return;
+    final timestampMillis = _clock.now().millisecondsSinceEpoch;
+    _lifecycleOperation = _lifecycleOperation.then(
+      (_) => _dispatch(PauseForOffline(timestampMillis: timestampMillis)),
+    );
+    await _lifecycleOperation;
+  }
+
+  Future<void> resumeFromOffline() async {
+    if (!_isReady) return;
+    final timestampMillis = _clock.now().millisecondsSinceEpoch;
+    _lifecycleOperation = _lifecycleOperation.then(
+      (_) => _dispatch(ResumeFromOffline(timestampMillis: timestampMillis)),
+    );
+    await _lifecycleOperation;
   }
 
   Future<void> resetState() async {

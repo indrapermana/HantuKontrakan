@@ -55,4 +55,31 @@ void main() {
       isNull,
     );
   });
+
+  testWidgets('app lifecycle persists and consumes one offline snapshot', (
+    tester,
+  ) async {
+    final saves = MemorySaveService();
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('id')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      saves.storedState?.offlineRateSnapshotMicrocoinsPerMinute,
+      isNotNull,
+    );
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump(const Duration(milliseconds: 100));
+    final pendingAfterResume = saves.storedState?.pendingRentMicrocoins;
+    expect(saves.storedState?.offlineRateSnapshotMicrocoinsPerMinute, isNull);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(saves.storedState?.pendingRentMicrocoins, pendingAfterResume);
+  });
 }
