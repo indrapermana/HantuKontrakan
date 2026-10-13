@@ -22,4 +22,23 @@ void main() {
       expect(reloaded.happinessFor('pocong_01'), 40);
     },
   );
+
+  test('rejected save seeds safely and exposes recovery reason', () async {
+    final saves = MemorySaveService(
+      initialResult: const SaveRejected(
+        reason: SaveRejectionReason.unsupportedVersion,
+        schemaVersion: 99,
+      ),
+    );
+    final controller = GameController(saveService: saves);
+
+    await controller.initialize();
+
+    expect(controller.state.walletCoins, 200);
+    expect(
+      controller.saveRecoveryReason,
+      SaveRejectionReason.unsupportedVersion,
+    );
+    expect(saves.storedResult, isA<SaveRejected>());
+  });
 }

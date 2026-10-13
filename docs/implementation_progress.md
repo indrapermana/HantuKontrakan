@@ -67,9 +67,27 @@ Verification:
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; the simulation layer has no Flutter or Flame imports.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-004 — Versioned save/load and recovery
+
+Status: implemented and verified on 2026-10-13.
+
+- Replaced nullable/catch-all loading with explicit not-found, loaded, corrupt, and unsupported-version outcomes.
+- Added strict schema-version validation and a dedicated unsupported-version exception before version-1 decoding.
+- Preserved rejected SharedPreferences payloads at both the primary key and a recovery backup key.
+- Seeded a safe playable state after rejection while exposing the recovery reason and avoiding writes during initialization.
+- Retained save/reload survival for room swaps, complaint resolution, wallet changes, and happiness effects.
+
+Verification:
+
+- Dart formatter completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test test/services test/application`: all 7 focused persistence/application tests passed.
+- `flutter test`: all 19 tests passed, including missing-save, round-trip, corrupt-save, unsupported-version, backup-preservation, fallback, and reload coverage.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-004 and all later M1/M2 tickets beyond what P0 directly requires.
+- HK-005 and all later M1/M2 tickets beyond what P0 directly requires.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

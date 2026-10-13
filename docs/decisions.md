@@ -38,3 +38,13 @@ Date: 2026-10-11
 - The existing Flutter `GameController` remains the application adapter for `ChangeNotifier` and persistence. It delegates state transitions to the pure controller, then notifies and saves only when dispatch succeeds.
 - Existing P0 complaint costs, happiness effects, and the stable resolution ID moved into `GameBalance`; this is organization of established behavior, not a balance change.
 - Equality/value-generation packages were not added. Identity-preserving no-ops plus immutable state are sufficient for the current command surface; structural equality can be reconsidered if later state tooling requires it.
+
+## HK-004 persistence decisions
+
+Date: 2026-10-13
+
+- Save loading returns one of three explicit outcomes: not found, loaded, or rejected. Rejections distinguish corrupt data from a well-formed save using an unsupported schema version.
+- `GameState.fromJson` validates that `schemaVersion` is an integer before dispatching to the version-1 decoder. Unknown integer versions throw `UnsupportedSaveVersion`; missing or malformed versions are corrupt input.
+- A rejected SharedPreferences payload remains at its original key and is also copied to a stable backup key before the app falls back. This avoids silently destroying forward-version or diagnostically useful corrupt data.
+- The application controller exposes the rejection reason, seeds a playable state, and does not write during recovery initialization. A later real player command may create a fresh current-version primary save while the rejected backup remains available.
+- No speculative migration was added because version 1 is the only released schema. Future versions must add an explicit decoder/migration branch rather than weakening current validation.

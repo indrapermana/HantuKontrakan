@@ -17,11 +17,17 @@ class GameController extends ChangeNotifier {
     GameState.seeded(),
   );
   bool _isReady = false;
+  SaveLoadResult _loadResult = const SaveNotFound();
 
   GameState get state => _domainController.state;
   bool get isReady => _isReady;
   int get revision => _domainController.revision;
   bool get hasPendingComplaint => !state.complaintResolved;
+  SaveLoadResult get loadResult => _loadResult;
+  SaveRejectionReason? get saveRecoveryReason => switch (_loadResult) {
+    SaveRejected(:final reason) => reason,
+    _ => null,
+  };
 
   int happinessFor(String ghostId) =>
       HappinessSystem.happinessFor(state, ghostId);
@@ -29,9 +35,11 @@ class GameController extends ChangeNotifier {
       HappinessSystem.compatibilityFor(state, ghostId);
 
   Future<void> initialize() async {
-    _domainController = GameStateController(
-      await _saveService.load() ?? GameState.seeded(),
-    );
+    _loadResult = await _saveService.load();
+    _domainController = GameStateController(switch (_loadResult) {
+      SaveLoaded(:final state) => state,
+      SaveNotFound() || SaveRejected() => GameState.seeded(),
+    });
     _isReady = true;
     notifyListeners();
   }

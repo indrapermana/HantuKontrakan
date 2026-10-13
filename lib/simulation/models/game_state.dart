@@ -71,11 +71,18 @@ class GameState {
 
   factory GameState.fromJson(Map<String, Object?> json) {
     final schemaVersion = json['schemaVersion'];
-    if (schemaVersion != currentSchemaVersion) {
-      throw UnsupportedError('Unsupported save schema: $schemaVersion');
+    if (schemaVersion is! int) {
+      throw const FormatException('Save schemaVersion must be an integer.');
     }
+    if (schemaVersion != currentSchemaVersion) {
+      throw UnsupportedSaveVersion(schemaVersion);
+    }
+    return GameState._fromVersion1Json(json);
+  }
+
+  factory GameState._fromVersion1Json(Map<String, Object?> json) {
     return GameState(
-      schemaVersion: schemaVersion! as int,
+      schemaVersion: currentSchemaVersion,
       walletCoins: json['walletCoins']! as int,
       ghosts: (json['ghosts']! as List<Object?>)
           .map((item) => GhostState.fromJson(item! as Map<String, Object?>))
@@ -87,4 +94,13 @@ class GameState {
       resolutionId: json['resolutionId'] as String?,
     );
   }
+}
+
+class UnsupportedSaveVersion implements Exception {
+  const UnsupportedSaveVersion(this.version);
+
+  final int version;
+
+  @override
+  String toString() => 'Unsupported save schema: $version';
 }
