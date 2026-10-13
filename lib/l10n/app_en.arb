@@ -98,5 +98,11 @@
   "tutorialIncidentBody": "A complaint needs your decision. Open the incident below and choose a consequence.",
   "tutorialLockedRoomTitle": "MORE ROOMS AWAIT",
   "tutorialLockedRoomBody": "The upstairs rooms unlock through future missions. Your kontrakan is now open for play.",
-  "tutorialFinish": "Continue playing"
+  "tutorialFinish": "Continue playing",
+  "mysticalCrystals": "{count} Crystals",
+  "missionsTitle": "MISSIONS",
+  "missionRewardSummary": "+{coins} coins · +{experience} XP · +{crystals} crystals",
+  "missionClaim": "Claim",
+  "missionClaimed": "Claimed",
+  "missionInProgress": "In progress"
 }

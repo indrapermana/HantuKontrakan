@@ -12,6 +12,7 @@ import '../../simulation/content/progression_definitions.dart';
 import '../../simulation/models/incident_definition.dart';
 import '../../simulation/systems/game_rules.dart';
 import '../tutorial/tutorial_panel.dart';
+import '../missions/mission_dialog.dart';
 import 'detail_sheets.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -39,6 +40,17 @@ class HomeScreen extends StatelessWidget {
           appBar: AppBar(
             title: Text(strings.appTitleUppercase),
             centerTitle: true,
+            actions: [
+              IconButton(
+                key: const Key('missions-button'),
+                tooltip: strings.missionsTitle,
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => MissionDialog(controller: controller),
+                ),
+                icon: const Icon(Icons.assignment_turned_in),
+              ),
+            ],
           ),
           body: SafeArea(
             child: Column(
@@ -53,6 +65,11 @@ class HomeScreen extends StatelessWidget {
                         strings.spiritCoins(state.walletCoins),
                         key: const Key('wallet-coins'),
                         style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        strings.mysticalCrystals(state.mysticalCrystals),
+                        key: const Key('mystical-crystals'),
                       ),
                       const Spacer(),
                       Text(

@@ -79,6 +79,9 @@ class GameController extends ChangeNotifier {
     await _dispatch(GrantExperience(amount: amount));
   }
 
+  Future<bool> claimMissionReward(String missionId) =>
+      _dispatch(ClaimMissionReward(missionId: missionId));
+
   Future<void> moveGhost(
     String ghostId,
     String targetRoomId, {

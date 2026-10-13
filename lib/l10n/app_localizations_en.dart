@@ -370,4 +370,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tutorialFinish => 'Continue playing';
+
+  @override
+  String mysticalCrystals(int count) {
+    return '$count Crystals';
+  }
+
+  @override
+  String get missionsTitle => 'MISSIONS';
+
+  @override
+  String missionRewardSummary(int coins, int experience, int crystals) {
+    return '+$coins coins · +$experience XP · +$crystals crystals';
+  }
+
+  @override
+  String get missionClaim => 'Claim';
+
+  @override
+  String get missionClaimed => 'Claimed';
+
+  @override
+  String get missionInProgress => 'In progress';
 }

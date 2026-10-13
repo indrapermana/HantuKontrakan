@@ -48,6 +48,10 @@ class GameStateController {
         _state,
         amount,
       ),
+      ClaimMissionReward(:final missionId) => GameRules.claimMissionReward(
+        _state,
+        missionId,
+      ),
       ResolveIncident(
         :final incidentId,
         :final choiceId,

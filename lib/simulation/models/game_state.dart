@@ -12,6 +12,7 @@ class GameState {
     this.activeSimulationSeconds = 0,
     this.playerLevel = GameBalance.initialPlayerLevel,
     this.playerExperience = 0,
+    this.mysticalCrystals = 0,
     this.reputation = GameBalance.initialReputation,
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
@@ -27,6 +28,7 @@ class GameState {
     Set<String> completedIncidentResolutionIds = const {},
     this.incidentRandomState = GameBalance.defaultRandomSeed,
     Set<String> completedRepairIds = const {},
+    Set<String> completedMissionIds = const {},
     this.tutorialStep = TutorialStep.completed,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
@@ -42,6 +44,7 @@ class GameState {
          completedIncidentResolutionIds,
        ),
        completedRepairIds = Set.unmodifiable(completedRepairIds),
+       completedMissionIds = Set.unmodifiable(completedMissionIds),
        ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
@@ -50,6 +53,7 @@ class GameState {
         playerLevel < 1 ||
         playerLevel > ProgressionDefinitions.levels.length ||
         playerExperience < 0 ||
+        mysticalCrystals < 0 ||
         reputation < 0 ||
         reputation > GameBalance.maximumReputation ||
         chaos < GameBalance.minimumChaos ||
@@ -71,7 +75,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 14;
+  static const int currentSchemaVersion = 15;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -79,6 +83,7 @@ class GameState {
   final int activeSimulationSeconds;
   final int playerLevel;
   final int playerExperience;
+  final int mysticalCrystals;
   final int reputation;
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
@@ -94,6 +99,7 @@ class GameState {
   final Set<String> completedIncidentResolutionIds;
   final int incidentRandomState;
   final Set<String> completedRepairIds;
+  final Set<String> completedMissionIds;
   final TutorialStep tutorialStep;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
@@ -206,6 +212,7 @@ class GameState {
     int? activeSimulationSeconds,
     int? playerLevel,
     int? playerExperience,
+    int? mysticalCrystals,
     int? reputation,
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
@@ -221,6 +228,7 @@ class GameState {
     Set<String>? completedIncidentResolutionIds,
     int? incidentRandomState,
     Set<String>? completedRepairIds,
+    Set<String>? completedMissionIds,
     TutorialStep? tutorialStep,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
@@ -234,6 +242,7 @@ class GameState {
         activeSimulationSeconds ?? this.activeSimulationSeconds,
     playerLevel: playerLevel ?? this.playerLevel,
     playerExperience: playerExperience ?? this.playerExperience,
+    mysticalCrystals: mysticalCrystals ?? this.mysticalCrystals,
     reputation: reputation ?? this.reputation,
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
@@ -264,6 +273,7 @@ class GameState {
         completedIncidentResolutionIds ?? this.completedIncidentResolutionIds,
     incidentRandomState: incidentRandomState ?? this.incidentRandomState,
     completedRepairIds: completedRepairIds ?? this.completedRepairIds,
+    completedMissionIds: completedMissionIds ?? this.completedMissionIds,
     tutorialStep: tutorialStep ?? this.tutorialStep,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
@@ -278,6 +288,7 @@ class GameState {
     'activeSimulationSeconds': activeSimulationSeconds,
     'playerLevel': playerLevel,
     'playerExperience': playerExperience,
+    'mysticalCrystals': mysticalCrystals,
     'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
@@ -296,6 +307,7 @@ class GameState {
     ),
     'incidentRandomState': incidentRandomState,
     'completedRepairIds': completedRepairIds.toList(growable: false),
+    'completedMissionIds': completedMissionIds.toList(growable: false),
     'tutorialStep': tutorialStep.name,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
@@ -322,10 +334,11 @@ class GameState {
       11 => GameState._fromVersion11Json(json),
       12 => GameState._fromVersion12Json(json),
       13 => GameState._fromVersion13Json(json),
-      currentSchemaVersion => GameState._fromVersion14Json(json),
+      14 => GameState._fromVersion14Json(json),
+      currentSchemaVersion => GameState._fromVersion15Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
-    if (schemaVersion < currentSchemaVersion) {
+    if (schemaVersion < 14) {
       return state.copyWith(
         playerExperience: ProgressionDefinitions.byLevel(
           state.playerLevel,
@@ -517,6 +530,14 @@ class GameState {
       GameState._fromVersion13Json(
         json,
       ).copyWith(playerExperience: json['playerExperience']! as int);
+
+  factory GameState._fromVersion15Json(Map<String, Object?> json) =>
+      GameState._fromVersion14Json(json).copyWith(
+        mysticalCrystals: json['mysticalCrystals']! as int,
+        completedMissionIds: (json['completedMissionIds']! as List<Object?>)
+            .cast<String>()
+            .toSet(),
+      );
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)

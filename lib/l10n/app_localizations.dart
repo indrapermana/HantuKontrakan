@@ -691,6 +691,42 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Lanjut bermain'**
   String get tutorialFinish;
+
+  /// No description provided for @mysticalCrystals.
+  ///
+  /// In id, this message translates to:
+  /// **'{count} Kristal'**
+  String mysticalCrystals(int count);
+
+  /// No description provided for @missionsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'MISI'**
+  String get missionsTitle;
+
+  /// No description provided for @missionRewardSummary.
+  ///
+  /// In id, this message translates to:
+  /// **'+{coins} koin · +{experience} XP · +{crystals} kristal'**
+  String missionRewardSummary(int coins, int experience, int crystals);
+
+  /// No description provided for @missionClaim.
+  ///
+  /// In id, this message translates to:
+  /// **'Klaim'**
+  String get missionClaim;
+
+  /// No description provided for @missionClaimed.
+  ///
+  /// In id, this message translates to:
+  /// **'Diklaim'**
+  String get missionClaimed;
+
+  /// No description provided for @missionInProgress.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum selesai'**
+  String get missionInProgress;
 }
 
 class _AppLocalizationsDelegate

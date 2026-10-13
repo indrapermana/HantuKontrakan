@@ -111,6 +111,26 @@ void main() {
     expect(reloaded.state.roomById('room_02').occupantId, 'tuyul_01');
   });
 
+  test(
+    'mission reward persists and duplicate controller claim is ignored',
+    () async {
+      var initial = GameRules.continueTutorial(GameState.newGame());
+      initial = GameRules.placeGhost(initial, 'pocong_01', 'room_01');
+      final saves = MemorySaveService(initialResult: SaveLoaded(initial));
+      final first = GameController(saveService: saves);
+      await first.initialize();
+
+      expect(await first.claimMissionReward('place_pocong'), isTrue);
+      expect(await first.claimMissionReward('place_pocong'), isFalse);
+
+      final reloaded = GameController(saveService: saves);
+      await reloaded.initialize();
+      expect(reloaded.state.walletCoins, 225);
+      expect(reloaded.state.playerExperience, 25);
+      expect(reloaded.state.completedMissionIds, {'place_pocong'});
+    },
+  );
+
   test('initialize credits persisted offline snapshot exactly once', () async {
     final pausedAt = DateTime.utc(2026, 10, 13, 8);
     final resumedAt = pausedAt.add(const Duration(hours: 2));

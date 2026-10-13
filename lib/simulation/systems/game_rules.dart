@@ -6,6 +6,7 @@ import 'ability_system.dart';
 import 'chaos_reputation_system.dart';
 import 'event_modifier_system.dart';
 import 'incident_system.dart';
+import 'mission_system.dart';
 import 'offline_earnings_system.dart';
 import 'progression_system.dart';
 import 'rent_system.dart';
@@ -206,6 +207,9 @@ abstract final class GameRules {
 
   static GameState grantExperience(GameState state, int amount) =>
       ProgressionSystem.grantExperience(state, amount);
+
+  static GameState claimMissionReward(GameState state, String missionId) =>
+      MissionSystem.claim(state, missionId);
 
   static GameState upgradeRoom(
     GameState state,

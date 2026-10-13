@@ -78,6 +78,12 @@ final class GrantExperience extends GameCommand {
   final int amount;
 }
 
+final class ClaimMissionReward extends GameCommand {
+  const ClaimMissionReward({required this.missionId});
+
+  final String missionId;
+}
+
 final class ResolveIncident extends GameCommand {
   const ResolveIncident({
     required this.incidentId,

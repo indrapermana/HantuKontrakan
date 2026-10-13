@@ -24,6 +24,7 @@ void main() {
       walletCoins: 123,
       playerLevel: 5,
       playerExperience: 800,
+      mysticalCrystals: 4,
       reputation: 77,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
@@ -38,6 +39,7 @@ void main() {
       completedIncidentResolutionIds: const {'incident-resolution-1'},
       incidentRandomState: 12345,
       completedRepairIds: const {'repair-1'},
+      completedMissionIds: const {'place_pocong'},
       ghosts: seed.ghosts
           .map(
             (ghost) => ghost.id == 'pocong_01'
@@ -76,6 +78,7 @@ void main() {
     expect(loaded.walletCoins, 123);
     expect(loaded.playerLevel, 5);
     expect(loaded.playerExperience, 800);
+    expect(loaded.mysticalCrystals, 4);
     expect(loaded.reputation, 77);
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
     expect(loaded.chaos, 40);
@@ -93,6 +96,7 @@ void main() {
     expect(loaded.completedIncidentResolutionIds, {'incident-resolution-1'});
     expect(loaded.incidentRandomState, 12345);
     expect(loaded.completedRepairIds, {'repair-1'});
+    expect(loaded.completedMissionIds, {'place_pocong'});
     expect(loaded.roomById('room_01').repairRequired, isTrue);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
     expect(loaded.ghostById('pocong_01').eventHappinessModifier, 12);
@@ -339,6 +343,27 @@ void main() {
     expect(migrated.schemaVersion, GameState.currentSchemaVersion);
     expect(migrated.playerLevel, 5);
     expect(migrated.playerExperience, 700);
+  });
+
+  test('version 14 save preserves XP and adds empty mission rewards', () async {
+    final version14 =
+        GameState.seeded()
+            .copyWith(playerLevel: 3, playerExperience: 300)
+            .toJson()
+          ..['schemaVersion'] = 14
+          ..remove('mysticalCrystals')
+          ..remove('completedMissionIds');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version14),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.playerLevel, 3);
+    expect(migrated.playerExperience, 300);
+    expect(migrated.mysticalCrystals, 0);
+    expect(migrated.completedMissionIds, isEmpty);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

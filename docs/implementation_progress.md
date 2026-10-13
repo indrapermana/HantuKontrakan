@@ -419,7 +419,7 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-023 and all later tickets.
+- HK-024 and all later tickets.
 - Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
 
 ## Verification evidence
@@ -494,3 +494,34 @@ Verification:
 - The HK-021 widget acceptance flow still passes with the new level-2 gate.
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; progression remains pure Dart.
 - The implementation-plan HK-022 checkbox is synchronized with this tracker as requested.
+
+### HK-023 — Ten beginner missions and one-time reward claims
+
+Status: implemented and verified on 2026-10-14.
+
+- Added ten ordered, bilingual beginner mission definitions covering Pocong placement, first rent, Kuntilanak placement, first incident, Comfort upgrade, furniture, happiness 70, Tuyul placement, Room 3 unlock, and player level 5.
+- Added pure-Dart mission completion checks derived from persisted gameplay evidence instead of transient UI notifications or counters.
+- Added atomic `ClaimMissionReward(missionId)` handling across domain and application controllers. A claim validates the mission, prerequisite, objective, and persisted completed-ID set before applying any reward.
+- Added centralized coin, XP, and Kristal Mistis rewards. XP uses HK-022's progression system, while Kristal Mistis remains cosmetic-only and is not required by any mechanic.
+- Added a localized Flutter mission dialog showing all objectives, exact rewards, progress/claim state, and disabled claimed actions. Current Kristal Mistis is visible in the home status row.
+- Persisted Kristal Mistis and completed mission IDs under save schema version 15. Version-14 migration preserves exact XP and initializes mission rewards safely.
+
+Implementation decisions and assumptions:
+
+- Mission order is explicit: `place_pocong`, `collect_first_rent`, `place_kuntilanak`, `resolve_first_incident`, `upgrade_comfort`, `furnish_room`, `happy_tenant`, `place_tuyul`, `unlock_room_03`, and `reach_level_5`.
+- Rewards are tuning data rather than widget logic. XP rewards are `25, 25, 50, 50, 75, 75, 100, 150, 250, 250`; coin rewards total 720; Kristal Mistis rewards total 5 across the happiness and level-5 missions.
+- Missions must be claimed in order. Completing a later objective early preserves the underlying state, but its reward remains unavailable until the preceding mission has been claimed.
+- Placement, rent, incident, upgrade, furniture, happiness, room, and level completion are calculated from current persisted state. No analytics hooks, wall-clock counters, or network state are required.
+- `resolve_first_incident` uses the HK-017/HK-019 persisted incident-resolution IDs; the older P0 complaint does not substitute for an incident.
+- Mission XP is sufficient to progress from the tutorial's level 2 through the Room 3 and level-5 gates when the ordered objectives are completed. Economy pacing remains tunable and should be revisited with playtest data.
+- Kristal Mistis has no spend path in HK-023, consistent with the plan's requirement that key MVP mechanics not depend on premium cosmetic currency.
+
+Verification:
+
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test`: all 137 tests passed.
+- Mission tests cover the exact ten-item catalog, all ordered claims, deterministic rewards, prerequisite rejection, incomplete/blank/unknown no-ops, duplicate replay rejection, XP/level progression, five-crystal total, JSON continuation, schema-14 migration, and controller reload.
+- Widget coverage verifies a completed mission is visibly claimable, updates coins/XP and persistence once, then exposes a disabled claimed action.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; mission rules and content remain pure Dart.
+- The implementation-plan HK-023 checkbox is synchronized with this tracker as requested.
