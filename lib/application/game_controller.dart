@@ -7,12 +7,20 @@ import '../simulation/game_state_controller.dart';
 import '../simulation/models/game_state.dart';
 import '../simulation/systems/game_rules.dart';
 import '../simulation/systems/happiness_system.dart';
+import 'simulation_runtime.dart';
 
 class GameController extends ChangeNotifier {
-  GameController({required SaveService saveService})
-    : _saveService = saveService;
+  GameController({
+    required SaveService saveService,
+    GameClock clock = const SystemGameClock(),
+    int randomSeed = GameBalance.defaultRandomSeed,
+  }) : _saveService = saveService,
+       _clock = clock,
+       _randomSource = SeededRandomSource(randomSeed);
 
   final SaveService _saveService;
+  final GameClock _clock;
+  final SeededRandomSource _randomSource;
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
   );
@@ -28,6 +36,8 @@ class GameController extends ChangeNotifier {
     SaveRejected(:final reason) => reason,
     _ => null,
   };
+  DateTime get debugNow => _clock.now();
+  int get randomSeed => _randomSource.seed;
 
   int happinessFor(String ghostId) =>
       HappinessSystem.happinessFor(state, ghostId);
@@ -55,6 +65,15 @@ class GameController extends ChangeNotifier {
         resolutionId: GameBalance.p0ComplaintResolutionId,
       ),
     );
+  }
+
+  Future<void> debugTick() async {
+    await _dispatch(const DebugTick(seconds: GameBalance.debugTickSeconds));
+  }
+
+  Future<void> resetState() async {
+    _randomSource.reset();
+    await _dispatch(const ResetGame());
   }
 
   Future<void> _dispatch(GameCommand command) async {

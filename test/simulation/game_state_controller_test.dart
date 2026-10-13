@@ -73,4 +73,18 @@ void main() {
     expect(controller.revision, 2);
     expect(controller.state.walletCoins, 150);
   });
+
+  test('debug tick validates elapsed time and reset restores seed state', () {
+    final controller = GameStateController(GameState.seeded());
+
+    expect(controller.dispatch(const DebugTick(seconds: 0)), isFalse);
+    expect(controller.revision, 0);
+    expect(controller.dispatch(const DebugTick(seconds: 3)), isTrue);
+    expect(controller.state.activeSimulationSeconds, 3);
+
+    expect(controller.dispatch(const ResetGame()), isTrue);
+    expect(controller.state.activeSimulationSeconds, 0);
+    expect(controller.state.chaos, GameBalance.initialChaos);
+    expect(controller.state.walletCoins, GameBalance.initialCoins);
+  });
 }

@@ -494,7 +494,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 - [x] **HK-002** Create `HantuGame`, camera/world, 2×2 cutaway building, tappable room components. **Accept:** tap each room opens selected room ID.
 - [x] **HK-003** Pure Dart immutable game state, commands, controller, balance constants. **Accept:** tests construct and update state without Flutter/Flame.
 - [x] **HK-004** Save/load with schema versioning and safe fallback for corrupt saves. **Accept:** changes survive termination/relaunch; unsupported versions handled deliberately.
-- [ ] **HK-005** Debug HUD and deterministic test clock/seed. **Accept:** dev can inspect coins, chaos, happiness, tick and reset state.
+- [x] **HK-005** Debug HUD and deterministic test clock/seed. **Accept:** dev can inspect coins, chaos, happiness, tick and reset state.
 
 ### Milestone M2 — Ghosts and room management
 

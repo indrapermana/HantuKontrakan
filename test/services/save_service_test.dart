@@ -26,6 +26,26 @@ void main() {
     final loaded = (result as SaveLoaded).state;
     expect(loaded.walletCoins, 123);
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
+    expect(loaded.chaos, 40);
+    expect(loaded.activeSimulationSeconds, 0);
+  });
+
+  test('version 1 save migrates to current debug state defaults', () async {
+    final version1 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 1
+      ..remove('chaos')
+      ..remove('activeSimulationSeconds');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version1),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    expect(result, isA<SaveLoaded>());
+    final migrated = (result as SaveLoaded).state;
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(migrated.chaos, 40);
+    expect(migrated.activeSimulationSeconds, 0);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

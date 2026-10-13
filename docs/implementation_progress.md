@@ -85,9 +85,27 @@ Verification:
 - `flutter test`: all 19 tests passed, including missing-save, round-trip, corrupt-save, unsupported-version, backup-preservation, fallback, and reload coverage.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-005 — Debug HUD and deterministic runtime
+
+Status: implemented and verified on 2026-10-13. Milestone M1 is complete.
+
+- Added a debug-only HUD showing coins, chaos, Pocong/Tuyul happiness, active tick count, injected clock time, and RNG seed.
+- Added manual one-second tick and seeded-state reset controls, both routed through typed domain commands and persisted normally.
+- Added injectable `GameClock` and resettable `SeededRandomSource` runtime dependencies with deterministic tests.
+- Added persisted chaos and active simulation seconds under schema version 2, plus an explicit version-1 migration.
+- Kept actual economy accrual, periodic chaos changes, incidents, and offline simulation outside HK-005.
+
+Verification:
+
+- Dart formatter completed successfully.
+- `flutter analyze`: no issues found.
+- Focused simulation, runtime, persistence, and debug-HUD suite: all 22 tests passed.
+- `flutter test`: all 24 tests passed, including deterministic clock/seed, RNG reset, tick/reset persistence, debug HUD, and v1 migration coverage.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-005 and all later M1/M2 tickets beyond what P0 directly requires.
+- HK-006 and all later M2 tickets.
 - Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

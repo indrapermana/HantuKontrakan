@@ -41,4 +41,22 @@ void main() {
     expect(androidManifest, contains('android:screenOrientation="portrait"'));
     expect(iosManifest, isNot(contains('UIInterfaceOrientationLandscape')));
   });
+
+  testWidgets('debug HUD exposes state and supports tick and reset', (
+    tester,
+  ) async {
+    await pumpApp(tester, locale: const Locale('id'));
+
+    expect(find.byKey(const Key('debug-hud')), findsOneWidget);
+    expect(find.textContaining('Coins 200  Chaos 40  Tick 0'), findsOneWidget);
+    expect(find.textContaining('P 35  T 45  Seed 20261011'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('debug-tick')));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.textContaining('Tick 1'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('debug-reset')));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.textContaining('Coins 200  Chaos 40  Tick 0'), findsOneWidget);
+  });
 }

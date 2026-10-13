@@ -1,5 +1,8 @@
 abstract final class GameBalance {
   static const int initialCoins = 200;
+  static const int initialChaos = 40;
+  static const int defaultRandomSeed = 20261011;
+  static const int debugTickSeconds = 1;
   static const int baseHappiness = 50;
   static const int compatibilityMinimum = -20;
   static const int compatibilityMaximum = 15;

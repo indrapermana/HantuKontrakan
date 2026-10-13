@@ -48,3 +48,13 @@ Date: 2026-10-13
 - A rejected SharedPreferences payload remains at its original key and is also copied to a stable backup key before the app falls back. This avoids silently destroying forward-version or diagnostically useful corrupt data.
 - The application controller exposes the rejection reason, seeds a playable state, and does not write during recovery initialization. A later real player command may create a fresh current-version primary save while the rejected backup remains available.
 - No speculative migration was added because version 1 is the only released schema. Future versions must add an explicit decoder/migration branch rather than weakening current validation.
+
+## HK-005 debug runtime decisions
+
+Date: 2026-10-13
+
+- The debug HUD is compiled into debug builds only via `kDebugMode`. It uses concise developer-facing English labels rather than expanding player localization scope.
+- Chaos starts at the specified provisional value of 40 and active simulation seconds start at zero. HK-005 manual ticks advance only this persisted counter; real fixed-step economy, chaos intervals, and offline behavior remain deferred.
+- Adding persisted chaos and active seconds advances the save schema to version 2. Version-1 saves migrate explicitly with chaos 40 and zero active seconds, preserving all prior wallet, ghost, room, and complaint fields.
+- `GameClock` and `SeededRandomSource` are injectable application-runtime dependencies. Production uses system time and seed `20261011`; tests inject fixed time/seed, and reset rewinds the random source.
+- Debug reset dispatches through the same pure command controller and save path as other changes. It restores the seeded state and persists it rather than mutating UI-only values.

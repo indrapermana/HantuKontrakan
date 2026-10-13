@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/application/game_controller.dart';
+import 'package:hantu_kontrakan/application/simulation_runtime.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/systems/game_rules.dart';
 
@@ -41,4 +42,43 @@ void main() {
     );
     expect(saves.storedResult, isA<SaveRejected>());
   });
+
+  test('debug clock, seed, tick and reset are deterministic', () async {
+    final clock = _FixedClock(DateTime.utc(2026, 10, 13, 12));
+    final saves = MemorySaveService();
+    final controller = GameController(
+      saveService: saves,
+      clock: clock,
+      randomSeed: 42,
+    );
+    await controller.initialize();
+
+    expect(controller.debugNow, DateTime.utc(2026, 10, 13, 12));
+    expect(controller.randomSeed, 42);
+    expect(controller.state.chaos, 40);
+    expect(controller.state.activeSimulationSeconds, 0);
+
+    await controller.debugTick();
+    expect(controller.state.activeSimulationSeconds, 1);
+    expect(saves.storedState?.activeSimulationSeconds, 1);
+
+    await controller.resolveComplaint(ComplaintChoice.installSoundproofing);
+    expect(controller.state.walletCoins, 150);
+    await controller.resetState();
+
+    expect(controller.state.walletCoins, 200);
+    expect(controller.state.chaos, 40);
+    expect(controller.state.activeSimulationSeconds, 0);
+    expect(controller.state.complaintResolved, isFalse);
+    expect(saves.storedState?.walletCoins, 200);
+  });
+}
+
+class _FixedClock implements GameClock {
+  const _FixedClock(this.value);
+
+  final DateTime value;
+
+  @override
+  DateTime now() => value;
 }

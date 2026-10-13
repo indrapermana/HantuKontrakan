@@ -1,7 +1,9 @@
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/game_controller.dart';
+import '../../features/debug/debug_hud.dart';
 import '../../game/hantu_game.dart';
 import '../../l10n/app_localizations.dart';
 import '../../simulation/systems/game_rules.dart';
@@ -54,6 +56,7 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (kDebugMode) DebugHud(controller: controller),
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),

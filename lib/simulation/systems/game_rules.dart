@@ -4,6 +4,13 @@ import '../models/game_state.dart';
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
 abstract final class GameRules {
+  static GameState advanceDebugTick(GameState state, int seconds) {
+    if (seconds <= 0) return state;
+    return state.copyWith(
+      activeSimulationSeconds: state.activeSimulationSeconds + seconds,
+    );
+  }
+
   static GameState swapOccupants(GameState state, String firstRoomId) {
     final first = state.roomById(firstRoomId);
     if (first.occupantId == null || state.rooms.length != 2) return state;

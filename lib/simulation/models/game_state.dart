@@ -6,6 +6,8 @@ class GameState {
   GameState({
     required this.schemaVersion,
     required this.walletCoins,
+    this.chaos = GameBalance.initialChaos,
+    this.activeSimulationSeconds = 0,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
     required this.complaintResolved,
@@ -13,9 +15,11 @@ class GameState {
   }) : ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms);
 
-  static const int currentSchemaVersion = 1;
+  static const int currentSchemaVersion = 2;
   final int schemaVersion;
   final int walletCoins;
+  final int chaos;
+  final int activeSimulationSeconds;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
   final bool complaintResolved;
@@ -24,6 +28,8 @@ class GameState {
   factory GameState.seeded() => GameState(
     schemaVersion: currentSchemaVersion,
     walletCoins: GameBalance.initialCoins,
+    chaos: GameBalance.initialChaos,
+    activeSimulationSeconds: 0,
     ghosts: const [
       GhostState(id: 'pocong_01', kind: GhostKind.pocong),
       GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
@@ -47,6 +53,8 @@ class GameState {
 
   GameState copyWith({
     int? walletCoins,
+    int? chaos,
+    int? activeSimulationSeconds,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
@@ -54,6 +62,9 @@ class GameState {
   }) => GameState(
     schemaVersion: schemaVersion,
     walletCoins: walletCoins ?? this.walletCoins,
+    chaos: chaos ?? this.chaos,
+    activeSimulationSeconds:
+        activeSimulationSeconds ?? this.activeSimulationSeconds,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
     complaintResolved: complaintResolved ?? this.complaintResolved,
@@ -63,6 +74,8 @@ class GameState {
   Map<String, Object?> toJson() => {
     'schemaVersion': schemaVersion,
     'walletCoins': walletCoins,
+    'chaos': chaos,
+    'activeSimulationSeconds': activeSimulationSeconds,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
     'complaintResolved': complaintResolved,
@@ -74,26 +87,48 @@ class GameState {
     if (schemaVersion is! int) {
       throw const FormatException('Save schemaVersion must be an integer.');
     }
-    if (schemaVersion != currentSchemaVersion) {
-      throw UnsupportedSaveVersion(schemaVersion);
-    }
-    return GameState._fromVersion1Json(json);
+    return switch (schemaVersion) {
+      1 => GameState._fromVersion1Json(json),
+      currentSchemaVersion => GameState._fromVersion2Json(json),
+      _ => throw UnsupportedSaveVersion(schemaVersion),
+    };
   }
 
   factory GameState._fromVersion1Json(Map<String, Object?> json) {
     return GameState(
       schemaVersion: currentSchemaVersion,
       walletCoins: json['walletCoins']! as int,
-      ghosts: (json['ghosts']! as List<Object?>)
-          .map((item) => GhostState.fromJson(item! as Map<String, Object?>))
-          .toList(growable: false),
-      rooms: (json['rooms']! as List<Object?>)
-          .map((item) => RoomState.fromJson(item! as Map<String, Object?>))
-          .toList(growable: false),
+      chaos: GameBalance.initialChaos,
+      activeSimulationSeconds: 0,
+      ghosts: _ghostsFromJson(json),
+      rooms: _roomsFromJson(json),
       complaintResolved: json['complaintResolved']! as bool,
       resolutionId: json['resolutionId'] as String?,
     );
   }
+
+  factory GameState._fromVersion2Json(Map<String, Object?> json) {
+    return GameState(
+      schemaVersion: currentSchemaVersion,
+      walletCoins: json['walletCoins']! as int,
+      chaos: json['chaos']! as int,
+      activeSimulationSeconds: json['activeSimulationSeconds']! as int,
+      ghosts: _ghostsFromJson(json),
+      rooms: _roomsFromJson(json),
+      complaintResolved: json['complaintResolved']! as bool,
+      resolutionId: json['resolutionId'] as String?,
+    );
+  }
+
+  static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
+      (json['ghosts']! as List<Object?>)
+          .map((item) => GhostState.fromJson(item! as Map<String, Object?>))
+          .toList(growable: false);
+
+  static List<RoomState> _roomsFromJson(Map<String, Object?> json) =>
+      (json['rooms']! as List<Object?>)
+          .map((item) => RoomState.fromJson(item! as Map<String, Object?>))
+          .toList(growable: false);
 }
 
 class UnsupportedSaveVersion implements Exception {
