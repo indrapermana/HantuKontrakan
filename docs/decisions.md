@@ -155,3 +155,14 @@ Date: 2026-10-13
 - Lifecycle pause/resume operations are serialized through the application controller so asynchronous persistence writes retain event order during rapid background/foreground transitions.
 - No incidents, chaos changes, reputation changes, repairs, departures, or active-only abilities run through the offline path.
 - Save schema advances to version 8 for the nullable offline rate snapshot and last-accrual timestamp. Version-7 and older saves migrate with no pending offline absence.
+
+## HK-014 ghost ability decisions
+
+Date: 2026-10-13
+
+- Pocong and Kuntilanak use persisted per-instance 600-active-second cooldowns. At each completed interval, the current happiness threshold is checked; success grants 30 wallet coins or 1 reputation respectively, while failure grants nothing and begins the next interval.
+- Periodic cooldowns advance only for ghosts assigned to rooms and only through `AdvanceSimulation`. Large elapsed updates can complete multiple intervals and produce the same result as one-second chunks.
+- Reputation is introduced at the plan's initial value 60 and clamped to 100. Broader reputation event rules remain HK-016 scope.
+- Tuyul's happiness-60 continuous 15% base-rent bonus remains in `RentSystem`; it has no artificial cooldown. Genderuwo's happiness-60 ability is exposed as a pure 75%-of-base repair-cost query for HK-020 to consume later.
+- Offline resume does not call the ability system. It credits only snapshotted rent, leaving active seconds, periodic cooldowns, wallet rewards, and reputation unchanged.
+- Save schema advances to version 9 for reputation and the immutable cooldown map. Version-8 and older saves migrate with reputation 60 and lazily initialized full periodic cooldowns.

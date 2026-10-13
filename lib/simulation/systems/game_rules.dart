@@ -2,8 +2,9 @@ import '../constants/game_balance.dart';
 import '../content/furniture_definitions.dart';
 import '../models/game_state.dart';
 import '../models/room.dart';
-import 'rent_system.dart';
+import 'ability_system.dart';
 import 'offline_earnings_system.dart';
+import 'rent_system.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
@@ -28,7 +29,11 @@ abstract final class GameRules {
   }
 
   static GameState advanceSimulation(GameState state, int seconds) {
-    return RentSystem.accrue(state, seconds);
+    if (seconds <= 0) return state;
+    return AbilitySystem.advanceActiveTime(
+      RentSystem.accrue(state, seconds),
+      seconds,
+    );
   }
 
   static GameState collectAllRent(GameState state, String claimId) {

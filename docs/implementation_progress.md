@@ -261,10 +261,28 @@ Verification:
 - `flutter test`: all 74 tests passed, including 2-hour and 5-hour worked examples, four-hour capping, 50% earnings, snapshot-rate capture, repeated resume/load protection, clock rollback, ordered lifecycle persistence, and v7 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-014 — Four ghost abilities and persisted cooldowns
+
+Status: implemented and verified on 2026-10-13.
+
+- Added chunk-independent active cooldown execution for Pocong's 30-coin reward and Kuntilanak's +1 reputation reward at their happiness thresholds.
+- Retained Tuyul's exact continuous base-rent bonus and added Genderuwo's deterministic 25% repair-discount query without implementing HK-020 repairs early.
+- Persisted per-instance cooldowns and reputation under save schema version 9 with explicit version-8 migration.
+- Kept ability processing outside offline resume, so capped offline rent cannot trigger active-only rewards or consume cooldown time.
+- Added controller-reload coverage proving a partially elapsed cooldown resumes from its saved value.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused ability, rent, offline, persistence, and controller suite: all 39 tests passed.
+- `flutter test`: all 83 tests passed, including all four abilities, happiness gates, multi-trigger chunk equivalence, cooldown reload, reputation cap, offline exclusion, and v8 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-014 and all later tickets.
-- Rent accrual, furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
+- HK-015 and all later tickets.
+- Furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence
 

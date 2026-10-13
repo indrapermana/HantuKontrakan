@@ -2,6 +2,8 @@ abstract final class GameBalance {
   static const int initialCoins = 200;
   static const int initialChaos = 40;
   static const int initialPlayerLevel = 1;
+  static const int initialReputation = 60;
+  static const int maximumReputation = 100;
   static const int defaultRandomSeed = 20261011;
   static const int debugTickSeconds = 1;
   static const int microcoinsPerCoin = 1000000;
@@ -9,6 +11,12 @@ abstract final class GameBalance {
   static const int millisecondsPerMinute = 60000;
   static const int offlineEarningsPercent = 50;
   static const int maximumOfflineMinutes = 240;
+  static const int periodicAbilityIntervalSeconds = 600;
+  static const int periodicAbilityMinimumHappiness = 80;
+  static const int pocongAbilityCoinReward = 30;
+  static const int kuntilanakAbilityReputationReward = 1;
+  static const int conditionalAbilityMinimumHappiness = 60;
+  static const int genderuwoRepairCostPercent = 75;
   static const int tuyulBaseRentBonusPercent = 15;
   static const int baseHappiness = 50;
   static const Map<int, int> roomTagMatchHappinessByLevel = {1: 10, 2: 15};

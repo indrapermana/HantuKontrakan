@@ -9,9 +9,11 @@ class GameState {
     this.chaos = GameBalance.initialChaos,
     this.activeSimulationSeconds = 0,
     this.playerLevel = GameBalance.initialPlayerLevel,
+    this.reputation = GameBalance.initialReputation,
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
     Set<String> completedRentClaimIds = const {},
+    Map<String, int> abilityCooldownSeconds = const {},
     this.offlineRateSnapshotMicrocoinsPerMinute,
     this.lastOfflineAccrualTimestampMillis,
     required List<GhostState> ghosts,
@@ -19,11 +21,15 @@ class GameState {
     required this.complaintResolved,
     this.resolutionId,
   }) : completedRentClaimIds = Set.unmodifiable(completedRentClaimIds),
+       abilityCooldownSeconds = Map.unmodifiable(abilityCooldownSeconds),
        ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
         rentAccrualRemainder < 0 ||
         rentAccrualRemainder >= GameBalance.secondsPerMinute ||
+        reputation < 0 ||
+        reputation > GameBalance.maximumReputation ||
+        abilityCooldownSeconds.values.any((seconds) => seconds <= 0) ||
         (offlineRateSnapshotMicrocoinsPerMinute != null &&
             offlineRateSnapshotMicrocoinsPerMinute! < 0)) {
       throw ArgumentError('Rent accumulation values are out of range.');
@@ -31,16 +37,18 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 8;
+  static const int currentSchemaVersion = 9;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
   final int activeSimulationSeconds;
   final int playerLevel;
+  final int reputation;
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
   final Set<String> completedRentClaimIds;
+  final Map<String, int> abilityCooldownSeconds;
   final int? offlineRateSnapshotMicrocoinsPerMinute;
   final int? lastOfflineAccrualTimestampMillis;
   final List<GhostState> ghosts;
@@ -54,9 +62,13 @@ class GameState {
     chaos: GameBalance.initialChaos,
     activeSimulationSeconds: 0,
     playerLevel: GameBalance.initialPlayerLevel,
+    reputation: GameBalance.initialReputation,
     pendingRentMicrocoins: 0,
     rentAccrualRemainder: 0,
     completedRentClaimIds: const {},
+    abilityCooldownSeconds: const {
+      'pocong_01': GameBalance.periodicAbilityIntervalSeconds,
+    },
     offlineRateSnapshotMicrocoinsPerMinute: null,
     lastOfflineAccrualTimestampMillis: null,
     ghosts: const [
@@ -126,9 +138,11 @@ class GameState {
     int? chaos,
     int? activeSimulationSeconds,
     int? playerLevel,
+    int? reputation,
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
     Set<String>? completedRentClaimIds,
+    Map<String, int>? abilityCooldownSeconds,
     Object? offlineRateSnapshotMicrocoinsPerMinute = _notProvided,
     Object? lastOfflineAccrualTimestampMillis = _notProvided,
     List<GhostState>? ghosts,
@@ -142,9 +156,12 @@ class GameState {
     activeSimulationSeconds:
         activeSimulationSeconds ?? this.activeSimulationSeconds,
     playerLevel: playerLevel ?? this.playerLevel,
+    reputation: reputation ?? this.reputation,
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
     completedRentClaimIds: completedRentClaimIds ?? this.completedRentClaimIds,
+    abilityCooldownSeconds:
+        abilityCooldownSeconds ?? this.abilityCooldownSeconds,
     offlineRateSnapshotMicrocoinsPerMinute:
         identical(offlineRateSnapshotMicrocoinsPerMinute, _notProvided)
         ? this.offlineRateSnapshotMicrocoinsPerMinute
@@ -165,9 +182,11 @@ class GameState {
     'chaos': chaos,
     'activeSimulationSeconds': activeSimulationSeconds,
     'playerLevel': playerLevel,
+    'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
     'completedRentClaimIds': completedRentClaimIds.toList(growable: false),
+    'abilityCooldownSeconds': abilityCooldownSeconds,
     'offlineRateSnapshotMicrocoinsPerMinute':
         offlineRateSnapshotMicrocoinsPerMinute,
     'lastOfflineAccrualTimestampMillis': lastOfflineAccrualTimestampMillis,
@@ -190,7 +209,8 @@ class GameState {
       5 => GameState._fromVersion5Json(json),
       6 => GameState._fromVersion6Json(json),
       7 => GameState._fromVersion7Json(json),
-      currentSchemaVersion => GameState._fromVersion8Json(json),
+      8 => GameState._fromVersion8Json(json),
+      currentSchemaVersion => GameState._fromVersion9Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -281,6 +301,32 @@ class GameState {
     completedRentClaimIds: (json['completedRentClaimIds']! as List<Object?>)
         .cast<String>()
         .toSet(),
+    offlineRateSnapshotMicrocoinsPerMinute:
+        json['offlineRateSnapshotMicrocoinsPerMinute'] as int?,
+    lastOfflineAccrualTimestampMillis:
+        json['lastOfflineAccrualTimestampMillis'] as int?,
+    ghosts: _ghostsFromJson(json),
+    rooms: _roomsFromJson(json),
+    complaintResolved: json['complaintResolved']! as bool,
+    resolutionId: json['resolutionId'] as String?,
+  );
+
+  factory GameState._fromVersion9Json(Map<String, Object?> json) => GameState(
+    schemaVersion: currentSchemaVersion,
+    walletCoins: json['walletCoins']! as int,
+    chaos: json['chaos']! as int,
+    activeSimulationSeconds: json['activeSimulationSeconds']! as int,
+    playerLevel: json['playerLevel']! as int,
+    reputation: json['reputation']! as int,
+    pendingRentMicrocoins: json['pendingRentMicrocoins']! as int,
+    rentAccrualRemainder: json['rentAccrualRemainder']! as int,
+    completedRentClaimIds: (json['completedRentClaimIds']! as List<Object?>)
+        .cast<String>()
+        .toSet(),
+    abilityCooldownSeconds:
+        (json['abilityCooldownSeconds']! as Map<String, Object?>).map(
+          (ghostId, seconds) => MapEntry(ghostId, seconds! as int),
+        ),
     offlineRateSnapshotMicrocoinsPerMinute:
         json['offlineRateSnapshotMicrocoinsPerMinute'] as int?,
     lastOfflineAccrualTimestampMillis:

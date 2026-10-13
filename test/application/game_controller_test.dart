@@ -3,6 +3,8 @@ import 'package:hantu_kontrakan/application/game_controller.dart';
 import 'package:hantu_kontrakan/application/simulation_runtime.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
+import 'package:hantu_kontrakan/simulation/models/ghost.dart';
+import 'package:hantu_kontrakan/simulation/models/room.dart';
 import 'package:hantu_kontrakan/simulation/systems/game_rules.dart';
 
 void main() {
@@ -146,6 +148,41 @@ void main() {
 
     expect(saves.storedState?.offlineRateSnapshotMicrocoinsPerMinute, isNull);
     expect(saves.storedState?.pendingRentMicrocoins, greaterThan(0));
+  });
+
+  test('ability cooldown continues after controller reload', () async {
+    final initial = GameState(
+      schemaVersion: GameState.currentSchemaVersion,
+      walletCoins: 0,
+      chaos: 0,
+      ghosts: const [
+        GhostState(
+          id: 'pocong_01',
+          kind: GhostKind.pocong,
+          eventHappinessModifier: 20,
+        ),
+      ],
+      rooms: [
+        RoomState(
+          id: 'room_01',
+          column: 0,
+          occupantId: 'pocong_01',
+          roomTagLevels: const {'quiet': 1},
+        ),
+      ],
+      complaintResolved: false,
+    );
+    final saves = MemorySaveService(initialResult: SaveLoaded(initial));
+    final first = GameController(saveService: saves);
+    await first.initialize();
+    await first.advanceSimulation(300);
+
+    final reloaded = GameController(saveService: saves);
+    await reloaded.initialize();
+    await reloaded.advanceSimulation(300);
+
+    expect(reloaded.state.walletCoins, 30);
+    expect(reloaded.state.abilityCooldownSeconds['pocong_01'], 600);
   });
 }
 

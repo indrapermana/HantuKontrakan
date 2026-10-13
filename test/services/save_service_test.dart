@@ -22,9 +22,11 @@ void main() {
     final seed = GameState.seeded();
     final state = seed.copyWith(
       walletCoins: 123,
+      reputation: 77,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
       completedRentClaimIds: const {'rent-claim-1'},
+      abilityCooldownSeconds: const {'pocong_01': 123},
       offlineRateSnapshotMicrocoinsPerMinute: 42000000,
       lastOfflineAccrualTimestampMillis: 1791864000000,
       ghosts: seed.ghosts
@@ -58,12 +60,14 @@ void main() {
     expect(result, isA<SaveLoaded>());
     final loaded = (result as SaveLoaded).state;
     expect(loaded.walletCoins, 123);
+    expect(loaded.reputation, 77);
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
     expect(loaded.chaos, 40);
     expect(loaded.activeSimulationSeconds, 0);
     expect(loaded.pendingRentMicrocoins, 12345678);
     expect(loaded.rentAccrualRemainder, 37);
     expect(loaded.completedRentClaimIds, {'rent-claim-1'});
+    expect(loaded.abilityCooldownSeconds, {'pocong_01': 123});
     expect(loaded.offlineRateSnapshotMicrocoinsPerMinute, 42000000);
     expect(loaded.lastOfflineAccrualTimestampMillis, 1791864000000);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
@@ -208,6 +212,22 @@ void main() {
     final migrated = (result as SaveLoaded).state;
     expect(migrated.offlineRateSnapshotMicrocoinsPerMinute, isNull);
     expect(migrated.lastOfflineAccrualTimestampMillis, isNull);
+  });
+
+  test('version 8 save migrates reputation and ability cooldowns', () async {
+    final version8 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 8
+      ..remove('reputation')
+      ..remove('abilityCooldownSeconds');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version8),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    final migrated = (result as SaveLoaded).state;
+    expect(migrated.reputation, GameBalance.initialReputation);
+    expect(migrated.abilityCooldownSeconds, isEmpty);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {
