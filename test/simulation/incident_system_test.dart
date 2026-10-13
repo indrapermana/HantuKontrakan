@@ -81,11 +81,13 @@ void main() {
       final resolved = GameRules.resolveIncident(
         spawned,
         spawned.activeIncidentId!,
+        IncidentDefinitions.byId(spawned.activeIncidentId!)!.choices.first.id,
         'resolution-1',
       );
       final replayed = GameRules.resolveIncident(
         resolved,
         spawned.activeIncidentId!,
+        IncidentDefinitions.byId(spawned.activeIncidentId!)!.choices.first.id,
         'resolution-1',
       );
       final stillCoolingDown = GameRules.advanceSimulation(
@@ -225,6 +227,80 @@ void main() {
     );
     expect(allowed.activeIncidentId, isNotNull);
     expect(IncidentDefinitions.byId('pak_rt_complaint')?.cooldownSeconds, 240);
+  });
+
+  test(
+    'choice effects commit atomically once and duplicate resolution is ignored',
+    () {
+      final pending = GameState.seeded().copyWith(
+        activeIncidentId: 'electricity_outage',
+      );
+      final resolved = GameRules.resolveIncident(
+        pending,
+        'electricity_outage',
+        'buy_emergency_lights',
+        'resolution-1',
+      );
+      final replayed = GameRules.resolveIncident(
+        resolved,
+        'electricity_outage',
+        'buy_emergency_lights',
+        'resolution-1',
+      );
+
+      expect(resolved.walletCoins, 175);
+      expect(resolved.chaos, 37);
+      expect(resolved.reputation, 60);
+      expect(resolved.ghostById('pocong_01').eventHappinessModifier, 5);
+      expect(resolved.ghostById('tuyul_01').eventHappinessModifier, 5);
+      expect(resolved.activeIncidentId, isNull);
+      expect(resolved.completedIncidentResolutionIds, {'resolution-1'});
+      expect(identical(replayed, resolved), isTrue);
+    },
+  );
+
+  test('unknown, mismatched, and unaffordable choices are no-ops', () {
+    final pending = GameState.seeded().copyWith(
+      walletCoins: 10,
+      activeIncidentId: 'genderuwo_breaks_furniture',
+    );
+
+    expect(
+      identical(
+        GameRules.resolveIncident(
+          pending,
+          'genderuwo_breaks_furniture',
+          'hire_carpenter',
+          'too-expensive',
+        ),
+        pending,
+      ),
+      isTrue,
+    );
+    expect(
+      identical(
+        GameRules.resolveIncident(
+          pending,
+          'genderuwo_breaks_furniture',
+          'missing-choice',
+          'missing',
+        ),
+        pending,
+      ),
+      isTrue,
+    );
+    expect(
+      identical(
+        GameRules.resolveIncident(
+          pending,
+          'electricity_outage',
+          'wait_in_the_dark',
+          'wrong-incident',
+        ),
+        pending,
+      ),
+      isTrue,
+    );
   });
 }
 

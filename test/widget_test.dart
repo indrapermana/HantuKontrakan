@@ -82,4 +82,53 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(saves.storedState?.pendingRentMicrocoins, pendingAfterResume);
   });
+
+  testWidgets('incident previews effects, commits once, and shows outcome', (
+    tester,
+  ) async {
+    final state = GameState.seeded().copyWith(
+      activeIncidentId: 'electricity_outage',
+    );
+    final saves = MemorySaveService(initialResult: SaveLoaded(state));
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('id')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Insiden: Listrik Padam'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('incident-button')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Listrik Padam'), findsOneWidget);
+    expect(
+      find.text(
+        'Kontrakan gelap. Beberapa penghuni justru terlihat lebih jelas.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Dampak: -25 koin'), findsOneWidget);
+
+    await tester.tap(
+      find.byKey(const Key('incident-choice-buy_emergency_lights')),
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('INSIDEN SELESAI'), findsOneWidget);
+    expect(
+      find.textContaining(
+        'Lampu menyala dan bayangan kembali berperilaku normal.',
+      ),
+      findsOneWidget,
+    );
+    expect(saves.storedState?.walletCoins, 175);
+    expect(saves.storedState?.chaos, 37);
+    expect(saves.storedState?.activeIncidentId, isNull);
+    expect(saves.storedState?.completedIncidentResolutionIds, hasLength(1));
+
+    await tester.tap(find.byKey(const Key('incident-outcome-continue')));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const Key('incident-button')), findsNothing);
+    expect(saves.storedState?.walletCoins, 175);
+  });
 }

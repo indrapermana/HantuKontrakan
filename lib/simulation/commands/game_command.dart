@@ -69,9 +69,14 @@ final class CollectAllRent extends GameCommand {
 }
 
 final class ResolveIncident extends GameCommand {
-  const ResolveIncident({required this.incidentId, required this.resolutionId});
+  const ResolveIncident({
+    required this.incidentId,
+    required this.choiceId,
+    required this.resolutionId,
+  });
 
   final String incidentId;
+  final String choiceId;
   final String resolutionId;
 }
 

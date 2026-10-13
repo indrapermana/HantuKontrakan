@@ -123,21 +123,38 @@ class GameController extends ChangeNotifier {
     await _dispatch(CollectAllRent(claimId: resolvedClaimId));
   }
 
+  Future<bool> resolveIncident(
+    String incidentId,
+    String choiceId, {
+    String? resolutionId,
+  }) async {
+    final resolvedId =
+        resolutionId ??
+        'incident-$incidentId-$choiceId-${state.activeSimulationSeconds}';
+    return _dispatch(
+      ResolveIncident(
+        incidentId: incidentId,
+        choiceId: choiceId,
+        resolutionId: resolvedId,
+      ),
+    );
+  }
+
   Future<void> pauseForOffline() async {
     if (!_isReady) return;
     final timestampMillis = _clock.now().millisecondsSinceEpoch;
-    _lifecycleOperation = _lifecycleOperation.then(
-      (_) => _dispatch(PauseForOffline(timestampMillis: timestampMillis)),
-    );
+    _lifecycleOperation = _lifecycleOperation.then((_) async {
+      await _dispatch(PauseForOffline(timestampMillis: timestampMillis));
+    });
     await _lifecycleOperation;
   }
 
   Future<void> resumeFromOffline() async {
     if (!_isReady) return;
     final timestampMillis = _clock.now().millisecondsSinceEpoch;
-    _lifecycleOperation = _lifecycleOperation.then(
-      (_) => _dispatch(ResumeFromOffline(timestampMillis: timestampMillis)),
-    );
+    _lifecycleOperation = _lifecycleOperation.then((_) async {
+      await _dispatch(ResumeFromOffline(timestampMillis: timestampMillis));
+    });
     await _lifecycleOperation;
   }
 
@@ -150,9 +167,10 @@ class GameController extends ChangeNotifier {
     await _dispatch(SetGhostSpecialAction(ghostId: ghostId, active: active));
   }
 
-  Future<void> _dispatch(GameCommand command) async {
-    if (!_domainController.dispatch(command)) return;
+  Future<bool> _dispatch(GameCommand command) async {
+    if (!_domainController.dispatch(command)) return false;
     notifyListeners();
     await _saveService.save(state);
+    return true;
   }
 }

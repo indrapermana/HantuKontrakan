@@ -273,4 +273,43 @@ class AppLocalizationsId extends AppLocalizations {
   String complaintResolvedMessage(int happiness) {
     return 'Keluhan selesai. Pocong sekarang $happiness bahagia.';
   }
+
+  @override
+  String activeIncident(String title) {
+    return 'Insiden: $title';
+  }
+
+  @override
+  String incidentConsequencePreview(String effects) {
+    return 'Dampak: $effects';
+  }
+
+  @override
+  String incidentEffectCoins(String value) {
+    return '$value koin';
+  }
+
+  @override
+  String incidentEffectHappiness(String ghost, String value) {
+    return '$ghost $value bahagia';
+  }
+
+  @override
+  String incidentEffectChaos(String value) {
+    return '$value kekacauan';
+  }
+
+  @override
+  String incidentEffectReputation(String value) {
+    return '$value reputasi';
+  }
+
+  @override
+  String get incidentNotEnoughCoins => 'Koin tidak cukup';
+
+  @override
+  String get incidentResolvedTitle => 'INSIDEN SELESAI';
+
+  @override
+  String get continueLabel => 'Lanjut';
 }

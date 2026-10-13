@@ -535,6 +535,60 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Keluhan selesai. Pocong sekarang {happiness} bahagia.'**
   String complaintResolvedMessage(int happiness);
+
+  /// No description provided for @activeIncident.
+  ///
+  /// In id, this message translates to:
+  /// **'Insiden: {title}'**
+  String activeIncident(String title);
+
+  /// No description provided for @incidentConsequencePreview.
+  ///
+  /// In id, this message translates to:
+  /// **'Dampak: {effects}'**
+  String incidentConsequencePreview(String effects);
+
+  /// No description provided for @incidentEffectCoins.
+  ///
+  /// In id, this message translates to:
+  /// **'{value} koin'**
+  String incidentEffectCoins(String value);
+
+  /// No description provided for @incidentEffectHappiness.
+  ///
+  /// In id, this message translates to:
+  /// **'{ghost} {value} bahagia'**
+  String incidentEffectHappiness(String ghost, String value);
+
+  /// No description provided for @incidentEffectChaos.
+  ///
+  /// In id, this message translates to:
+  /// **'{value} kekacauan'**
+  String incidentEffectChaos(String value);
+
+  /// No description provided for @incidentEffectReputation.
+  ///
+  /// In id, this message translates to:
+  /// **'{value} reputasi'**
+  String incidentEffectReputation(String value);
+
+  /// No description provided for @incidentNotEnoughCoins.
+  ///
+  /// In id, this message translates to:
+  /// **'Koin tidak cukup'**
+  String get incidentNotEnoughCoins;
+
+  /// No description provided for @incidentResolvedTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'INSIDEN SELESAI'**
+  String get incidentResolvedTitle;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Lanjut'**
+  String get continueLabel;
 }
 
 class _AppLocalizationsDelegate

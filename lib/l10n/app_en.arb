@@ -72,5 +72,14 @@
   "askTuyulCalmEffect": "Pocong +10, Tuyul −10 happiness",
   "peaceOffering": "Offer peace money",
   "peaceOfferingEffect": "−25 coins, both +5 happiness",
-  "complaintResolvedMessage": "Complaint resolved. Pocong now has {happiness} happiness."
+  "complaintResolvedMessage": "Complaint resolved. Pocong now has {happiness} happiness.",
+  "activeIncident": "Incident: {title}",
+  "incidentConsequencePreview": "Effects: {effects}",
+  "incidentEffectCoins": "{value} coins",
+  "incidentEffectHappiness": "{ghost} {value} happiness",
+  "incidentEffectChaos": "{value} chaos",
+  "incidentEffectReputation": "{value} reputation",
+  "incidentNotEnoughCoins": "Not enough coins",
+  "incidentResolvedTitle": "INCIDENT RESOLVED",
+  "continueLabel": "Continue"
 }

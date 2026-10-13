@@ -1,5 +1,7 @@
 # Implementation progress
 
+This is the single canonical progress tracker. `HANTU_KONTRAKAN_IMPLEMENTATION_PLAN.md` remains the immutable product specification and acceptance-criteria source; milestone status, verification evidence, implementation decisions, and remaining work are recorded only here.
+
 ## P0 vertical slice
 
 Status: implemented and verified on 2026-10-11.
@@ -359,10 +361,39 @@ Verification:
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; incident content and rules remain pure Dart.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-019 — Incident decisions, consequence previews, and outcomes
+
+Status: implemented and verified on 2026-10-13. Milestone M4 incident flow is complete; HK-020 remains separate repair/departure work.
+
+- Added a localized active-incident button, decision dialog, exact consequence previews, affordability disabling, and a non-dismissible resolved-outcome dialog with the authored response.
+- Extended `ResolveIncident` with the stable choice ID required by the plan and routed it through the application and pure-Dart domain controllers.
+- Incident resolution now validates the pending incident, authored choice, wallet affordability, and unique resolution ID before atomically applying coin, resident happiness, chaos, and reputation effects.
+- Duplicate taps/replays, stale or mismatched incidents, unknown choices, blank identifiers, and unaffordable choices are identity-preserving no-ops and cannot award effects or clear the pending incident.
+- Successful choices clear the pending incident, record the completed resolution token, start the authored scheduler cooldown, notify Flutter once, and persist before the outcome dialog is shown.
+- Added Indonesian and English UI copy for the incident entry point, previews, affordability message, resolved heading, and continuation action.
+
+Implementation decisions:
+
+- Consequence previews are derived from the same immutable `IncidentEffects` objects used by the domain transition, preventing UI text from drifting from applied values.
+- Happiness deltas apply only to currently placed residents of the targeted ghost kinds. They add to the current temporary event modifier, respect the established -20/+20 event cap, and refresh its 600-active-second expiry.
+- Coin costs must be affordable before any part of a choice is applied. Chaos and reputation retain their established 0–100 clamps.
+- The default resolution token is stable for the pending incident, selected choice, and current active second. Domain correctness still relies on pending-incident matching and the persisted completed-token set rather than the Flutter dialog guard.
+- No save-schema change is required: HK-017 already persists the active incident, resolution IDs, history, and cooldown timestamps.
+- `docs/implementation_progress.md` is now the only progress/decision tracker. The implementation plan remains specification-only, and the historical `docs/decisions.md` is no longer updated.
+
+Verification:
+
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused incident, application-controller, and widget suite: all 23 tests passed.
+- `flutter test`: all 111 tests passed, including atomic exact effects, replay rejection, invalid/unaffordable no-ops, localized preview UI, persistence, and resolved outcome presentation.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; effect application remains pure Dart.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-019 and all later tickets.
-- Furniture purchasing/inventory, incident decision UI, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
+- HK-020 and all later tickets.
+- Furniture purchasing/inventory, room repairs/departures, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
 
 ## Verification evidence
 

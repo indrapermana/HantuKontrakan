@@ -7,6 +7,8 @@ import '../../features/debug/debug_hud.dart';
 import '../../game/hantu_game.dart';
 import '../../l10n/app_localizations.dart';
 import '../../simulation/constants/game_balance.dart';
+import '../../simulation/content/incident_definitions.dart';
+import '../../simulation/models/incident_definition.dart';
 import '../../simulation/systems/game_rules.dart';
 import 'detail_sheets.dart';
 
@@ -27,6 +29,9 @@ class HomeScreen extends StatelessWidget {
           );
         }
         final state = controller.state;
+        final activeIncident = state.activeIncidentId == null
+            ? null
+            : IncidentDefinitions.byId(state.activeIncidentId!);
         final pocongHappiness = controller.happinessFor('pocong_01');
         return Scaffold(
           appBar: AppBar(
@@ -91,6 +96,23 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
+                      if (activeIncident != null) ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            key: const Key('incident-button'),
+                            onPressed: () =>
+                                _showIncident(context, activeIncident),
+                            icon: const Icon(Icons.crisis_alert),
+                            label: Text(
+                              strings.activeIncident(
+                                _localized(context, activeIncident.title!),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                       SizedBox(
                         width: double.infinity,
                         child: FilledButton.icon(
@@ -296,6 +318,111 @@ class HomeScreen extends StatelessWidget {
   }
 
   String _roomNumber(String roomId) => roomId.split('_').last;
+
+  Future<void> _showIncident(
+    BuildContext context,
+    IncidentDefinition incident,
+  ) async {
+    final strings = AppLocalizations.of(context);
+    final choice = await showDialog<IncidentChoiceDefinition>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(_localized(context, incident.title!)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(_localized(context, incident.dialogue!)),
+              const SizedBox(height: 16),
+              for (final choice in incident.choices) ...[
+                OutlinedButton(
+                  key: Key('incident-choice-${choice.id}'),
+                  onPressed:
+                      controller.state.walletCoins + choice.effects.coinDelta >=
+                          0
+                      ? () => Navigator.pop(dialogContext, choice)
+                      : null,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: Text(
+                        '${_localized(context, choice.label)}\n'
+                        '${strings.incidentConsequencePreview(_effectPreview(context, choice.effects))}'
+                        '${controller.state.walletCoins + choice.effects.coinDelta < 0 ? '\n${strings.incidentNotEnoughCoins}' : ''}',
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(strings.cancel),
+          ),
+        ],
+      ),
+    );
+    if (choice == null || !context.mounted) return;
+
+    final committed = await controller.resolveIncident(incident.id, choice.id);
+    if (!committed || !context.mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(strings.incidentResolvedTitle),
+        content: Text(
+          '${_localized(context, choice.response)}\n\n'
+          '${strings.incidentConsequencePreview(_effectPreview(context, choice.effects))}',
+        ),
+        actions: [
+          FilledButton(
+            key: const Key('incident-outcome-continue'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(strings.continueLabel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _localized(BuildContext context, LocalizedIncidentText text) =>
+      Localizations.localeOf(context).languageCode == 'id' ? text.id : text.en;
+
+  String _effectPreview(BuildContext context, IncidentEffects effects) {
+    final strings = AppLocalizations.of(context);
+    final parts = <String>[];
+    if (effects.coinDelta != 0) {
+      parts.add(strings.incidentEffectCoins(_signed(effects.coinDelta)));
+    }
+    final happinessEntries = effects.happinessDeltaByKind.entries.toList()
+      ..sort((left, right) => left.key.index.compareTo(right.key.index));
+    for (final entry in happinessEntries) {
+      parts.add(
+        strings.incidentEffectHappiness(
+          entry.key.displayName,
+          _signed(entry.value),
+        ),
+      );
+    }
+    if (effects.chaosDelta != 0) {
+      parts.add(strings.incidentEffectChaos(_signed(effects.chaosDelta)));
+    }
+    if (effects.reputationDelta != 0) {
+      parts.add(
+        strings.incidentEffectReputation(_signed(effects.reputationDelta)),
+      );
+    }
+    return parts.join(', ');
+  }
+
+  String _signed(int value) => value > 0 ? '+$value' : '$value';
 
   Future<void> _showComplaint(BuildContext context) async {
     final strings = AppLocalizations.of(context);

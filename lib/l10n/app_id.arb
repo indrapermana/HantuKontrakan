@@ -93,5 +93,20 @@
   "peaceOffering": "Kasih uang damai",
   "peaceOfferingEffect": "−25 koin, keduanya +5 bahagia",
   "complaintResolvedMessage": "Keluhan selesai. Pocong sekarang {happiness} bahagia.",
-  "@complaintResolvedMessage": {"placeholders": {"happiness": {"type": "int"}}}
+  "@complaintResolvedMessage": {"placeholders": {"happiness": {"type": "int"}}},
+  "activeIncident": "Insiden: {title}",
+  "@activeIncident": {"placeholders": {"title": {"type": "String"}}},
+  "incidentConsequencePreview": "Dampak: {effects}",
+  "@incidentConsequencePreview": {"placeholders": {"effects": {"type": "String"}}},
+  "incidentEffectCoins": "{value} koin",
+  "@incidentEffectCoins": {"placeholders": {"value": {"type": "String"}}},
+  "incidentEffectHappiness": "{ghost} {value} bahagia",
+  "@incidentEffectHappiness": {"placeholders": {"ghost": {"type": "String"}, "value": {"type": "String"}}},
+  "incidentEffectChaos": "{value} kekacauan",
+  "@incidentEffectChaos": {"placeholders": {"value": {"type": "String"}}},
+  "incidentEffectReputation": "{value} reputasi",
+  "@incidentEffectReputation": {"placeholders": {"value": {"type": "String"}}},
+  "incidentNotEnoughCoins": "Koin tidak cukup",
+  "incidentResolvedTitle": "INSIDEN SELESAI",
+  "continueLabel": "Lanjut"
 }

@@ -272,4 +272,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String complaintResolvedMessage(int happiness) {
     return 'Complaint resolved. Pocong now has $happiness happiness.';
   }
+
+  @override
+  String activeIncident(String title) {
+    return 'Incident: $title';
+  }
+
+  @override
+  String incidentConsequencePreview(String effects) {
+    return 'Effects: $effects';
+  }
+
+  @override
+  String incidentEffectCoins(String value) {
+    return '$value coins';
+  }
+
+  @override
+  String incidentEffectHappiness(String ghost, String value) {
+    return '$ghost $value happiness';
+  }
+
+  @override
+  String incidentEffectChaos(String value) {
+    return '$value chaos';
+  }
+
+  @override
+  String incidentEffectReputation(String value) {
+    return '$value reputation';
+  }
+
+  @override
+  String get incidentNotEnoughCoins => 'Not enough coins';
+
+  @override
+  String get incidentResolvedTitle => 'INCIDENT RESOLVED';
+
+  @override
+  String get continueLabel => 'Continue';
 }

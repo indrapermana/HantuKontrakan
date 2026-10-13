@@ -96,8 +96,9 @@ abstract final class GameRules {
   static GameState resolveIncident(
     GameState state,
     String incidentId,
+    String choiceId,
     String resolutionId,
-  ) => IncidentSystem.resolve(state, incidentId, resolutionId);
+  ) => IncidentSystem.resolve(state, incidentId, choiceId, resolutionId);
 
   static GameState pauseForOffline(GameState state, int timestampMillis) =>
       OfflineEarningsSystem.pause(state, timestampMillis);
