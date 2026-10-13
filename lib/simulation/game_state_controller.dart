@@ -52,6 +52,10 @@ class GameStateController {
         _state,
         missionId,
       ),
+      SetLanguageCode(:final languageCode) => GameRules.setLanguageCode(
+        _state,
+        languageCode,
+      ),
       ResolveIncident(
         :final incidentId,
         :final choiceId,

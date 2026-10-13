@@ -116,13 +116,15 @@ abstract final class HappinessSystem {
     );
   }
 
-  static String moodFor(int happiness) {
-    if (happiness >= 80) return 'Senang';
-    if (happiness >= 60) return 'Nyaman';
-    if (happiness >= 40) return 'Tidak senang';
-    return 'Marah';
+  static HappinessMood moodFor(int happiness) {
+    if (happiness >= 80) return HappinessMood.happy;
+    if (happiness >= 60) return HappinessMood.comfortable;
+    if (happiness >= 40) return HappinessMood.unhappy;
+    return HappinessMood.angry;
   }
 }
+
+enum HappinessMood { happy, comfortable, unhappy, angry }
 
 class HappinessBreakdown {
   const HappinessBreakdown({

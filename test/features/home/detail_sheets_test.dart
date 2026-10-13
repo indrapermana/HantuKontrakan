@@ -93,7 +93,7 @@ void main() {
     await tester.ensureVisible(find.byKey(const Key('furniture-primary')));
     await tester.tap(find.byKey(const Key('furniture-primary')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Bed').last);
+    await tester.tap(find.text('Tempat tidur').last);
     expect(equipped, (FurnitureSlot.primary, 'bed'));
   });
 
@@ -197,7 +197,7 @@ void main() {
     expect(find.text('Kamar saat ini: 01'), findsOneWidget);
     expect(find.text('Kebahagiaan: 70 (Nyaman)'), findsOneWidget);
     expect(find.text('Sewa dasar: 10 / menit'), findsOneWidget);
-    expect(find.text('Suka: quiet'), findsOneWidget);
+    expect(find.text('Suka: Tenang'), findsOneWidget);
     expect(find.text('Tidak suka: Tuyul'), findsOneWidget);
     expect(
       find.text(

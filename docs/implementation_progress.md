@@ -419,8 +419,8 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-024 and all later tickets.
-- Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, final artwork, and remaining localization.
+- HK-025 and all later tickets.
+- Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, and final artwork.
 
 ## Verification evidence
 
@@ -525,3 +525,31 @@ Verification:
 - Widget coverage verifies a completed mission is visibly claimable, updates coins/XP and persistence once, then exposes a disabled claimed action.
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; mission rules and content remain pure Dart.
 - The implementation-plan HK-023 checkbox is synchronized with this tracker as requested.
+
+### HK-024 — Complete Indonesian/English localization and language toggle
+
+Status: implemented and verified on 2026-10-14.
+
+- Added a localized language picker that switches the player-facing Flutter UI and active incident dialogue immediately between Indonesian and English.
+- Persisted the selected `id`/`en` language code under save schema version 16; restarting with the same save restores the selection. Existing version-15 saves continue to use device locale until the player chooses a language.
+- Completed localization for furniture names, preference tags, happiness moods, and Flame-rendered room labels/locked state. Authored incidents and missions retain their existing bilingual pure-Dart content.
+- Added catalog parity tests requiring the Indonesian and English ARB files to contain the same nonempty message keys, plus exhaustive checks for every current furniture and preferred-tag identifier.
+- Added widget acceptance coverage proving an English save switches the status UI and active incident dialogue to Indonesian, persists the choice, and restores Indonesian after app reconstruction.
+
+Implementation decisions and assumptions:
+
+- A missing saved language deliberately delegates to Flutter's supported device-locale negotiation. An explicit test-only `locale` override remains authoritative so deterministic widget tests can still select a locale without mutating save data.
+- The persisted setting stores only supported language codes (`id` or `en`). Blank, unsupported, and duplicate commands are identity-preserving no-ops in the pure-Dart rules layer.
+- Simulation content remains Flutter/Flame-free. Flutter resolves furniture/tag/mood copy, while localized strings are injected into Flame components; Flame does not read localization context or own game rules.
+- Proper names such as Pocong, Kuntilanak, Tuyul, and Genderuwo are intentionally identical in both languages.
+- The debug HUD remains developer-only diagnostic output guarded by `kDebugMode`; it is not player-facing release content and is excluded from the localization catalog.
+
+Verification:
+
+- `flutter gen-l10n` completed successfully.
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused localization, app, persistence, mission, detail-sheet, and Flame suite passed after updating prior assertions to the localized labels.
+- `flutter test`: all 143 tests passed, including catalog parity, exhaustive furniture/tag resolution, bilingual mission copy, language-command validation, schema-15 migration, schema-16 round trip, live dialogue switching, and reload persistence.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; deterministic simulation and localization preference rules remain independent from rendering.
+- The implementation-plan HK-024 checkbox is synchronized with this tracker as requested.

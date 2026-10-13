@@ -53,21 +53,31 @@ class _HantuKontrakanAppState extends State<HantuKontrakanApp>
 
   @override
   Widget build(BuildContext context) {
-    final router = AppRouter(controller: controller);
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
-      theme: AppTheme.dark,
-      locale: widget.locale,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: AppLocalizations.supportedLocales,
-      initialRoute: AppRoutes.home,
-      onGenerateRoute: router.onGenerateRoute,
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final router = AppRouter(controller: controller);
+        final savedLanguage = controller.isReady
+            ? controller.state.languageCode
+            : null;
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
+          theme: AppTheme.dark,
+          locale:
+              widget.locale ??
+              (savedLanguage == null ? null : Locale(savedLanguage)),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          initialRoute: AppRoutes.home,
+          onGenerateRoute: router.onGenerateRoute,
+        );
+      },
     );
   }
 }

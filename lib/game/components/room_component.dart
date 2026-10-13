@@ -10,6 +10,9 @@ class RoomComponent extends PositionComponent with TapCallbacks {
     required this.roomId,
     required this.ghost,
     required this.happiness,
+    required this.roomLabel,
+    required this.happinessLabel,
+    required this.lockedLabel,
     required super.position,
     required this.onTap,
     this.onGhostTap,
@@ -19,6 +22,9 @@ class RoomComponent extends PositionComponent with TapCallbacks {
   final String roomId;
   final GhostState? ghost;
   final int? happiness;
+  final String roomLabel;
+  final String? happinessLabel;
+  final String lockedLabel;
   final void Function() onTap;
   final void Function()? onGhostTap;
   final bool locked;
@@ -57,20 +63,16 @@ class RoomComponent extends PositionComponent with TapCallbacks {
     );
     canvas.drawRect(Rect.fromLTWH(0, size.y - 24, size.x, 24), _floorPaint);
     canvas.drawRect(const Rect.fromLTWH(16, 35, 30, 35), _windowPaint);
-    _labelPaint.render(
-      canvas,
-      roomId.replaceAll('_', ' ').toUpperCase(),
-      Vector2(10, 9),
-    );
+    _labelPaint.render(canvas, roomLabel, Vector2(10, 9));
     if (ghost != null) {
-      _labelPaint.render(canvas, 'Bahagia $happiness', Vector2(10, 107));
+      _labelPaint.render(canvas, happinessLabel!, Vector2(10, 107));
     }
     if (locked) {
       canvas.drawRRect(
         RRect.fromRectAndRadius(size.toRect(), const Radius.circular(8)),
         _lockedPaint,
       );
-      _labelPaint.render(canvas, 'TERKUNCI', Vector2(48, 60));
+      _labelPaint.render(canvas, lockedLabel, Vector2(48, 60));
     }
     super.render(canvas);
   }

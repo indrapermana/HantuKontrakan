@@ -25,6 +25,7 @@ void main() {
       playerLevel: 5,
       playerExperience: 800,
       mysticalCrystals: 4,
+      languageCode: 'en',
       reputation: 77,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
@@ -79,6 +80,7 @@ void main() {
     expect(loaded.playerLevel, 5);
     expect(loaded.playerExperience, 800);
     expect(loaded.mysticalCrystals, 4);
+    expect(loaded.languageCode, 'en');
     expect(loaded.reputation, 77);
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
     expect(loaded.chaos, 40);
@@ -112,6 +114,19 @@ void main() {
       loaded.roomById('room_01').furnitureIn(FurnitureSlot.primary),
       'bed',
     );
+  });
+
+  test('version 15 save migrates with device language preference', () async {
+    final version15 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 15
+      ..remove('languageCode');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version15),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    expect((result as SaveLoaded).state.languageCode, isNull);
   });
 
   test('version 1 save migrates to current debug state defaults', () async {

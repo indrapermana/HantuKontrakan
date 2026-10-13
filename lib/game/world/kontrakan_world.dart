@@ -12,12 +12,18 @@ class KontrakanWorld extends World {
     required this.happinessFor,
     required this.onRoomTap,
     required this.onGhostTap,
+    required this.roomLabelFor,
+    required this.happinessLabelFor,
+    required this.lockedLabel,
   });
 
   final GameState state;
   final int Function(String ghostId) happinessFor;
   final void Function(String roomId) onRoomTap;
   final void Function(String ghostId) onGhostTap;
+  final String Function(String roomId) roomLabelFor;
+  final String Function(int happiness) happinessLabelFor;
+  final String lockedLabel;
 
   @override
   Future<void> onLoad() async {
@@ -39,6 +45,11 @@ class KontrakanWorld extends World {
       roomId: layout.id,
       ghost: ghost,
       happiness: ghost == null ? null : happinessFor(ghost.id),
+      roomLabel: roomLabelFor(layout.id),
+      happinessLabel: ghost == null
+          ? null
+          : happinessLabelFor(happinessFor(ghost.id)),
+      lockedLabel: lockedLabel,
       position: Vector2(8 + (layout.column * 174), 34 + (layout.row * 134)),
       locked: !room.unlocked,
       onTap: () => onRoomTap(layout.id),

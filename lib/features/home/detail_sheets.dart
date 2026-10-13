@@ -207,7 +207,9 @@ class _FurnitureRow extends StatelessWidget {
           child: Text(
             strings.furnitureSlotValue(
               _slotName(strings, slot),
-              current == null ? strings.emptySlot : _furnitureName(current),
+              current == null
+                  ? strings.emptySlot
+                  : localizedFurniture(strings, current),
             ),
           ),
         ),
@@ -219,7 +221,7 @@ class _FurnitureRow extends StatelessWidget {
             for (final item in choices)
               PopupMenuItem(
                 value: item.id,
-                child: Text(_furnitureName(item.id)),
+                child: Text(localizedFurniture(strings, item.id)),
               ),
           ],
           child: Padding(
@@ -294,7 +296,13 @@ class GhostProfileSheet extends StatelessWidget {
               key: const Key('ghost-room'),
             ),
             Text(strings.baseRent(definition.baseRentPerMinute)),
-            Text(strings.likes(definition.preferredRoomTags.join(', '))),
+            Text(
+              strings.likes(
+                definition.preferredRoomTags
+                    .map((tag) => localizedTag(strings, tag))
+                    .join(', '),
+              ),
+            ),
             Text(strings.dislikes(definition.dislikedNeighbor.displayName)),
             Text(
               strings.ability(localizedAbility(strings, definition.abilityId)),
@@ -353,10 +361,10 @@ class _BreakdownRows extends StatelessWidget {
 String localizedMood(AppLocalizations strings, int happiness) {
   final mood = HappinessSystem.moodFor(happiness);
   return switch (mood) {
-    'Senang' => strings.moodHappy,
-    'Nyaman' => strings.moodComfortable,
-    'Tidak senang' => strings.moodUnhappy,
-    _ => strings.moodAngry,
+    HappinessMood.happy => strings.moodHappy,
+    HappinessMood.comfortable => strings.moodComfortable,
+    HappinessMood.unhappy => strings.moodUnhappy,
+    HappinessMood.angry => strings.moodAngry,
   };
 }
 
@@ -400,7 +408,28 @@ String _slotName(AppLocalizations strings, FurnitureSlot slot) =>
       FurnitureSlot.decoration => strings.decorationSlot,
     };
 
-String _furnitureName(String id) => id
-    .split('_')
-    .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
-    .join(' ');
+String localizedTag(AppLocalizations strings, String tag) => switch (tag) {
+  'quiet' => strings.tagQuiet,
+  'plant' => strings.tagPlant,
+  'decorated' => strings.tagDecorated,
+  'mystical' => strings.tagMystical,
+  'shiny' => strings.tagShiny,
+  'sturdy' => strings.tagSturdy,
+  _ => throw ArgumentError.value(tag, 'tag', 'Missing localization'),
+};
+
+String localizedFurniture(AppLocalizations strings, String id) => switch (id) {
+  'bed' => strings.furnitureBed,
+  'reinforced_shelf' => strings.furnitureReinforcedShelf,
+  'fan' => strings.furnitureFan,
+  'dresser' => strings.furnitureDresser,
+  'door' => strings.furnitureDoor,
+  'lamp' => strings.furnitureLamp,
+  'plant' => strings.furniturePlant,
+  'lantern' => strings.furnitureLantern,
+  'curtain' => strings.furnitureCurtain,
+  'rug' => strings.furnitureRug,
+  'wall_charm' => strings.furnitureWallCharm,
+  'shiny_trinket' => strings.furnitureShinyTrinket,
+  _ => throw ArgumentError.value(id, 'id', 'Missing localization'),
+};

@@ -211,6 +211,14 @@ abstract final class GameRules {
   static GameState claimMissionReward(GameState state, String missionId) =>
       MissionSystem.claim(state, missionId);
 
+  static GameState setLanguageCode(GameState state, String languageCode) {
+    if ((languageCode != 'id' && languageCode != 'en') ||
+        state.languageCode == languageCode) {
+      return state;
+    }
+    return state.copyWith(languageCode: languageCode);
+  }
+
   static GameState upgradeRoom(
     GameState state,
     String roomId,

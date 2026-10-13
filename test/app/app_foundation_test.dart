@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/app/app.dart';
 import 'package:hantu_kontrakan/features/home/home_screen.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
+import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 
 void main() {
   Future<void> pumpApp(WidgetTester tester, {Locale? locale}) async {
@@ -30,6 +31,51 @@ void main() {
 
     expect(find.text('200 Spirit Coins'), findsOneWidget);
     expect(find.text('YOUR NEW KONTRAKAN'), findsOneWidget);
+  });
+
+  testWidgets('language toggle updates dialogue and survives reload', (
+    tester,
+  ) async {
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(
+        GameState.seeded().copyWith(
+          languageCode: 'en',
+          activeIncidentId: 'electricity_outage',
+        ),
+      ),
+    );
+    await tester.pumpWidget(HantuKontrakanApp(saveService: saves));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('200 Spirit Coins'), findsOneWidget);
+    expect(find.text('Incident: Electricity Outage'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('language-button')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('language-id')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('200 Koin Arwah'), findsOneWidget);
+    expect(find.text('Insiden: Listrik Padam'), findsOneWidget);
+    expect(saves.storedState?.languageCode, 'id');
+
+    await tester.tap(find.byKey(const Key('incident-button')));
+    await tester.pump();
+    expect(
+      find.text(
+        'Kontrakan gelap. Beberapa penghuni justru terlihat lebih jelas.',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    await tester.pumpWidget(HantuKontrakanApp(saveService: saves));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('200 Koin Arwah'), findsOneWidget);
   });
 
   test('platform manifests declare portrait-only presentation', () {

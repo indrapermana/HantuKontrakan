@@ -40,6 +40,15 @@ void main() {
     );
   });
 
+  test('every mission has complete Indonesian and English copy', () {
+    for (final mission in MissionDefinitions.all) {
+      expect(mission.title.id.trim(), isNotEmpty, reason: mission.id);
+      expect(mission.title.en.trim(), isNotEmpty, reason: mission.id);
+      expect(mission.description.id.trim(), isNotEmpty, reason: mission.id);
+      expect(mission.description.en.trim(), isNotEmpty, reason: mission.id);
+    }
+  });
+
   test('completed mission reward is atomic and cannot be claimed twice', () {
     var state = GameRules.continueTutorial(GameState.newGame());
     state = GameRules.placeGhost(state, 'pocong_01', 'room_01');

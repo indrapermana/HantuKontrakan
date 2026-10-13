@@ -13,6 +13,9 @@ void main() {
       happinessFor: (id) => HappinessSystem.happinessFor(state, id),
       onRoomTap: selectedRoomIds.add,
       onGhostTap: selectedGhostIds.add,
+      roomLabelFor: (id) => id,
+      happinessLabelFor: (value) => '$value',
+      lockedLabel: 'locked',
     );
 
     final rooms = world.createRoomComponents();

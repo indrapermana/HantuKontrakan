@@ -10,6 +10,9 @@ class HantuGame extends FlameGame {
     required this.state,
     required this.onRoomTap,
     required this.onGhostTap,
+    required this.roomLabelFor,
+    required this.happinessLabelFor,
+    required this.lockedLabel,
   }) : super(
          camera: CameraComponent.withFixedResolution(width: 360, height: 360),
        );
@@ -17,6 +20,9 @@ class HantuGame extends FlameGame {
   final GameState state;
   final void Function(String roomId) onRoomTap;
   final void Function(String ghostId) onGhostTap;
+  final String Function(String roomId) roomLabelFor;
+  final String Function(int happiness) happinessLabelFor;
+  final String lockedLabel;
 
   @override
   Future<void> onLoad() async {
@@ -27,6 +33,9 @@ class HantuGame extends FlameGame {
         happinessFor: (id) => HappinessSystem.happinessFor(state, id),
         onRoomTap: onRoomTap,
         onGhostTap: onGhostTap,
+        roomLabelFor: roomLabelFor,
+        happinessLabelFor: happinessLabelFor,
+        lockedLabel: lockedLabel,
       ),
     );
   }

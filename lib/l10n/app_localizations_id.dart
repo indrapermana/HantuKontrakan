@@ -393,4 +393,75 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get missionInProgress => 'Belum selesai';
+
+  @override
+  String get languageTitle => 'Bahasa';
+
+  @override
+  String get languageIndonesian => 'Bahasa Indonesia';
+
+  @override
+  String get languageEnglish => 'Bahasa Inggris';
+
+  @override
+  String roomCanvasHappiness(int value) {
+    return 'Bahagia $value';
+  }
+
+  @override
+  String get roomCanvasLocked => 'TERKUNCI';
+
+  @override
+  String get tagQuiet => 'Tenang';
+
+  @override
+  String get tagPlant => 'Tanaman';
+
+  @override
+  String get tagDecorated => 'Berdekorasi';
+
+  @override
+  String get tagMystical => 'Mistis';
+
+  @override
+  String get tagShiny => 'Berkilau';
+
+  @override
+  String get tagSturdy => 'Kokoh';
+
+  @override
+  String get furnitureBed => 'Tempat tidur';
+
+  @override
+  String get furnitureReinforcedShelf => 'Rak kokoh';
+
+  @override
+  String get furnitureFan => 'Kipas';
+
+  @override
+  String get furnitureDresser => 'Lemari';
+
+  @override
+  String get furnitureDoor => 'Pintu';
+
+  @override
+  String get furnitureLamp => 'Lampu';
+
+  @override
+  String get furniturePlant => 'Tanaman';
+
+  @override
+  String get furnitureLantern => 'Lentera';
+
+  @override
+  String get furnitureCurtain => 'Tirai';
+
+  @override
+  String get furnitureRug => 'Karpet';
+
+  @override
+  String get furnitureWallCharm => 'Jimat dinding';
+
+  @override
+  String get furnitureShinyTrinket => 'Pernak-pernik berkilau';
 }

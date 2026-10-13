@@ -392,4 +392,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get missionInProgress => 'In progress';
+
+  @override
+  String get languageTitle => 'Language';
+
+  @override
+  String get languageIndonesian => 'Indonesian';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String roomCanvasHappiness(int value) {
+    return 'Happy $value';
+  }
+
+  @override
+  String get roomCanvasLocked => 'LOCKED';
+
+  @override
+  String get tagQuiet => 'Quiet';
+
+  @override
+  String get tagPlant => 'Plant';
+
+  @override
+  String get tagDecorated => 'Decorated';
+
+  @override
+  String get tagMystical => 'Mystical';
+
+  @override
+  String get tagShiny => 'Shiny';
+
+  @override
+  String get tagSturdy => 'Sturdy';
+
+  @override
+  String get furnitureBed => 'Bed';
+
+  @override
+  String get furnitureReinforcedShelf => 'Reinforced shelf';
+
+  @override
+  String get furnitureFan => 'Fan';
+
+  @override
+  String get furnitureDresser => 'Dresser';
+
+  @override
+  String get furnitureDoor => 'Door';
+
+  @override
+  String get furnitureLamp => 'Lamp';
+
+  @override
+  String get furniturePlant => 'Plant';
+
+  @override
+  String get furnitureLantern => 'Lantern';
+
+  @override
+  String get furnitureCurtain => 'Curtain';
+
+  @override
+  String get furnitureRug => 'Rug';
+
+  @override
+  String get furnitureWallCharm => 'Wall charm';
+
+  @override
+  String get furnitureShinyTrinket => 'Shiny trinket';
 }

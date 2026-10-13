@@ -83,6 +83,30 @@ void main() {
     expect(controller.state.walletCoins, 150);
   });
 
+  test(
+    'language commands accept only supported values and avoid duplicates',
+    () {
+      final controller = GameStateController(GameState.seeded());
+
+      expect(
+        controller.dispatch(const SetLanguageCode(languageCode: 'en')),
+        isTrue,
+      );
+      expect(controller.state.languageCode, 'en');
+      expect(controller.revision, 1);
+
+      expect(
+        controller.dispatch(const SetLanguageCode(languageCode: 'en')),
+        isFalse,
+      );
+      expect(
+        controller.dispatch(const SetLanguageCode(languageCode: 'fr')),
+        isFalse,
+      );
+      expect(controller.revision, 1);
+    },
+  );
+
   test('game state rejects invalid one-to-one occupancy', () {
     expect(
       () => GameState(

@@ -525,7 +525,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 - [x] **HK-021** Opening story, tutorial steps, scripted incident. **Accept:** new player can place ghost, collect rent, resolve event.
 - [x] **HK-022** Levels 1–10 and unlock definitions. **Accept:** level gates deterministic and reload-safe.
 - [x] **HK-023** Ten beginner missions and one-time reward claims. **Accept:** no duplicate reward.
-- [ ] **HK-024** Localize all content into Indonesian and English. **Accept:** language toggle updates UI/dialogue with no missing keys.
+- [x] **HK-024** Localize all content into Indonesian and English. **Accept:** language toggle updates UI/dialogue with no missing keys.
 - [ ] **HK-025** Gameplay analytics hooks, optional/consent-aware. **Accept:** events identified and no sensitive personal data in payloads.
 
 ### Milestone M6 — Polish, ads, beta

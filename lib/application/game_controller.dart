@@ -82,6 +82,9 @@ class GameController extends ChangeNotifier {
   Future<bool> claimMissionReward(String missionId) =>
       _dispatch(ClaimMissionReward(missionId: missionId));
 
+  Future<bool> setLanguageCode(String languageCode) =>
+      _dispatch(SetLanguageCode(languageCode: languageCode));
+
   Future<void> moveGhost(
     String ghostId,
     String targetRoomId, {

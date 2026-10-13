@@ -727,6 +727,144 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Belum selesai'**
   String get missionInProgress;
+
+  /// No description provided for @languageTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Bahasa'**
+  String get languageTitle;
+
+  /// No description provided for @languageIndonesian.
+  ///
+  /// In id, this message translates to:
+  /// **'Bahasa Indonesia'**
+  String get languageIndonesian;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In id, this message translates to:
+  /// **'Bahasa Inggris'**
+  String get languageEnglish;
+
+  /// No description provided for @roomCanvasHappiness.
+  ///
+  /// In id, this message translates to:
+  /// **'Bahagia {value}'**
+  String roomCanvasHappiness(int value);
+
+  /// No description provided for @roomCanvasLocked.
+  ///
+  /// In id, this message translates to:
+  /// **'TERKUNCI'**
+  String get roomCanvasLocked;
+
+  /// No description provided for @tagQuiet.
+  ///
+  /// In id, this message translates to:
+  /// **'Tenang'**
+  String get tagQuiet;
+
+  /// No description provided for @tagPlant.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanaman'**
+  String get tagPlant;
+
+  /// No description provided for @tagDecorated.
+  ///
+  /// In id, this message translates to:
+  /// **'Berdekorasi'**
+  String get tagDecorated;
+
+  /// No description provided for @tagMystical.
+  ///
+  /// In id, this message translates to:
+  /// **'Mistis'**
+  String get tagMystical;
+
+  /// No description provided for @tagShiny.
+  ///
+  /// In id, this message translates to:
+  /// **'Berkilau'**
+  String get tagShiny;
+
+  /// No description provided for @tagSturdy.
+  ///
+  /// In id, this message translates to:
+  /// **'Kokoh'**
+  String get tagSturdy;
+
+  /// No description provided for @furnitureBed.
+  ///
+  /// In id, this message translates to:
+  /// **'Tempat tidur'**
+  String get furnitureBed;
+
+  /// No description provided for @furnitureReinforcedShelf.
+  ///
+  /// In id, this message translates to:
+  /// **'Rak kokoh'**
+  String get furnitureReinforcedShelf;
+
+  /// No description provided for @furnitureFan.
+  ///
+  /// In id, this message translates to:
+  /// **'Kipas'**
+  String get furnitureFan;
+
+  /// No description provided for @furnitureDresser.
+  ///
+  /// In id, this message translates to:
+  /// **'Lemari'**
+  String get furnitureDresser;
+
+  /// No description provided for @furnitureDoor.
+  ///
+  /// In id, this message translates to:
+  /// **'Pintu'**
+  String get furnitureDoor;
+
+  /// No description provided for @furnitureLamp.
+  ///
+  /// In id, this message translates to:
+  /// **'Lampu'**
+  String get furnitureLamp;
+
+  /// No description provided for @furniturePlant.
+  ///
+  /// In id, this message translates to:
+  /// **'Tanaman'**
+  String get furniturePlant;
+
+  /// No description provided for @furnitureLantern.
+  ///
+  /// In id, this message translates to:
+  /// **'Lentera'**
+  String get furnitureLantern;
+
+  /// No description provided for @furnitureCurtain.
+  ///
+  /// In id, this message translates to:
+  /// **'Tirai'**
+  String get furnitureCurtain;
+
+  /// No description provided for @furnitureRug.
+  ///
+  /// In id, this message translates to:
+  /// **'Karpet'**
+  String get furnitureRug;
+
+  /// No description provided for @furnitureWallCharm.
+  ///
+  /// In id, this message translates to:
+  /// **'Jimat dinding'**
+  String get furnitureWallCharm;
+
+  /// No description provided for @furnitureShinyTrinket.
+  ///
+  /// In id, this message translates to:
+  /// **'Pernak-pernik berkilau'**
+  String get furnitureShinyTrinket;
 }
 
 class _AppLocalizationsDelegate

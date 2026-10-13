@@ -84,6 +84,12 @@ final class ClaimMissionReward extends GameCommand {
   final String missionId;
 }
 
+final class SetLanguageCode extends GameCommand {
+  const SetLanguageCode({required this.languageCode});
+
+  final String languageCode;
+}
+
 final class ResolveIncident extends GameCommand {
   const ResolveIncident({
     required this.incidentId,

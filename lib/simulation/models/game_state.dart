@@ -13,6 +13,7 @@ class GameState {
     this.playerLevel = GameBalance.initialPlayerLevel,
     this.playerExperience = 0,
     this.mysticalCrystals = 0,
+    this.languageCode,
     this.reputation = GameBalance.initialReputation,
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
@@ -54,6 +55,9 @@ class GameState {
         playerLevel > ProgressionDefinitions.levels.length ||
         playerExperience < 0 ||
         mysticalCrystals < 0 ||
+        (languageCode != null &&
+            languageCode != 'id' &&
+            languageCode != 'en') ||
         reputation < 0 ||
         reputation > GameBalance.maximumReputation ||
         chaos < GameBalance.minimumChaos ||
@@ -75,7 +79,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 15;
+  static const int currentSchemaVersion = 16;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -84,6 +88,7 @@ class GameState {
   final int playerLevel;
   final int playerExperience;
   final int mysticalCrystals;
+  final String? languageCode;
   final int reputation;
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
@@ -213,6 +218,7 @@ class GameState {
     int? playerLevel,
     int? playerExperience,
     int? mysticalCrystals,
+    Object? languageCode = _notProvided,
     int? reputation,
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
@@ -243,6 +249,9 @@ class GameState {
     playerLevel: playerLevel ?? this.playerLevel,
     playerExperience: playerExperience ?? this.playerExperience,
     mysticalCrystals: mysticalCrystals ?? this.mysticalCrystals,
+    languageCode: identical(languageCode, _notProvided)
+        ? this.languageCode
+        : languageCode as String?,
     reputation: reputation ?? this.reputation,
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
@@ -289,6 +298,7 @@ class GameState {
     'playerLevel': playerLevel,
     'playerExperience': playerExperience,
     'mysticalCrystals': mysticalCrystals,
+    'languageCode': languageCode,
     'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
@@ -335,7 +345,8 @@ class GameState {
       12 => GameState._fromVersion12Json(json),
       13 => GameState._fromVersion13Json(json),
       14 => GameState._fromVersion14Json(json),
-      currentSchemaVersion => GameState._fromVersion15Json(json),
+      15 => GameState._fromVersion15Json(json),
+      currentSchemaVersion => GameState._fromVersion16Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -538,6 +549,11 @@ class GameState {
             .cast<String>()
             .toSet(),
       );
+
+  factory GameState._fromVersion16Json(Map<String, Object?> json) =>
+      GameState._fromVersion15Json(
+        json,
+      ).copyWith(languageCode: json['languageCode'] as String?);
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)

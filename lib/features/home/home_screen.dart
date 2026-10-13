@@ -42,6 +42,12 @@ class HomeScreen extends StatelessWidget {
             centerTitle: true,
             actions: [
               IconButton(
+                key: const Key('language-button'),
+                tooltip: strings.languageTitle,
+                onPressed: () => _showLanguagePicker(context),
+                icon: const Icon(Icons.language),
+              ),
+              IconButton(
                 key: const Key('missions-button'),
                 tooltip: strings.missionsTitle,
                 onPressed: () => showDialog<void>(
@@ -101,6 +107,10 @@ class HomeScreen extends StatelessWidget {
                             _showRoomDetails(context, roomId),
                         onGhostTap: (ghostId) =>
                             _showGhostProfile(context, ghostId),
+                        roomLabelFor: (roomId) =>
+                            strings.roomTitle(_roomNumber(roomId)),
+                        happinessLabelFor: strings.roomCanvasHappiness,
+                        lockedLabel: strings.roomCanvasLocked,
                       ),
                     ),
                   ),
@@ -267,6 +277,31 @@ class HomeScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _showLanguagePicker(BuildContext context) async {
+    final strings = AppLocalizations.of(context);
+    final languageCode = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: Text(strings.languageTitle),
+        children: [
+          SimpleDialogOption(
+            key: const Key('language-id'),
+            onPressed: () => Navigator.pop(dialogContext, 'id'),
+            child: Text(strings.languageIndonesian),
+          ),
+          SimpleDialogOption(
+            key: const Key('language-en'),
+            onPressed: () => Navigator.pop(dialogContext, 'en'),
+            child: Text(strings.languageEnglish),
+          ),
+        ],
+      ),
+    );
+    if (languageCode != null) {
+      await controller.setLanguageCode(languageCode);
+    }
   }
 
   Future<void> _showGhostProfile(BuildContext context, String ghostId) async {
