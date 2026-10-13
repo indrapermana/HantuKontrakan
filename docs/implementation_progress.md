@@ -224,9 +224,28 @@ Verification:
 - `flutter test`: all 57 tests passed, including the 18.1125 worked example, Tuyul bonus semantics, multiplier thresholds, 601-second chunk equivalence, carried fractional remainder, non-positive no-ops, save round-trip, and v5 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-012 — Atomic and idempotent Collect All
+
+Status: implemented and verified on 2026-10-13.
+
+- Added typed rent collection with caller-visible claim IDs and persisted replay protection.
+- Atomically transfers claimable whole coins to the wallet while preserving sub-coin microcoins and the elapsed-time remainder.
+- Rejects empty IDs, duplicate claims, and balances below one coin as identity-preserving no-ops.
+- Added a localized Collect All control that shows floored claimable coins and disables itself at zero.
+- Advanced saves to schema version 7 with explicit version-6 migration and completed-claim round-trip coverage.
+- Kept offline snapshots and resume claims deferred to HK-013.
+
+Verification:
+
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused collection, controller-reload, persistence, and widget suite: all 21 tests passed.
+- `flutter test`: all 64 tests passed, including atomic whole-coin payout, fractional preservation, duplicate replay before/after reload, early-claim retry behavior, visible wallet updates, disabled zero balance, save round-trip, and v6 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-012 and all later tickets.
+- HK-013 and all later tickets.
 - Rent accrual, furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

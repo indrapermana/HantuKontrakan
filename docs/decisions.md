@@ -129,3 +129,15 @@ Date: 2026-10-13
 - `AdvanceSimulation(seconds)` is the typed application/domain entry point and rejects non-positive elapsed time as an identity-preserving no-op. The existing debug one-second control calls this same path; Flame frame callbacks never mutate rent.
 - HK-011 accumulates claimable microcoins but does not transfer them to the wallet. Atomic collection/idempotency belongs to HK-012, and lifecycle/offline scheduling belongs to HK-013.
 - Save schema advances to version 6 for pending rent microcoins and the sub-microcoin time remainder. Version-5 and older saves migrate both values to zero.
+
+## HK-012 atomic rent collection decisions
+
+Date: 2026-10-13
+
+- `CollectAllRent(claimId)` pays only `pendingRentMicrocoins ~/ 1,000,000` into the wallet. The remaining sub-coin microcoins and HK-011's modulo-60 accrual remainder are preserved exactly.
+- A successful payout updates wallet, pending rent, and the completed-claim set in one immutable transition. Empty claim IDs, previously completed IDs, and balances below one whole coin are identity-preserving no-ops.
+- Claims below one coin are not recorded. This allows the caller to retry the same request after more rent accrues without losing the future payout.
+- Completed claim IDs are persisted as immutable state. Replay remains a no-op after save/reload rather than relying on an in-memory UI guard.
+- The application controller generates claim IDs from the injected clock, current revision, and a local sequence unless a stable ID is supplied by a test or retrying caller. Domain correctness does not depend on the generator.
+- The Flutter Collect All control displays floored whole coins and is disabled at zero. It never displays or discards fractional microcoins.
+- Save schema advances to version 7 for completed rent claim IDs. Version-6 and older saves migrate with an empty completed set.

@@ -11,11 +11,13 @@ class GameState {
     this.playerLevel = GameBalance.initialPlayerLevel,
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
+    Set<String> completedRentClaimIds = const {},
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
     required this.complaintResolved,
     this.resolutionId,
-  }) : ghosts = List.unmodifiable(ghosts),
+  }) : completedRentClaimIds = Set.unmodifiable(completedRentClaimIds),
+       ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
         rentAccrualRemainder < 0 ||
@@ -25,7 +27,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 6;
+  static const int currentSchemaVersion = 7;
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
@@ -33,6 +35,7 @@ class GameState {
   final int playerLevel;
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
+  final Set<String> completedRentClaimIds;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
   final bool complaintResolved;
@@ -46,6 +49,7 @@ class GameState {
     playerLevel: GameBalance.initialPlayerLevel,
     pendingRentMicrocoins: 0,
     rentAccrualRemainder: 0,
+    completedRentClaimIds: const {},
     ghosts: const [
       GhostState(id: 'pocong_01', kind: GhostKind.pocong),
       GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
@@ -115,6 +119,7 @@ class GameState {
     int? playerLevel,
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
+    Set<String>? completedRentClaimIds,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
@@ -128,6 +133,7 @@ class GameState {
     playerLevel: playerLevel ?? this.playerLevel,
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
+    completedRentClaimIds: completedRentClaimIds ?? this.completedRentClaimIds,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
     complaintResolved: complaintResolved ?? this.complaintResolved,
@@ -142,6 +148,7 @@ class GameState {
     'playerLevel': playerLevel,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
+    'completedRentClaimIds': completedRentClaimIds.toList(growable: false),
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
     'complaintResolved': complaintResolved,
@@ -159,7 +166,8 @@ class GameState {
       3 => GameState._fromVersion3Json(json),
       4 => GameState._fromVersion4Json(json),
       5 => GameState._fromVersion5Json(json),
-      currentSchemaVersion => GameState._fromVersion6Json(json),
+      6 => GameState._fromVersion6Json(json),
+      currentSchemaVersion => GameState._fromVersion7Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -216,6 +224,23 @@ class GameState {
     playerLevel: json['playerLevel']! as int,
     pendingRentMicrocoins: json['pendingRentMicrocoins']! as int,
     rentAccrualRemainder: json['rentAccrualRemainder']! as int,
+    ghosts: _ghostsFromJson(json),
+    rooms: _roomsFromJson(json),
+    complaintResolved: json['complaintResolved']! as bool,
+    resolutionId: json['resolutionId'] as String?,
+  );
+
+  factory GameState._fromVersion7Json(Map<String, Object?> json) => GameState(
+    schemaVersion: currentSchemaVersion,
+    walletCoins: json['walletCoins']! as int,
+    chaos: json['chaos']! as int,
+    activeSimulationSeconds: json['activeSimulationSeconds']! as int,
+    playerLevel: json['playerLevel']! as int,
+    pendingRentMicrocoins: json['pendingRentMicrocoins']! as int,
+    rentAccrualRemainder: json['rentAccrualRemainder']! as int,
+    completedRentClaimIds: (json['completedRentClaimIds']! as List<Object?>)
+        .cast<String>()
+        .toSet(),
     ghosts: _ghostsFromJson(json),
     rooms: _roomsFromJson(json),
     complaintResolved: json['complaintResolved']! as bool,

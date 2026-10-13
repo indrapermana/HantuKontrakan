@@ -39,6 +39,10 @@ class GameStateController {
         _state,
         seconds,
       ),
+      CollectAllRent(:final claimId) => GameRules.collectAllRent(
+        _state,
+        claimId,
+      ),
       ResetGame() => GameState.seeded(),
       SetGhostSpecialAction(:final ghostId, :final active) =>
         GameRules.setGhostSpecialAction(_state, ghostId, active),

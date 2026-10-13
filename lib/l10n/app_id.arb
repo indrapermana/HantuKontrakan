@@ -4,6 +4,8 @@
   "appTitleUppercase": "HANTU KONTRAKAN",
   "spiritCoins": "{count} Koin Arwah",
   "@spiritCoins": {"placeholders": {"count": {"type": "int"}}},
+  "collectAllRent": "Ambil Semua · {count} koin",
+  "@collectAllRent": {"placeholders": {"count": {"type": "int"}}},
   "ghostHappinessSummary": "{ghostName} {happiness}",
   "@ghostHappinessSummary": {"placeholders": {"ghostName": {"type": "String"}, "happiness": {"type": "int"}}},
   "pendingComplaint": "Keluhan: Pocong terganggu Tuyul",

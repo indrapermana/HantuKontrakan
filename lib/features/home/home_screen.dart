@@ -75,24 +75,42 @@ class HomeScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      key: const Key('complaint-button'),
-                      onPressed: controller.hasPendingComplaint
-                          ? () => _showComplaint(context)
-                          : null,
-                      icon: Icon(
-                        controller.hasPendingComplaint
-                            ? Icons.campaign
-                            : Icons.check_circle,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          key: const Key('collect-rent'),
+                          onPressed: controller.pendingRentCoins > 0
+                              ? () => controller.collectAllRent()
+                              : null,
+                          icon: const Icon(Icons.savings),
+                          label: Text(
+                            strings.collectAllRent(controller.pendingRentCoins),
+                          ),
+                        ),
                       ),
-                      label: Text(
-                        controller.hasPendingComplaint
-                            ? strings.pendingComplaint
-                            : strings.resolvedComplaint,
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          key: const Key('complaint-button'),
+                          onPressed: controller.hasPendingComplaint
+                              ? () => _showComplaint(context)
+                              : null,
+                          icon: Icon(
+                            controller.hasPendingComplaint
+                                ? Icons.campaign
+                                : Icons.check_circle,
+                          ),
+                          label: Text(
+                            controller.hasPendingComplaint
+                                ? strings.pendingComplaint
+                                : strings.resolvedComplaint,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],

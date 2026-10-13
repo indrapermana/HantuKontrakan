@@ -30,6 +30,22 @@ abstract final class GameRules {
     return RentSystem.accrue(state, seconds);
   }
 
+  static GameState collectAllRent(GameState state, String claimId) {
+    if (claimId.trim().isEmpty ||
+        state.completedRentClaimIds.contains(claimId)) {
+      return state;
+    }
+    final wholeCoins =
+        state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
+    if (wholeCoins <= 0) return state;
+    return state.copyWith(
+      walletCoins: state.walletCoins + wholeCoins,
+      pendingRentMicrocoins:
+          state.pendingRentMicrocoins % GameBalance.microcoinsPerCoin,
+      completedRentClaimIds: {...state.completedRentClaimIds, claimId},
+    );
+  }
+
   static GameState placeGhost(GameState state, String ghostId, String roomId) {
     if (!state.ghosts.any((ghost) => ghost.id == ghostId) ||
         state.roomForGhost(ghostId) != null) {

@@ -3,6 +3,7 @@
   "appTitle": "Hantu Kontrakan",
   "appTitleUppercase": "HANTU KONTRAKAN",
   "spiritCoins": "{count} Spirit Coins",
+  "collectAllRent": "Collect All · {count} coins",
   "ghostHappinessSummary": "{ghostName} {happiness}",
   "pendingComplaint": "Complaint: Pocong is bothered by Tuyul",
   "resolvedComplaint": "Complaint resolved and saved",

@@ -507,7 +507,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 ### Milestone M3 — Economy & offline earnings
 
 - [x] **HK-011** Precise, deterministic rent accrual. **Accept:** output independent of FPS and elapsed-time chunk sizes.
-- [ ] **HK-012** Collect All with atomic/idempotent payout. **Accept:** duplicated claim never grants twice.
+- [x] **HK-012** Collect All with atomic/idempotent payout. **Accept:** duplicated claim never grants twice.
 - [ ] **HK-013** Offline snapshot and 4-hour/50% cap. **Accept:** repeated resume does not double-credit, negative timestamps yield zero.
 - [ ] **HK-014** Four unique ghost abilities with persisted cooldowns. **Accept:** active-only abilities do not trigger offline.
 - [ ] **HK-015** Balance and serialization regression tests. **Accept:** documented worked examples pass.

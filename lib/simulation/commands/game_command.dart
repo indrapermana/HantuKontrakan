@@ -62,6 +62,12 @@ final class AdvanceSimulation extends GameCommand {
   final int seconds;
 }
 
+final class CollectAllRent extends GameCommand {
+  const CollectAllRent({required this.claimId});
+
+  final String claimId;
+}
+
 final class ResetGame extends GameCommand {
   const ResetGame();
 }

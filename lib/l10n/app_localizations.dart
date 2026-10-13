@@ -116,6 +116,12 @@ abstract class AppLocalizations {
   /// **'{count} Koin Arwah'**
   String spiritCoins(int count);
 
+  /// No description provided for @collectAllRent.
+  ///
+  /// In id, this message translates to:
+  /// **'Ambil Semua · {count} koin'**
+  String collectAllRent(int count);
+
   /// No description provided for @ghostHappinessSummary.
   ///
   /// In id, this message translates to:

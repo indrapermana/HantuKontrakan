@@ -22,6 +22,7 @@ class GameController extends ChangeNotifier {
   final SaveService _saveService;
   final GameClock _clock;
   final SeededRandomSource _randomSource;
+  int _rentClaimSequence = 0;
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
   );
@@ -108,6 +109,13 @@ class GameController extends ChangeNotifier {
 
   Future<void> advanceSimulation(int elapsedSeconds) async {
     await _dispatch(AdvanceSimulation(seconds: elapsedSeconds));
+  }
+
+  Future<void> collectAllRent({String? claimId}) async {
+    final resolvedClaimId =
+        claimId ??
+        'rent-${_clock.now().microsecondsSinceEpoch}-$revision-${_rentClaimSequence++}';
+    await _dispatch(CollectAllRent(claimId: resolvedClaimId));
   }
 
   Future<void> resetState() async {

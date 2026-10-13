@@ -24,6 +24,7 @@ void main() {
       walletCoins: 123,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
+      completedRentClaimIds: const {'rent-claim-1'},
       ghosts: seed.ghosts
           .map(
             (ghost) => ghost.id == 'pocong_01'
@@ -60,6 +61,7 @@ void main() {
     expect(loaded.activeSimulationSeconds, 0);
     expect(loaded.pendingRentMicrocoins, 12345678);
     expect(loaded.rentAccrualRemainder, 37);
+    expect(loaded.completedRentClaimIds, {'rent-claim-1'});
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
     expect(loaded.roomById('room_01').row, 1);
     expect(loaded.roomById('room_01').levelFor(RoomAttribute.silence), 2);
@@ -172,6 +174,20 @@ void main() {
     final migrated = (result as SaveLoaded).state;
     expect(migrated.pendingRentMicrocoins, 0);
     expect(migrated.rentAccrualRemainder, 0);
+  });
+
+  test('version 6 save migrates completed rent claims to empty', () async {
+    final version6 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 6
+      ..remove('completedRentClaimIds');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version6),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    final migrated = (result as SaveLoaded).state;
+    expect(migrated.completedRentClaimIds, isEmpty);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

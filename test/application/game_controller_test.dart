@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/application/game_controller.dart';
 import 'package:hantu_kontrakan/application/simulation_runtime.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
+import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/systems/game_rules.dart';
 
 void main() {
@@ -71,6 +72,22 @@ void main() {
     expect(controller.state.activeSimulationSeconds, 0);
     expect(controller.state.complaintResolved, isFalse);
     expect(saves.storedState?.walletCoins, 200);
+  });
+
+  test('rent claim remains idempotent after controller reload', () async {
+    final initial = GameState.seeded().copyWith(pendingRentMicrocoins: 2250000);
+    final saves = MemorySaveService(initialResult: SaveLoaded(initial));
+    final first = GameController(saveService: saves);
+    await first.initialize();
+    await first.collectAllRent(claimId: 'stable-claim');
+
+    final reloaded = GameController(saveService: saves);
+    await reloaded.initialize();
+    await reloaded.collectAllRent(claimId: 'stable-claim');
+
+    expect(reloaded.state.walletCoins, 202);
+    expect(reloaded.state.pendingRentMicrocoins, 250000);
+    expect(reloaded.state.completedRentClaimIds, {'stable-claim'});
   });
 }
 

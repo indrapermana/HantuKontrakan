@@ -20,6 +20,11 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String collectAllRent(int count) {
+    return 'Ambil Semua · $count koin';
+  }
+
+  @override
   String ghostHappinessSummary(String ghostName, int happiness) {
     return '$ghostName $happiness';
   }
