@@ -4,6 +4,20 @@ import '../models/ghost.dart';
 import 'happiness_system.dart';
 
 abstract final class AbilitySystem {
+  static int? secondsUntilNextTrigger(GameState state) {
+    int? next;
+    for (final ghost in state.ghosts) {
+      if (state.roomForGhost(ghost.id) == null || !_isPeriodic(ghost.kind)) {
+        continue;
+      }
+      final remaining =
+          state.abilityCooldownSeconds[ghost.id] ??
+          GameBalance.periodicAbilityIntervalSeconds;
+      if (next == null || remaining < next) next = remaining;
+    }
+    return next;
+  }
+
   static GameState advanceActiveTime(GameState state, int seconds) {
     if (seconds <= 0) return state;
 

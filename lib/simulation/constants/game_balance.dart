@@ -1,6 +1,8 @@
 abstract final class GameBalance {
   static const int initialCoins = 200;
   static const int initialChaos = 40;
+  static const int minimumChaos = 0;
+  static const int maximumChaos = 100;
   static const int initialPlayerLevel = 1;
   static const int initialReputation = 60;
   static const int maximumReputation = 100;
@@ -12,6 +14,9 @@ abstract final class GameBalance {
   static const int offlineEarningsPercent = 50;
   static const int maximumOfflineMinutes = 240;
   static const int periodicAbilityIntervalSeconds = 600;
+  static const int chaosIntervalSeconds = 600;
+  static const int chaosNaturalReductionPerInterval = 4;
+  static const int eventModifierDurationSeconds = 600;
   static const int periodicAbilityMinimumHappiness = 80;
   static const int pocongAbilityCoinReward = 30;
   static const int kuntilanakAbilityReputationReward = 1;

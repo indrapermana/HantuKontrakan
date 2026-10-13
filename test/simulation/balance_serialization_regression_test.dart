@@ -87,7 +87,7 @@ void main() {
     );
   });
 
-  test('v9 JSON round-trip preserves deterministic continuation', () {
+  test('current JSON round-trip preserves deterministic continuation', () {
     final seed = GameState.seeded();
     final evolved = seed.copyWith(
       walletCoins: 987,

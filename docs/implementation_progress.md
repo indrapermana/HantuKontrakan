@@ -296,9 +296,30 @@ Verification:
 - `flutter test`: all 88 tests passed, including every documented worked example and post-serialization deterministic continuation.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+## M4 — Chaos, incidents, and comedy
+
+### HK-016 — Chaos, reputation, and event modifier expiry
+
+Status: implemented and verified on 2026-10-13.
+
+- Added deterministic ten-active-minute chaos ticks using occupied ghost contributions and the plan's natural -4 adjustment.
+- Added explicit event chaos/reputation delta handling with 0–100 clamps while retaining ability-only passive reputation gains.
+- Added persisted 600-active-second happiness modifier expiry; offline time never changes chaos, reputation, or expiry progress.
+- Added boundary-aware active simulation so rent, abilities, modifier expiry, and chaos remain chunk independent when state changes mid-update.
+- Advanced saves to schema version 10 with explicit version-9 migration and expiry round-trip coverage.
+- Added reputation to the existing debug HUD; no incident scheduler or incident UI was implemented early.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused chaos, abilities, rent, serialization, persistence, controller, and HUD suite: all 50 tests passed.
+- `flutter test`: all 95 tests passed, including exact chaos contributions, both bounds, chunk equivalence, active expiry, offline exclusion, and v9 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-016 and all later tickets.
+- HK-017 and all later tickets.
 - Furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

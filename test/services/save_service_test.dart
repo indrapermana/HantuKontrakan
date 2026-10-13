@@ -32,7 +32,11 @@ void main() {
       ghosts: seed.ghosts
           .map(
             (ghost) => ghost.id == 'pocong_01'
-                ? ghost.copyWith(specialActionActive: true)
+                ? ghost.copyWith(
+                    eventHappinessModifier: 12,
+                    eventModifierExpiresAtActiveSecond: 654,
+                    specialActionActive: true,
+                  )
                 : ghost,
           )
           .toList(growable: false),
@@ -71,6 +75,11 @@ void main() {
     expect(loaded.offlineRateSnapshotMicrocoinsPerMinute, 42000000);
     expect(loaded.lastOfflineAccrualTimestampMillis, 1791864000000);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
+    expect(loaded.ghostById('pocong_01').eventHappinessModifier, 12);
+    expect(
+      loaded.ghostById('pocong_01').eventModifierExpiresAtActiveSecond,
+      654,
+    );
     expect(loaded.roomById('room_01').row, 1);
     expect(loaded.roomById('room_01').levelFor(RoomAttribute.silence), 2);
     expect(loaded.roomById('room_01').roomTagLevels, {'quiet': 2});
@@ -228,6 +237,28 @@ void main() {
     final migrated = (result as SaveLoaded).state;
     expect(migrated.reputation, GameBalance.initialReputation);
     expect(migrated.abilityCooldownSeconds, isEmpty);
+  });
+
+  test('version 9 save migrates event modifier expiry to empty', () async {
+    final version9 = GameState.seeded().toJson()..['schemaVersion'] = 9;
+    for (final ghost in version9['ghosts']! as List<Object?>) {
+      (ghost! as Map<String, Object?>).remove(
+        'eventModifierExpiresAtActiveSecond',
+      );
+    }
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version9),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    final migrated = (result as SaveLoaded).state;
+    expect(
+      migrated.ghosts.every(
+        (ghost) => ghost.eventModifierExpiresAtActiveSecond == null,
+      ),
+      isTrue,
+    );
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

@@ -176,3 +176,15 @@ Date: 2026-10-13
 - HK-015 centralizes cross-system examples in one regression file while retaining the narrower ticket-level tests. Covered contracts include happiness, 18.1125 rent, upgrade/unlock prices, offline earnings, and deterministic post-serialization behavior.
 - Serialization regression uses JSON encode/decode rather than only an in-memory map. It populates every current v9 economy field and verifies that both rent advancement and collection produce identical subsequent state before and after restoration.
 - No save schema change is needed because the corrected furniture value is a balance constant rather than persisted state.
+
+## HK-016 chaos, reputation, and modifier-expiry decisions
+
+Date: 2026-10-13
+
+- Chaos updates whenever cumulative active simulation crosses a 600-second boundary using the plan formula: current chaos plus occupied ghost contributions minus 4, clamped to 0–100. Vacant/unassigned ghosts do not contribute.
+- Reputation remains passive except for documented abilities or explicit event deltas. The shared event-delta rule clamps both chaos and reputation to 0–100; incident identity/replay protection remains HK-017/HK-019 scope.
+- Temporary happiness modifiers expire by cumulative active simulation time, choosing the plan's simplest deterministic option. New complaint modifiers last 600 active seconds; pause/offline resume does not move the expiry timestamp.
+- Expiry is stored as an absolute active-second timestamp per ghost. A null timestamp preserves legacy or deliberately non-expiring modifiers without treating wall-clock time as simulation time.
+- Active advancement is segmented at the next chaos tick, periodic-ability trigger, or modifier expiry. Rent uses the pre-boundary state, then due modifiers expire, abilities evaluate, and chaos updates for subsequent time. This keeps large elapsed updates equivalent to one-second chunks across changing happiness and chaos bands.
+- Save schema advances to version 10 for event modifier expiry timestamps. Version-9 and older saves migrate existing modifiers with no automatic expiry.
+- The debug HUD now includes persisted reputation alongside coins, chaos, active time, and pending rent.

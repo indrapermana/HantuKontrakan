@@ -3,6 +3,8 @@ import '../content/furniture_definitions.dart';
 import '../models/game_state.dart';
 import '../models/room.dart';
 import 'ability_system.dart';
+import 'chaos_reputation_system.dart';
+import 'event_modifier_system.dart';
 import 'offline_earnings_system.dart';
 import 'rent_system.dart';
 
@@ -30,10 +32,33 @@ abstract final class GameRules {
 
   static GameState advanceSimulation(GameState state, int seconds) {
     if (seconds <= 0) return state;
-    return AbilitySystem.advanceActiveTime(
-      RentSystem.accrue(state, seconds),
-      seconds,
-    );
+    var current = EventModifierSystem.expireDueModifiers(state);
+    var remaining = seconds;
+    while (remaining > 0) {
+      final untilChaosTick =
+          GameBalance.chaosIntervalSeconds -
+          (current.activeSimulationSeconds % GameBalance.chaosIntervalSeconds);
+      final untilAbility =
+          AbilitySystem.secondsUntilNextTrigger(current) ?? remaining;
+      final untilExpiry =
+          EventModifierSystem.secondsUntilNextExpiry(current) ?? remaining;
+      final step = [
+        remaining,
+        untilChaosTick,
+        untilAbility,
+        untilExpiry,
+      ].reduce((left, right) => left < right ? left : right);
+      final previousActiveSeconds = current.activeSimulationSeconds;
+      current = RentSystem.accrue(current, step);
+      current = EventModifierSystem.expireDueModifiers(current);
+      current = AbilitySystem.advanceActiveTime(current, step);
+      current = ChaosReputationSystem.applyActiveTicks(
+        current,
+        previousActiveSeconds,
+      );
+      remaining -= step;
+    }
+    return current;
   }
 
   static GameState collectAllRent(GameState state, String claimId) {
@@ -248,11 +273,21 @@ abstract final class GameRules {
     };
     final ghosts = state.ghosts
         .map((ghost) {
-          if (ghost.id == 'pocong_01') {
-            return ghost.copyWith(eventHappinessModifier: pocongDelta);
+          if (ghost.id == 'pocong_01' && pocongDelta != 0) {
+            return ghost.copyWith(
+              eventHappinessModifier: pocongDelta,
+              eventModifierExpiresAtActiveSecond:
+                  state.activeSimulationSeconds +
+                  GameBalance.eventModifierDurationSeconds,
+            );
           }
-          if (ghost.id == 'tuyul_01') {
-            return ghost.copyWith(eventHappinessModifier: tuyulDelta);
+          if (ghost.id == 'tuyul_01' && tuyulDelta != 0) {
+            return ghost.copyWith(
+              eventHappinessModifier: tuyulDelta,
+              eventModifierExpiresAtActiveSecond:
+                  state.activeSimulationSeconds +
+                  GameBalance.eventModifierDurationSeconds,
+            );
           }
           return ghost;
         })

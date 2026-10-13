@@ -29,6 +29,8 @@ class GameState {
         rentAccrualRemainder >= GameBalance.secondsPerMinute ||
         reputation < 0 ||
         reputation > GameBalance.maximumReputation ||
+        chaos < GameBalance.minimumChaos ||
+        chaos > GameBalance.maximumChaos ||
         abilityCooldownSeconds.values.any((seconds) => seconds <= 0) ||
         (offlineRateSnapshotMicrocoinsPerMinute != null &&
             offlineRateSnapshotMicrocoinsPerMinute! < 0)) {
@@ -37,7 +39,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 9;
+  static const int currentSchemaVersion = 10;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -210,7 +212,8 @@ class GameState {
       6 => GameState._fromVersion6Json(json),
       7 => GameState._fromVersion7Json(json),
       8 => GameState._fromVersion8Json(json),
-      currentSchemaVersion => GameState._fromVersion9Json(json),
+      9 => GameState._fromVersion9Json(json),
+      currentSchemaVersion => GameState._fromVersion10Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -336,6 +339,9 @@ class GameState {
     complaintResolved: json['complaintResolved']! as bool,
     resolutionId: json['resolutionId'] as String?,
   );
+
+  factory GameState._fromVersion10Json(Map<String, Object?> json) =>
+      GameState._fromVersion9Json(json);
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)

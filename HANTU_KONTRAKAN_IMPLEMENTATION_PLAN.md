@@ -514,7 +514,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 
 ### Milestone M4 — Chaos, incidents & comedy
 
-- [ ] **HK-016** Chaos and reputation systems and event modifier expiries. **Accept:** clamped 0–100, active-only chaos tick.
+- [x] **HK-016** Chaos and reputation systems and event modifier expiries. **Accept:** clamped 0–100, active-only chaos tick.
 - [ ] **HK-017** Seeded incident scheduler, gating, cooldowns, rolling cap. **Accept:** no overlapping incidents, deterministic test sequences.
 - [ ] **HK-018** Author 10 localized incidents and valid branching outcomes. **Accept:** every option has deterministic documented effects.
 - [ ] **HK-019** Incident UI, consequence preview and resolved screen. **Accept:** choice commits once, duplicate taps ignored.
