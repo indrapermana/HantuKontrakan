@@ -25,7 +25,8 @@ class DebugHud extends StatelessWidget {
                 children: [
                   Text(
                     'DEBUG  Coins ${state.walletCoins}  Chaos ${state.chaos}  '
-                    'Tick ${state.activeSimulationSeconds}',
+                    'Tick ${state.activeSimulationSeconds}  '
+                    'Rent ${controller.pendingRentCoins}',
                     key: const Key('debug-stats'),
                     style: Theme.of(context).textTheme.labelMedium,
                   ),

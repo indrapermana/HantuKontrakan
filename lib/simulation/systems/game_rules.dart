@@ -2,6 +2,7 @@ import '../constants/game_balance.dart';
 import '../content/furniture_definitions.dart';
 import '../models/game_state.dart';
 import '../models/room.dart';
+import 'rent_system.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
@@ -25,11 +26,8 @@ abstract final class GameRules {
     );
   }
 
-  static GameState advanceDebugTick(GameState state, int seconds) {
-    if (seconds <= 0) return state;
-    return state.copyWith(
-      activeSimulationSeconds: state.activeSimulationSeconds + seconds,
-    );
+  static GameState advanceSimulation(GameState state, int seconds) {
+    return RentSystem.accrue(state, seconds);
   }
 
   static GameState placeGhost(GameState state, String ghostId, String roomId) {

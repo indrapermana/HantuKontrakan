@@ -56,8 +56,8 @@ final class ResolveComplaint extends GameCommand {
   final String resolutionId;
 }
 
-final class DebugTick extends GameCommand {
-  const DebugTick({this.seconds = 1});
+final class AdvanceSimulation extends GameCommand {
+  const AdvanceSimulation({required this.seconds});
 
   final int seconds;
 }

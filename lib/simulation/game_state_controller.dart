@@ -35,7 +35,10 @@ class GameStateController {
         GameRules.equipFurniture(_state, roomId, furnitureId, slot),
       ResolveComplaint(:final choice, :final resolutionId) =>
         GameRules.resolveComplaint(_state, choice, resolutionId),
-      DebugTick(:final seconds) => GameRules.advanceDebugTick(_state, seconds),
+      AdvanceSimulation(:final seconds) => GameRules.advanceSimulation(
+        _state,
+        seconds,
+      ),
       ResetGame() => GameState.seeded(),
       SetGhostSpecialAction(:final ghostId, :final active) =>
         GameRules.setGhostSpecialAction(_state, ghostId, active),

@@ -9,21 +9,30 @@ class GameState {
     this.chaos = GameBalance.initialChaos,
     this.activeSimulationSeconds = 0,
     this.playerLevel = GameBalance.initialPlayerLevel,
+    this.pendingRentMicrocoins = 0,
+    this.rentAccrualRemainder = 0,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
     required this.complaintResolved,
     this.resolutionId,
   }) : ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
+    if (pendingRentMicrocoins < 0 ||
+        rentAccrualRemainder < 0 ||
+        rentAccrualRemainder >= GameBalance.secondsPerMinute) {
+      throw ArgumentError('Rent accumulation values are out of range.');
+    }
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 5;
+  static const int currentSchemaVersion = 6;
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
   final int activeSimulationSeconds;
   final int playerLevel;
+  final int pendingRentMicrocoins;
+  final int rentAccrualRemainder;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
   final bool complaintResolved;
@@ -35,6 +44,8 @@ class GameState {
     chaos: GameBalance.initialChaos,
     activeSimulationSeconds: 0,
     playerLevel: GameBalance.initialPlayerLevel,
+    pendingRentMicrocoins: 0,
+    rentAccrualRemainder: 0,
     ghosts: const [
       GhostState(id: 'pocong_01', kind: GhostKind.pocong),
       GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
@@ -102,6 +113,8 @@ class GameState {
     int? chaos,
     int? activeSimulationSeconds,
     int? playerLevel,
+    int? pendingRentMicrocoins,
+    int? rentAccrualRemainder,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
@@ -113,6 +126,8 @@ class GameState {
     activeSimulationSeconds:
         activeSimulationSeconds ?? this.activeSimulationSeconds,
     playerLevel: playerLevel ?? this.playerLevel,
+    pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
+    rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
     complaintResolved: complaintResolved ?? this.complaintResolved,
@@ -125,6 +140,8 @@ class GameState {
     'chaos': chaos,
     'activeSimulationSeconds': activeSimulationSeconds,
     'playerLevel': playerLevel,
+    'pendingRentMicrocoins': pendingRentMicrocoins,
+    'rentAccrualRemainder': rentAccrualRemainder,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
     'complaintResolved': complaintResolved,
@@ -141,7 +158,8 @@ class GameState {
       2 => GameState._fromVersion2Json(json),
       3 => GameState._fromVersion3Json(json),
       4 => GameState._fromVersion4Json(json),
-      currentSchemaVersion => GameState._fromVersion5Json(json),
+      5 => GameState._fromVersion5Json(json),
+      currentSchemaVersion => GameState._fromVersion6Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -184,6 +202,20 @@ class GameState {
     chaos: json['chaos']! as int,
     activeSimulationSeconds: json['activeSimulationSeconds']! as int,
     playerLevel: json['playerLevel']! as int,
+    ghosts: _ghostsFromJson(json),
+    rooms: _roomsFromJson(json),
+    complaintResolved: json['complaintResolved']! as bool,
+    resolutionId: json['resolutionId'] as String?,
+  );
+
+  factory GameState._fromVersion6Json(Map<String, Object?> json) => GameState(
+    schemaVersion: currentSchemaVersion,
+    walletCoins: json['walletCoins']! as int,
+    chaos: json['chaos']! as int,
+    activeSimulationSeconds: json['activeSimulationSeconds']! as int,
+    playerLevel: json['playerLevel']! as int,
+    pendingRentMicrocoins: json['pendingRentMicrocoins']! as int,
+    rentAccrualRemainder: json['rentAccrualRemainder']! as int,
     ghosts: _ghostsFromJson(json),
     rooms: _roomsFromJson(json),
     complaintResolved: json['complaintResolved']! as bool,

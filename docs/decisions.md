@@ -117,3 +117,15 @@ Date: 2026-10-13
 - The plan's twelve placeholder furniture items are split evenly across the two slots. Primary: bed/quiet, reinforced shelf/sturdy, fan/quiet, dresser/decorated, door/sturdy, lamp/shiny. Decoration: plant/plant, lantern/mystical, curtain/quiet, rug/decorated, wall charm/mystical, shiny trinket/shiny.
 - Furniture is currently freely selectable because shop ownership and purchase prices are later economy/content scope. HK-010 establishes slot validation and happiness effects without inventing a premature purchase system.
 - Save schema advances to version 5 for player level, unlock state, upgrades, and furniture IDs. Version-4 and older saves retain their existing rooms as unlocked and gain rooms 03/04 as locked defaults.
+
+## HK-011 deterministic rent accrual decisions
+
+Date: 2026-10-13
+
+- Rent uses integer microcoins (`1 coin = 1,000,000 microcoins`) throughout. Happiness, room, and chaos multipliers are integer percentages, so no floating-point arithmetic enters simulation state.
+- Per-minute rates implement the plan exactly: happiness multipliers 40/75/100/150%, room multiplier `100 + 5 × comfortLevel`%, and chaos multipliers 100/115/125% at 0/30/70 thresholds.
+- Tuyul's happiness-60 ability adds exactly 15% of base rent after the multiplied rate. The bonus is not multiplied by happiness, room comfort, or chaos.
+- Elapsed seconds are converted with a persisted remainder modulo 60. Accrual computes `(oldRemainder + ratePerMinute × elapsedSeconds) ~/ 60` and carries the modulus, making arbitrary elapsed-time chunking exactly equivalent.
+- `AdvanceSimulation(seconds)` is the typed application/domain entry point and rejects non-positive elapsed time as an identity-preserving no-op. The existing debug one-second control calls this same path; Flame frame callbacks never mutate rent.
+- HK-011 accumulates claimable microcoins but does not transfer them to the wallet. Atomic collection/idempotency belongs to HK-012, and lifecycle/offline scheduling belongs to HK-013.
+- Save schema advances to version 6 for pending rent microcoins and the sub-microcoin time remainder. Version-5 and older saves migrate both values to zero.

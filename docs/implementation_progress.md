@@ -202,9 +202,31 @@ Verification:
 - `flutter test`: all 50 tests passed, including wallet-floor safety, unlock gates, escalating upgrade costs, max-level no-ops, locked-room no-ops, slot replacement, UI disabling, twelve-item content, and v4 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+## M3 — Economy and offline earnings
+
+### HK-011 — Precise deterministic rent accrual
+
+Status: implemented and verified on 2026-10-13.
+
+- Added a pure-Dart fixed-point rent system using integer microcoins and exact percentage multipliers.
+- Implemented happiness, comfort, and chaos multipliers plus Tuyul's unmultiplied 15% base-rent bonus.
+- Added chunk-independent elapsed-second accrual with a persisted modulo-60 remainder.
+- Added typed `AdvanceSimulation` dispatch; debug ticks now exercise the production accrual rule while remaining independent from Flame frames.
+- Persisted pending rent and fractional remainder under save schema version 6 with version-5 migration defaults.
+- Exposed floored pending whole coins in the debug HUD without collecting them.
+- Kept wallet collection and idempotent claim IDs deferred to HK-012; offline snapshot/lifecycle behavior remains HK-013.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused rent, controller, persistence, and HUD suite: all 28 tests passed.
+- `flutter test`: all 57 tests passed, including the 18.1125 worked example, Tuyul bonus semantics, multiplier thresholds, 601-second chunk equivalence, carried fractional remainder, non-positive no-ops, save round-trip, and v5 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-011 and all later tickets.
+- HK-012 and all later tickets.
 - Rent accrual, furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

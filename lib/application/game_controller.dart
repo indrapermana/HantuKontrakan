@@ -44,6 +44,8 @@ class GameController extends ChangeNotifier {
       HappinessSystem.happinessFor(state, ghostId);
   int compatibilityFor(String ghostId) =>
       HappinessSystem.compatibilityFor(state, ghostId);
+  int get pendingRentCoins =>
+      state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
 
   Future<void> initialize() async {
     _loadResult = await _saveService.load();
@@ -101,7 +103,11 @@ class GameController extends ChangeNotifier {
   }
 
   Future<void> debugTick() async {
-    await _dispatch(const DebugTick(seconds: GameBalance.debugTickSeconds));
+    await advanceSimulation(GameBalance.debugTickSeconds);
+  }
+
+  Future<void> advanceSimulation(int elapsedSeconds) async {
+    await _dispatch(AdvanceSimulation(seconds: elapsedSeconds));
   }
 
   Future<void> resetState() async {

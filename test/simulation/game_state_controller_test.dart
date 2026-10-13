@@ -112,9 +112,9 @@ void main() {
   test('debug tick validates elapsed time and reset restores seed state', () {
     final controller = GameStateController(GameState.seeded());
 
-    expect(controller.dispatch(const DebugTick(seconds: 0)), isFalse);
+    expect(controller.dispatch(const AdvanceSimulation(seconds: 0)), isFalse);
     expect(controller.revision, 0);
-    expect(controller.dispatch(const DebugTick(seconds: 3)), isTrue);
+    expect(controller.dispatch(const AdvanceSimulation(seconds: 3)), isTrue);
     expect(controller.state.activeSimulationSeconds, 3);
 
     expect(controller.dispatch(const ResetGame()), isTrue);
