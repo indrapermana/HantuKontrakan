@@ -25,6 +25,14 @@ class GameStateController {
           targetRoomId,
           allowSwap: allowSwap,
         ),
+      UnlockRoom(:final roomId) => GameRules.unlockRoom(_state, roomId),
+      UpgradeRoom(:final roomId, :final attribute) => GameRules.upgradeRoom(
+        _state,
+        roomId,
+        attribute,
+      ),
+      EquipFurniture(:final roomId, :final furnitureId, :final slot) =>
+        GameRules.equipFurniture(_state, roomId, furnitureId, slot),
       ResolveComplaint(:final choice, :final resolutionId) =>
         GameRules.resolveComplaint(_state, choice, resolutionId),
       DebugTick(:final seconds) => GameRules.advanceDebugTick(_state, seconds),

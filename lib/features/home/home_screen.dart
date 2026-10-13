@@ -6,6 +6,7 @@ import '../../application/game_controller.dart';
 import '../../features/debug/debug_hud.dart';
 import '../../game/hantu_game.dart';
 import '../../l10n/app_localizations.dart';
+import '../../simulation/constants/game_balance.dart';
 import '../../simulation/systems/game_rules.dart';
 import 'detail_sheets.dart';
 
@@ -107,7 +108,7 @@ class HomeScreen extends StatelessWidget {
     final room = controller.state.rooms
         .where((candidate) => candidate.id == roomId)
         .firstOrNull;
-    if (room == null) {
+    if (room == null || !room.unlocked) {
       await showModalBottomSheet<void>(
         context: context,
         showDragHandle: true,
@@ -128,7 +129,34 @@ class HomeScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 4),
-              Text(strings.roomUnlockLater),
+              Text(
+                room == null
+                    ? strings.roomUnlockLater
+                    : strings.roomUnlockRequirement(
+                        GameBalance.roomUnlockCosts[room.id]!,
+                        GameBalance.roomUnlockLevels[room.id]!,
+                      ),
+              ),
+              if (room != null) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    key: Key('unlock-${room.id}'),
+                    onPressed:
+                        controller.state.playerLevel >=
+                                GameBalance.roomUnlockLevels[room.id]! &&
+                            controller.state.walletCoins >=
+                                GameBalance.roomUnlockCosts[room.id]!
+                        ? () async {
+                            Navigator.pop(context);
+                            await controller.unlockRoom(room.id);
+                          }
+                        : null,
+                    child: Text(strings.unlockRoom),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -156,6 +184,14 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pop(sheetContext);
                 await _chooseDestination(context, ghost.id, room.id);
               },
+        onUpgrade: (attribute) async {
+          Navigator.pop(sheetContext);
+          await controller.upgradeRoom(room.id, attribute);
+        },
+        onEquipFurniture: (slot, furnitureId) async {
+          Navigator.pop(sheetContext);
+          await controller.equipFurniture(room.id, furnitureId, slot);
+        },
       ),
     );
   }
@@ -189,7 +225,7 @@ class HomeScreen extends StatelessWidget {
   ) async {
     final strings = AppLocalizations.of(context);
     final destinations = controller.state.rooms
-        .where((room) => room.id != sourceRoomId)
+        .where((room) => room.unlocked && room.id != sourceRoomId)
         .toList(growable: false);
     if (destinations.isEmpty) return;
 

@@ -502,7 +502,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 - [x] **HK-007** Tenant placement, moves, swaps and vacancy validation. **Accept:** occupancy is always one-to-one; invalid swaps are no-ops.
 - [x] **HK-008** Happiness, room preferences, directional neighbor compatibility. **Accept:** Pocong + Tuyul adjacent gives Pocong -15 compatibility before clamps.
 - [x] **HK-009** Room and ghost detail sheets with state-driven content. **Accept:** correct profile, room, happiness, and available actions.
-- [ ] **HK-010** Upgrade attributes, room unlock gates/costs, furniture slots. **Accept:** no negative wallet; max upgrade and locked actions disabled.
+- [x] **HK-010** Upgrade attributes, room unlock gates/costs, furniture slots. **Accept:** no negative wallet; max upgrade and locked actions disabled.
 
 ### Milestone M3 — Economy & offline earnings
 

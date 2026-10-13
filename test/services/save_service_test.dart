@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
+import 'package:hantu_kontrakan/simulation/constants/game_balance.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/models/room.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,8 +35,13 @@ void main() {
           column: 0,
           row: 1,
           occupantId: 'pocong_01',
+          upgrades: const {RoomAttribute.silence: 2},
           roomTagLevels: const {'quiet': 2},
-          furnitureTags: const ['quiet', 'decorated'],
+          furnitureIds: const {
+            FurnitureSlot.primary: 'bed',
+            FurnitureSlot.decoration: 'plant',
+          },
+          furnitureTags: const ['quiet', 'plant'],
         ),
         seed.roomById('room_02'),
       ],
@@ -52,8 +58,13 @@ void main() {
     expect(loaded.activeSimulationSeconds, 0);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
     expect(loaded.roomById('room_01').row, 1);
+    expect(loaded.roomById('room_01').levelFor(RoomAttribute.silence), 2);
     expect(loaded.roomById('room_01').roomTagLevels, {'quiet': 2});
-    expect(loaded.roomById('room_01').furnitureTags, {'quiet', 'decorated'});
+    expect(loaded.roomById('room_01').furnitureTags, {'quiet', 'plant'});
+    expect(
+      loaded.roomById('room_01').furnitureIn(FurnitureSlot.primary),
+      'bed',
+    );
   });
 
   test('version 1 save migrates to current debug state defaults', () async {
@@ -112,6 +123,35 @@ void main() {
     expect(migrated.rooms.every((room) => room.row == 0), isTrue);
     expect(migrated.rooms.every((room) => room.roomTagLevels.isEmpty), isTrue);
     expect(migrated.rooms.every((room) => room.furnitureTags.isEmpty), isTrue);
+  });
+
+  test('version 4 save adds player level and locked upper rooms', () async {
+    final seed = GameState.seeded();
+    final version4 = seed.toJson()
+      ..['schemaVersion'] = 4
+      ..remove('playerLevel')
+      ..['rooms'] = seed.rooms
+          .where((room) => room.id == 'room_01' || room.id == 'room_02')
+          .map((room) {
+            final json = room.toJson()
+              ..remove('unlocked')
+              ..remove('upgrades')
+              ..remove('furnitureIds');
+            return json;
+          })
+          .toList();
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version4),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    final migrated = (result as SaveLoaded).state;
+    expect(migrated.playerLevel, GameBalance.initialPlayerLevel);
+    expect(migrated.rooms, hasLength(4));
+    expect(migrated.roomById('room_01').unlocked, isTrue);
+    expect(migrated.roomById('room_03').unlocked, isFalse);
+    expect(migrated.roomById('room_04').unlocked, isFalse);
   });
 
   test('corrupt save is rejected and preserved as a backup', () async {

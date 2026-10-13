@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../../simulation/constants/game_balance.dart';
+import '../../simulation/content/furniture_definitions.dart';
 import '../../simulation/content/ghost_definitions.dart';
 import '../../simulation/models/game_state.dart';
 import '../../simulation/models/ghost.dart';
@@ -13,6 +15,8 @@ class RoomDetailsSheet extends StatelessWidget {
     required this.room,
     required this.onViewGhost,
     required this.onMoveGhost,
+    required this.onUpgrade,
+    required this.onEquipFurniture,
     super.key,
   });
 
@@ -20,6 +24,8 @@ class RoomDetailsSheet extends StatelessWidget {
   final RoomState room;
   final VoidCallback onViewGhost;
   final VoidCallback onMoveGhost;
+  final ValueChanged<RoomAttribute> onUpgrade;
+  final void Function(FurnitureSlot slot, String furnitureId) onEquipFurniture;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +70,27 @@ class RoomDetailsSheet extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleSmall,
               ),
               _BreakdownRows(breakdown: breakdown),
+            ],
+            const SizedBox(height: 16),
+            Text(
+              strings.roomUpgrades,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            for (final attribute in RoomAttribute.values)
+              _UpgradeRow(
+                room: room,
+                attribute: attribute,
+                walletCoins: state.walletCoins,
+                onUpgrade: onUpgrade,
+              ),
+            const SizedBox(height: 12),
+            Text(
+              strings.furnitureSlots,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            for (final slot in FurnitureSlot.values)
+              _FurnitureRow(room: room, slot: slot, onEquip: onEquipFurniture),
+            if (ghost != null && breakdown != null) ...[
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -87,6 +114,96 @@ class RoomDetailsSheet extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _UpgradeRow extends StatelessWidget {
+  const _UpgradeRow({
+    required this.room,
+    required this.attribute,
+    required this.walletCoins,
+    required this.onUpgrade,
+  });
+
+  final RoomState room;
+  final RoomAttribute attribute;
+  final int walletCoins;
+  final ValueChanged<RoomAttribute> onUpgrade;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    final level = room.levelFor(attribute);
+    final cost = GameBalance.roomUpgradeCosts[level];
+    final enabled =
+        level < GameBalance.maximumRoomUpgradeLevel &&
+        cost != null &&
+        walletCoins >= cost;
+    return Row(
+      children: [
+        Expanded(
+          child: Text('${_attributeName(strings, attribute)}  $level/2'),
+        ),
+        TextButton(
+          key: Key('upgrade-${attribute.name}'),
+          onPressed: enabled ? () => onUpgrade(attribute) : null,
+          child: Text(
+            level >= GameBalance.maximumRoomUpgradeLevel
+                ? strings.maximumLevel
+                : strings.upgradeCost(cost!),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FurnitureRow extends StatelessWidget {
+  const _FurnitureRow({
+    required this.room,
+    required this.slot,
+    required this.onEquip,
+  });
+
+  final RoomState room;
+  final FurnitureSlot slot;
+  final void Function(FurnitureSlot slot, String furnitureId) onEquip;
+
+  @override
+  Widget build(BuildContext context) {
+    final strings = AppLocalizations.of(context);
+    final current = room.furnitureIn(slot);
+    final choices = FurnitureDefinitions.all.values
+        .where((item) => item.slot == slot)
+        .toList(growable: false);
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            strings.furnitureSlotValue(
+              _slotName(strings, slot),
+              current == null ? strings.emptySlot : _furnitureName(current),
+            ),
+          ),
+        ),
+        PopupMenuButton<String>(
+          key: Key('furniture-${slot.name}'),
+          tooltip: strings.chooseFurniture,
+          onSelected: (id) => onEquip(slot, id),
+          itemBuilder: (context) => [
+            for (final item in choices)
+              PopupMenuItem(
+                value: item.id,
+                child: Text(_furnitureName(item.id)),
+              ),
+          ],
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(strings.chooseFurniture),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -244,3 +361,22 @@ IconData _ghostIcon(GhostKind kind) => switch (kind) {
 };
 
 String _roomNumber(String roomId) => roomId.split('_').last;
+
+String _attributeName(AppLocalizations strings, RoomAttribute attribute) =>
+    switch (attribute) {
+      RoomAttribute.comfort => strings.comfortAttribute,
+      RoomAttribute.silence => strings.silenceAttribute,
+      RoomAttribute.mysticalAffinity => strings.mysticalAttribute,
+      RoomAttribute.durability => strings.durabilityAttribute,
+    };
+
+String _slotName(AppLocalizations strings, FurnitureSlot slot) =>
+    switch (slot) {
+      FurnitureSlot.primary => strings.primarySlot,
+      FurnitureSlot.decoration => strings.decorationSlot,
+    };
+
+String _furnitureName(String id) => id
+    .split('_')
+    .map((part) => '${part[0].toUpperCase()}${part.substring(1)}')
+    .join(' ');

@@ -40,7 +40,7 @@ class KontrakanWorld extends World {
       ghost: ghost,
       happiness: ghost == null ? null : happinessFor(ghost.id),
       position: Vector2(8 + (layout.column * 174), 34 + (layout.row * 134)),
-      locked: room.occupantId == null,
+      locked: !room.unlocked,
       onTap: () => onRoomTap(layout.id),
       onGhostTap: ghost == null ? null : () => onGhostTap(ghost.id),
     );

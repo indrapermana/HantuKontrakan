@@ -152,6 +152,96 @@ abstract class AppLocalizations {
   /// **'Kamar ini akan tersedia melalui progres permainan.'**
   String get roomUnlockLater;
 
+  /// No description provided for @roomUnlockRequirement.
+  ///
+  /// In id, this message translates to:
+  /// **'Memerlukan {cost} koin dan level pemain {level}.'**
+  String roomUnlockRequirement(int cost, int level);
+
+  /// No description provided for @unlockRoom.
+  ///
+  /// In id, this message translates to:
+  /// **'Buka kamar'**
+  String get unlockRoom;
+
+  /// No description provided for @roomUpgrades.
+  ///
+  /// In id, this message translates to:
+  /// **'Peningkatan kamar'**
+  String get roomUpgrades;
+
+  /// No description provided for @comfortAttribute.
+  ///
+  /// In id, this message translates to:
+  /// **'Kenyamanan'**
+  String get comfortAttribute;
+
+  /// No description provided for @silenceAttribute.
+  ///
+  /// In id, this message translates to:
+  /// **'Keheningan'**
+  String get silenceAttribute;
+
+  /// No description provided for @mysticalAttribute.
+  ///
+  /// In id, this message translates to:
+  /// **'Afinitas mistis'**
+  String get mysticalAttribute;
+
+  /// No description provided for @durabilityAttribute.
+  ///
+  /// In id, this message translates to:
+  /// **'Ketahanan'**
+  String get durabilityAttribute;
+
+  /// No description provided for @upgradeCost.
+  ///
+  /// In id, this message translates to:
+  /// **'Tingkatkan · {cost} koin'**
+  String upgradeCost(int cost);
+
+  /// No description provided for @maximumLevel.
+  ///
+  /// In id, this message translates to:
+  /// **'MAKS'**
+  String get maximumLevel;
+
+  /// No description provided for @furnitureSlots.
+  ///
+  /// In id, this message translates to:
+  /// **'Slot furnitur'**
+  String get furnitureSlots;
+
+  /// No description provided for @primarySlot.
+  ///
+  /// In id, this message translates to:
+  /// **'Utama'**
+  String get primarySlot;
+
+  /// No description provided for @decorationSlot.
+  ///
+  /// In id, this message translates to:
+  /// **'Dekorasi'**
+  String get decorationSlot;
+
+  /// No description provided for @emptySlot.
+  ///
+  /// In id, this message translates to:
+  /// **'Kosong'**
+  String get emptySlot;
+
+  /// No description provided for @furnitureSlotValue.
+  ///
+  /// In id, this message translates to:
+  /// **'{slot}: {item}'**
+  String furnitureSlotValue(String slot, String item);
+
+  /// No description provided for @chooseFurniture.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih'**
+  String get chooseFurniture;
+
   /// No description provided for @happinessDetail.
   ///
   /// In id, this message translates to:

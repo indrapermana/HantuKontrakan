@@ -1,5 +1,7 @@
 import '../constants/game_balance.dart';
+import '../content/furniture_definitions.dart';
 import '../models/game_state.dart';
+import '../models/room.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
@@ -36,7 +38,9 @@ abstract final class GameRules {
       return state;
     }
     final target = state.rooms.where((room) => room.id == roomId).firstOrNull;
-    if (target == null || target.occupantId != null) return state;
+    if (target == null || !target.unlocked || target.occupantId != null) {
+      return state;
+    }
 
     return state.copyWith(
       rooms: state.rooms
@@ -58,7 +62,10 @@ abstract final class GameRules {
     final target = state.rooms
         .where((room) => room.id == targetRoomId)
         .firstOrNull;
-    if (source == null || target == null || source.id == target.id) {
+    if (source == null ||
+        target == null ||
+        !target.unlocked ||
+        source.id == target.id) {
       return state;
     }
 
@@ -79,6 +86,111 @@ abstract final class GameRules {
           .toList(growable: false),
     );
   }
+
+  static GameState unlockRoom(GameState state, String roomId) {
+    final room = state.rooms.where((room) => room.id == roomId).firstOrNull;
+    final cost = GameBalance.roomUnlockCosts[roomId];
+    final requiredLevel = GameBalance.roomUnlockLevels[roomId];
+    if (room == null ||
+        room.unlocked ||
+        cost == null ||
+        requiredLevel == null ||
+        state.playerLevel < requiredLevel ||
+        state.walletCoins < cost) {
+      return state;
+    }
+    return state.copyWith(
+      walletCoins: state.walletCoins - cost,
+      rooms: state.rooms
+          .map(
+            (candidate) => candidate.id == roomId
+                ? candidate.copyWith(
+                    occupantId: candidate.occupantId,
+                    unlocked: true,
+                  )
+                : candidate,
+          )
+          .toList(growable: false),
+    );
+  }
+
+  static GameState upgradeRoom(
+    GameState state,
+    String roomId,
+    RoomAttribute attribute,
+  ) {
+    final room = state.rooms.where((room) => room.id == roomId).firstOrNull;
+    if (room == null || !room.unlocked) return state;
+    final currentLevel = room.levelFor(attribute);
+    final cost = GameBalance.roomUpgradeCosts[currentLevel];
+    if (currentLevel >= GameBalance.maximumRoomUpgradeLevel ||
+        cost == null ||
+        state.walletCoins < cost) {
+      return state;
+    }
+    final nextLevel = currentLevel + 1;
+    final upgrades = Map<RoomAttribute, int>.of(room.upgrades)
+      ..[attribute] = nextLevel;
+    final tagLevels = Map<String, int>.of(room.roomTagLevels)
+      ..[_tagFor(attribute)] = nextLevel;
+    return state.copyWith(
+      walletCoins: state.walletCoins - cost,
+      rooms: state.rooms
+          .map(
+            (candidate) => candidate.id == roomId
+                ? candidate.copyWith(
+                    occupantId: candidate.occupantId,
+                    upgrades: upgrades,
+                    roomTagLevels: tagLevels,
+                  )
+                : candidate,
+          )
+          .toList(growable: false),
+    );
+  }
+
+  static GameState equipFurniture(
+    GameState state,
+    String roomId,
+    String furnitureId,
+    FurnitureSlot slot,
+  ) {
+    final room = state.rooms.where((room) => room.id == roomId).firstOrNull;
+    final furniture = FurnitureDefinitions.byId(furnitureId);
+    if (room == null ||
+        !room.unlocked ||
+        furniture == null ||
+        furniture.slot != slot ||
+        room.furnitureIn(slot) == furnitureId) {
+      return state;
+    }
+    final furnitureIds = Map<FurnitureSlot, String>.of(room.furnitureIds)
+      ..[slot] = furnitureId;
+    final tags = <String>{
+      for (final id in furnitureIds.values)
+        ...FurnitureDefinitions.byId(id)!.tags,
+    };
+    return state.copyWith(
+      rooms: state.rooms
+          .map(
+            (candidate) => candidate.id == roomId
+                ? candidate.copyWith(
+                    occupantId: candidate.occupantId,
+                    furnitureIds: furnitureIds,
+                    furnitureTags: tags,
+                  )
+                : candidate,
+          )
+          .toList(growable: false),
+    );
+  }
+
+  static String _tagFor(RoomAttribute attribute) => switch (attribute) {
+    RoomAttribute.comfort => 'decorated',
+    RoomAttribute.silence => 'quiet',
+    RoomAttribute.mysticalAffinity => 'mystical',
+    RoomAttribute.durability => 'sturdy',
+  };
 
   static GameState resolveComplaint(
     GameState state,

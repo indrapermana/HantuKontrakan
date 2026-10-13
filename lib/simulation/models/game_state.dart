@@ -8,6 +8,7 @@ class GameState {
     required this.walletCoins,
     this.chaos = GameBalance.initialChaos,
     this.activeSimulationSeconds = 0,
+    this.playerLevel = GameBalance.initialPlayerLevel,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
     required this.complaintResolved,
@@ -17,11 +18,12 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 4;
+  static const int currentSchemaVersion = 5;
   final int schemaVersion;
   final int walletCoins;
   final int chaos;
   final int activeSimulationSeconds;
+  final int playerLevel;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
   final bool complaintResolved;
@@ -32,6 +34,7 @@ class GameState {
     walletCoins: GameBalance.initialCoins,
     chaos: GameBalance.initialChaos,
     activeSimulationSeconds: 0,
+    playerLevel: GameBalance.initialPlayerLevel,
     ghosts: const [
       GhostState(id: 'pocong_01', kind: GhostKind.pocong),
       GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
@@ -39,6 +42,8 @@ class GameState {
     rooms: [
       RoomState(id: 'room_01', column: 0, row: 1, occupantId: 'pocong_01'),
       RoomState(id: 'room_02', column: 1, row: 1, occupantId: 'tuyul_01'),
+      RoomState(id: 'room_03', column: 0, row: 0, unlocked: false),
+      RoomState(id: 'room_04', column: 1, row: 0, unlocked: false),
     ],
     complaintResolved: false,
   );
@@ -68,6 +73,13 @@ class GameState {
     for (final room in rooms) {
       final occupantId = room.occupantId;
       if (occupantId == null) continue;
+      if (!room.unlocked) {
+        throw ArgumentError.value(
+          room.id,
+          'rooms',
+          'Locked rooms cannot have occupants.',
+        );
+      }
       if (!ghostIds.contains(occupantId)) {
         throw ArgumentError.value(
           occupantId,
@@ -89,6 +101,7 @@ class GameState {
     int? walletCoins,
     int? chaos,
     int? activeSimulationSeconds,
+    int? playerLevel,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
@@ -99,6 +112,7 @@ class GameState {
     chaos: chaos ?? this.chaos,
     activeSimulationSeconds:
         activeSimulationSeconds ?? this.activeSimulationSeconds,
+    playerLevel: playerLevel ?? this.playerLevel,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
     complaintResolved: complaintResolved ?? this.complaintResolved,
@@ -110,6 +124,7 @@ class GameState {
     'walletCoins': walletCoins,
     'chaos': chaos,
     'activeSimulationSeconds': activeSimulationSeconds,
+    'playerLevel': playerLevel,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
     'complaintResolved': complaintResolved,
@@ -125,7 +140,8 @@ class GameState {
       1 => GameState._fromVersion1Json(json),
       2 => GameState._fromVersion2Json(json),
       3 => GameState._fromVersion3Json(json),
-      currentSchemaVersion => GameState._fromVersion4Json(json),
+      4 => GameState._fromVersion4Json(json),
+      currentSchemaVersion => GameState._fromVersion5Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
   }
@@ -137,7 +153,7 @@ class GameState {
       chaos: GameBalance.initialChaos,
       activeSimulationSeconds: 0,
       ghosts: _ghostsFromJson(json),
-      rooms: _roomsFromJson(json),
+      rooms: _legacyRoomsFromJson(json),
       complaintResolved: json['complaintResolved']! as bool,
       resolutionId: json['resolutionId'] as String?,
     );
@@ -150,7 +166,7 @@ class GameState {
       chaos: json['chaos']! as int,
       activeSimulationSeconds: json['activeSimulationSeconds']! as int,
       ghosts: _ghostsFromJson(json),
-      rooms: _roomsFromJson(json),
+      rooms: _legacyRoomsFromJson(json),
       complaintResolved: json['complaintResolved']! as bool,
       resolutionId: json['resolutionId'] as String?,
     );
@@ -162,6 +178,18 @@ class GameState {
   factory GameState._fromVersion4Json(Map<String, Object?> json) =>
       GameState._fromVersion2Json(json);
 
+  factory GameState._fromVersion5Json(Map<String, Object?> json) => GameState(
+    schemaVersion: currentSchemaVersion,
+    walletCoins: json['walletCoins']! as int,
+    chaos: json['chaos']! as int,
+    activeSimulationSeconds: json['activeSimulationSeconds']! as int,
+    playerLevel: json['playerLevel']! as int,
+    ghosts: _ghostsFromJson(json),
+    rooms: _roomsFromJson(json),
+    complaintResolved: json['complaintResolved']! as bool,
+    resolutionId: json['resolutionId'] as String?,
+  );
+
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)
           .map((item) => GhostState.fromJson(item! as Map<String, Object?>))
@@ -171,6 +199,17 @@ class GameState {
       (json['rooms']! as List<Object?>)
           .map((item) => RoomState.fromJson(item! as Map<String, Object?>))
           .toList(growable: false);
+
+  static List<RoomState> _legacyRoomsFromJson(Map<String, Object?> json) {
+    final rooms = _roomsFromJson(json).toList();
+    if (!rooms.any((room) => room.id == 'room_03')) {
+      rooms.add(RoomState(id: 'room_03', column: 0, row: 0, unlocked: false));
+    }
+    if (!rooms.any((room) => room.id == 'room_04')) {
+      rooms.add(RoomState(id: 'room_04', column: 1, row: 0, unlocked: false));
+    }
+    return rooms;
+  }
 }
 
 class UnsupportedSaveVersion implements Exception {

@@ -43,6 +43,57 @@ class AppLocalizationsEn extends AppLocalizations {
       'This room will become available through game progression.';
 
   @override
+  String roomUnlockRequirement(int cost, int level) {
+    return 'Requires $cost coins and player level $level.';
+  }
+
+  @override
+  String get unlockRoom => 'Unlock room';
+
+  @override
+  String get roomUpgrades => 'Room upgrades';
+
+  @override
+  String get comfortAttribute => 'Comfort';
+
+  @override
+  String get silenceAttribute => 'Silence';
+
+  @override
+  String get mysticalAttribute => 'Mystical affinity';
+
+  @override
+  String get durabilityAttribute => 'Durability';
+
+  @override
+  String upgradeCost(int cost) {
+    return 'Upgrade · $cost coins';
+  }
+
+  @override
+  String get maximumLevel => 'MAX';
+
+  @override
+  String get furnitureSlots => 'Furniture slots';
+
+  @override
+  String get primarySlot => 'Primary';
+
+  @override
+  String get decorationSlot => 'Decoration';
+
+  @override
+  String get emptySlot => 'Empty';
+
+  @override
+  String furnitureSlotValue(String slot, String item) {
+    return '$slot: $item';
+  }
+
+  @override
+  String get chooseFurniture => 'Choose';
+
+  @override
   String happinessDetail(int happiness, String mood) {
     return 'Happiness: $happiness ($mood)';
   }

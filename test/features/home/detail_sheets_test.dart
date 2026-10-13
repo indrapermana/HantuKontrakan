@@ -21,6 +21,8 @@ void main() {
           room: state.roomById('room_01'),
           onViewGhost: () => profileOpened = true,
           onMoveGhost: () => moveRequested = true,
+          onUpgrade: (_) {},
+          onEquipFurniture: (_, _) {},
         ),
       ),
     );
@@ -34,7 +36,9 @@ void main() {
     expect(find.text('Tetangga: -15'), findsOneWidget);
     expect(find.text('Peristiwa: 10'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const Key('view-ghost-profile')));
     await tester.tap(find.byKey(const Key('view-ghost-profile')));
+    await tester.ensureVisible(find.byKey(const Key('move-tenant')));
     await tester.tap(find.byKey(const Key('move-tenant')));
     expect(profileOpened, isTrue);
     expect(moveRequested, isTrue);
@@ -52,6 +56,8 @@ void main() {
           room: state.roomById('room_03'),
           onViewGhost: () {},
           onMoveGhost: () {},
+          onUpgrade: (_) {},
+          onEquipFurniture: (_, _) {},
         ),
       ),
     );
@@ -59,6 +65,78 @@ void main() {
     expect(find.text('Penghuni: Kosong'), findsOneWidget);
     expect(find.byKey(const Key('view-ghost-profile')), findsNothing);
     expect(find.byKey(const Key('move-tenant')), findsNothing);
+  });
+
+  testWidgets('room upgrade and furniture controls expose valid actions', (
+    tester,
+  ) async {
+    final state = _detailState();
+    RoomAttribute? upgraded;
+    (FurnitureSlot, String)? equipped;
+    await tester.pumpWidget(
+      _LocalizedHarness(
+        child: RoomDetailsSheet(
+          state: state,
+          room: state.roomById('room_01'),
+          onViewGhost: () {},
+          onMoveGhost: () {},
+          onUpgrade: (attribute) => upgraded = attribute,
+          onEquipFurniture: (slot, id) => equipped = (slot, id),
+        ),
+      ),
+    );
+
+    await tester.ensureVisible(find.byKey(const Key('upgrade-comfort')));
+    await tester.tap(find.byKey(const Key('upgrade-comfort')));
+    expect(upgraded, RoomAttribute.comfort);
+
+    await tester.ensureVisible(find.byKey(const Key('furniture-primary')));
+    await tester.tap(find.byKey(const Key('furniture-primary')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bed').last);
+    expect(equipped, (FurnitureSlot.primary, 'bed'));
+  });
+
+  testWidgets('maxed and unaffordable room upgrades are disabled', (
+    tester,
+  ) async {
+    final seed = _detailState();
+    final room = RoomState(
+      id: 'room_01',
+      column: 0,
+      occupantId: 'pocong_01',
+      upgrades: const {RoomAttribute.silence: 2},
+      roomTagLevels: const {'quiet': 2},
+    );
+    final state = seed.copyWith(
+      walletCoins: 0,
+      rooms: [room, seed.roomById('room_02'), seed.roomById('room_03')],
+    );
+    await tester.pumpWidget(
+      _LocalizedHarness(
+        child: RoomDetailsSheet(
+          state: state,
+          room: room,
+          onViewGhost: () {},
+          onMoveGhost: () {},
+          onUpgrade: (_) {},
+          onEquipFurniture: (_, _) {},
+        ),
+      ),
+    );
+
+    expect(
+      tester
+          .widget<TextButton>(find.byKey(const Key('upgrade-silence')))
+          .onPressed,
+      isNull,
+    );
+    expect(
+      tester
+          .widget<TextButton>(find.byKey(const Key('upgrade-comfort')))
+          .onPressed,
+      isNull,
+    );
   });
 
   testWidgets('ghost profile shows definition, room, happiness and move', (

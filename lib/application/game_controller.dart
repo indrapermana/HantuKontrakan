@@ -5,6 +5,7 @@ import '../simulation/commands/game_command.dart';
 import '../simulation/constants/game_balance.dart';
 import '../simulation/game_state_controller.dart';
 import '../simulation/models/game_state.dart';
+import '../simulation/models/room.dart';
 import '../simulation/systems/game_rules.dart';
 import '../simulation/systems/happiness_system.dart';
 import 'simulation_runtime.dart';
@@ -69,6 +70,24 @@ class GameController extends ChangeNotifier {
         targetRoomId: targetRoomId,
         allowSwap: allowSwap,
       ),
+    );
+  }
+
+  Future<void> unlockRoom(String roomId) async {
+    await _dispatch(UnlockRoom(roomId: roomId));
+  }
+
+  Future<void> upgradeRoom(String roomId, RoomAttribute attribute) async {
+    await _dispatch(UpgradeRoom(roomId: roomId, attribute: attribute));
+  }
+
+  Future<void> equipFurniture(
+    String roomId,
+    String furnitureId,
+    FurnitureSlot slot,
+  ) async {
+    await _dispatch(
+      EquipFurniture(roomId: roomId, furnitureId: furnitureId, slot: slot),
     );
   }
 

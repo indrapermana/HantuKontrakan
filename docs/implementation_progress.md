@@ -181,10 +181,31 @@ Verification:
 - `flutter test`: all 42 tests passed, including occupied/vacant action visibility, exact state-driven breakdown values, ghost definition/profile content, and distinct room/ghost selection callbacks.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-010 — Room upgrades, unlocks, and furniture slots
+
+Status: implemented and verified on 2026-10-13. Milestone M2 is complete.
+
+- Promoted all four cutaway rooms into persisted state with rooms 03/04 locked by default.
+- Added atomic unlock commands for the exact room 03/04 coin and player-level gates.
+- Added comfort, silence, mystical affinity, and durability levels with exact 100/200 costs and a hard level-2 cap.
+- Connected upgrades to HK-008 room preference tags and happiness calculations.
+- Added one primary and one decoration slot per room plus twelve slot-validated placeholder furniture definitions and derived happiness tags.
+- Added localized room controls with disabled maxed, unaffordable, and locked actions.
+- Advanced saves to schema version 5 with explicit legacy defaults for player level, locked upper rooms, upgrades, and furniture.
+- Kept XP/level progression, furniture purchasing/inventory, rent, and broader economy out of HK-010.
+
+Verification:
+
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused room-management, detail-sheet, persistence, and Flame-world suite: all 20 tests passed.
+- `flutter test`: all 50 tests passed, including wallet-floor safety, unlock gates, escalating upgrade costs, max-level no-ops, locked-room no-ops, slot replacement, UI disabling, twelve-item content, and v4 migration.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-010 and all later tickets.
-- Four-room economy, rent accrual, upgrades, furniture, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
+- HK-011 and all later tickets.
+- Rent accrual, furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence
 

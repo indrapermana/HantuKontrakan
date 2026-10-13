@@ -43,6 +43,57 @@ class AppLocalizationsId extends AppLocalizations {
       'Kamar ini akan tersedia melalui progres permainan.';
 
   @override
+  String roomUnlockRequirement(int cost, int level) {
+    return 'Memerlukan $cost koin dan level pemain $level.';
+  }
+
+  @override
+  String get unlockRoom => 'Buka kamar';
+
+  @override
+  String get roomUpgrades => 'Peningkatan kamar';
+
+  @override
+  String get comfortAttribute => 'Kenyamanan';
+
+  @override
+  String get silenceAttribute => 'Keheningan';
+
+  @override
+  String get mysticalAttribute => 'Afinitas mistis';
+
+  @override
+  String get durabilityAttribute => 'Ketahanan';
+
+  @override
+  String upgradeCost(int cost) {
+    return 'Tingkatkan · $cost koin';
+  }
+
+  @override
+  String get maximumLevel => 'MAKS';
+
+  @override
+  String get furnitureSlots => 'Slot furnitur';
+
+  @override
+  String get primarySlot => 'Utama';
+
+  @override
+  String get decorationSlot => 'Dekorasi';
+
+  @override
+  String get emptySlot => 'Kosong';
+
+  @override
+  String furnitureSlotValue(String slot, String item) {
+    return '$slot: $item';
+  }
+
+  @override
+  String get chooseFurniture => 'Pilih';
+
+  @override
   String happinessDetail(int happiness, String mood) {
     return 'Kebahagiaan: $happiness ($mood)';
   }

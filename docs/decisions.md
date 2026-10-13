@@ -103,3 +103,17 @@ Date: 2026-10-13
 - Ghost profiles read immutable definition and state data for archetype, current room, total happiness, base rent, preferred tags, disliked neighbor, and ability. Assigned ghosts expose move/swap; unassigned ghosts do not.
 - Placeholder Material icons remain sufficient profile artwork for HK-009. Upgrade controls, furniture slots, unlock actions, and final illustrations stay deferred to HK-010 or later.
 - New player-facing detail copy is localized in Indonesian and English. Stable content IDs remain internal and are mapped to localized ability text in the Flutter presentation layer.
+
+## HK-010 room upgrades, unlocks, and furniture decisions
+
+Date: 2026-10-13
+
+- All four rooms now belong to persisted simulation state. Rooms 01/02 seed unlocked; rooms 03/04 seed locked at their established cutaway coordinates. Flame renders `RoomState.unlocked` rather than treating every vacancy as locked.
+- Player level is persisted as the deterministic input to room gates, initially level 1. HK-010 does not add XP or level progression; that remains HK-022.
+- Room 03 costs 400 coins and requires level 3; room 04 costs 800 coins and requires level 5. Unlock commands require both conditions, spend atomically, and are no-ops for unknown or already unlocked rooms.
+- Comfort, silence, mystical affinity, and durability use levels 0–2. Upgrades cost 100 coins from level 0 and 200 from level 1; level 2, insufficient funds, and locked rooms are no-ops.
+- Upgrade-to-preference mapping is comfort → `decorated`, silence → `quiet`, mystical affinity → `mystical`, and durability → `sturdy`. The resulting level feeds HK-008's existing room preference scores and caps.
+- Each room has exactly one primary and one decoration furniture slot. Equipping validates the stable furniture definition and slot, replaces only that slot, and rebuilds the room's derived furniture tags atomically.
+- The plan's twelve placeholder furniture items are split evenly across the two slots. Primary: bed/quiet, reinforced shelf/sturdy, fan/quiet, dresser/decorated, door/sturdy, lamp/shiny. Decoration: plant/plant, lantern/mystical, curtain/quiet, rug/decorated, wall charm/mystical, shiny trinket/shiny.
+- Furniture is currently freely selectable because shop ownership and purchase prices are later economy/content scope. HK-010 establishes slot validation and happiness effects without inventing a premature purchase system.
+- Save schema advances to version 5 for player level, unlock state, upgrades, and furniture IDs. Version-4 and older saves retain their existing rooms as unlocked and gain rooms 03/04 as locked defaults.
