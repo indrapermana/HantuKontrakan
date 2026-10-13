@@ -279,9 +279,26 @@ Verification:
 - `flutter test`: all 83 tests passed, including all four abilities, happiness gates, multi-trigger chunk equivalence, cooldown reload, reputation cap, offline exclusion, and v8 migration.
 - `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
 
+### HK-015 — Balance and serialization regression suite
+
+Status: implemented and verified on 2026-10-13. Milestone M3 is complete.
+
+- Added a canonical regression suite for the documented 85/70 Pocong happiness example, exact 18.1125 rent example, upgrade/unlock prices, and 2-hour/5-hour offline earnings.
+- Corrected preferred-furniture happiness from the provisional +5 to the documented +10 while preserving the existing +10 aggregate cap.
+- Added a fully populated schema-v9 JSON round-trip that proves subsequent deterministic rent accrual, ability cooldown progression, and Collect All behavior remain identical.
+- Retained all narrower M2/M3 unit, persistence, lifecycle, and controller regression tests.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused balance, happiness, rent, room-management, and persistence suite: all 36 tests passed.
+- `flutter test`: all 88 tests passed, including every documented worked example and post-serialization deterministic continuation.
+- `flutter build apk --debug`: succeeded; artifact at `build/app/outputs/flutter-apk/app-debug.apk`.
+
 ## Scope intentionally deferred
 
-- HK-015 and all later tickets.
+- HK-016 and all later tickets.
 - Furniture purchasing/inventory, random incidents, ads, IAP, analytics, cloud/network services, final artwork, and full localization.
 
 ## Verification evidence

@@ -23,7 +23,7 @@ abstract final class GameBalance {
   static const Map<int, int> roomTagMismatchHappinessByLevel = {1: -5, 2: -10};
   static const int roomPreferenceMinimum = -20;
   static const int roomPreferenceMaximum = 20;
-  static const int furnitureTagMatchHappiness = 5;
+  static const int furnitureTagMatchHappiness = 10;
   static const int furnitureTagMismatchHappiness = -2;
   static const int furniturePreferenceMinimum = -10;
   static const int furniturePreferenceMaximum = 10;

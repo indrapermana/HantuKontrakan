@@ -141,8 +141,8 @@ void main() {
     );
 
     expect(HappinessSystem.roomPreferenceFor(state, 'kuntilanak_01'), 15);
-    expect(HappinessSystem.furniturePreferenceFor(state, 'kuntilanak_01'), 8);
-    expect(HappinessSystem.happinessFor(state, 'kuntilanak_01'), 73);
+    expect(HappinessSystem.furniturePreferenceFor(state, 'kuntilanak_01'), 10);
+    expect(HappinessSystem.happinessFor(state, 'kuntilanak_01'), 75);
     expect(HappinessSystem.roomPreferenceFor(state, 'pocong_01'), -20);
     expect(HappinessSystem.furniturePreferenceFor(state, 'pocong_01'), -10);
     expect(HappinessSystem.happinessFor(state, 'pocong_01'), 20);

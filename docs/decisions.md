@@ -166,3 +166,13 @@ Date: 2026-10-13
 - Tuyul's happiness-60 continuous 15% base-rent bonus remains in `RentSystem`; it has no artificial cooldown. Genderuwo's happiness-60 ability is exposed as a pure 75%-of-base repair-cost query for HK-020 to consume later.
 - Offline resume does not call the ability system. It credits only snapshotted rent, leaving active seconds, periodic cooldowns, wallet rewards, and reputation unchanged.
 - Save schema advances to version 9 for reputation and the immutable cooldown map. Version-8 and older saves migrate with reputation 60 and lazily initialized full periodic cooldowns.
+
+## HK-015 balance and serialization regression decisions
+
+Date: 2026-10-13
+
+- The plan's worked happiness example is treated as a locked balance contract: quiet level 2 contributes +15, a suitable bed contributes +10, and Genderuwo contributes +10, producing Pocong happiness 85; adding Tuyul changes compatibility to -5 and total happiness to 70.
+- `furnitureTagMatchHappiness` changes from the provisional +5 to +10 so the implemented balance matches that documented contract. Furniture contribution remains clamped to the existing [-10,+10] range, preventing stacked preferred tags from exceeding the plan cap.
+- HK-015 centralizes cross-system examples in one regression file while retaining the narrower ticket-level tests. Covered contracts include happiness, 18.1125 rent, upgrade/unlock prices, offline earnings, and deterministic post-serialization behavior.
+- Serialization regression uses JSON encode/decode rather than only an in-memory map. It populates every current v9 economy field and verifies that both rent advancement and collection produce identical subsequent state before and after restoration.
+- No save schema change is needed because the corrected furniture value is a balance constant rather than persisted state.

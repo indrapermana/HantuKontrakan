@@ -29,10 +29,10 @@ void main() {
 
     expect(find.text('KAMAR 01'), findsOneWidget);
     expect(find.text('Penghuni: Pocong'), findsOneWidget);
-    expect(find.text('Kebahagiaan: 65 (Nyaman)'), findsOneWidget);
+    expect(find.text('Kebahagiaan: 70 (Nyaman)'), findsOneWidget);
     expect(find.text('Dasar: 50'), findsOneWidget);
     expect(find.text('Preferensi kamar: 15'), findsOneWidget);
-    expect(find.text('Furnitur: 5'), findsOneWidget);
+    expect(find.text('Furnitur: 10'), findsOneWidget);
     expect(find.text('Tetangga: -15'), findsOneWidget);
     expect(find.text('Peristiwa: 10'), findsOneWidget);
 
@@ -158,7 +158,7 @@ void main() {
     expect(find.text('PROFIL Pocong'), findsOneWidget);
     expect(find.text('Si Pelompat Gelisah'), findsOneWidget);
     expect(find.text('Kamar saat ini: 01'), findsOneWidget);
-    expect(find.text('Kebahagiaan: 65 (Nyaman)'), findsOneWidget);
+    expect(find.text('Kebahagiaan: 70 (Nyaman)'), findsOneWidget);
     expect(find.text('Sewa dasar: 10 / menit'), findsOneWidget);
     expect(find.text('Suka: quiet'), findsOneWidget);
     expect(find.text('Tidak suka: Tuyul'), findsOneWidget);
