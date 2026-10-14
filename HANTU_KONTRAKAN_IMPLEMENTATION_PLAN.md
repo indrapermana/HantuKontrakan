@@ -484,7 +484,7 @@ Possible test prices (not validated market data): Retro Kontrakan Rp15k, Malam J
 
 Target validation metrics (hypotheses, not factual benchmarks): tutorial completion >75%, D1 retention ≥30%, D7 ≥10%, typical session 5–8 minutes, ≥20% of eligible players opt into rewarded ads, crash-free sessions >99%.
 
-## 11. MVP milestone backlog (30 tickets)
+## 11. MVP milestone backlog (30 numbered tickets plus HK-027-B)
 
 Complete each ticket with tests and explicit acceptance criteria. Use these stable IDs in issues and commits.
 
@@ -532,6 +532,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 
 - [x] **HK-026** SFX/music with mute and volume settings. **Accept:** background/resume audio works and settings persist.
 - [x] **HK-027** Rewarded ad integration behind platform adapter, test units, safe claims. **Accept:** ad callbacks grant bonus exactly once and failure never blocks collecting.
+- [ ] **HK-027-B** Prepare and integrate the selected production-style image/audio assets before privacy and beta work. Extract clean transparent assets from image sheets #1–#4; use image #3 for the cutaway/environment, image #4 for the four ghosts, selected compatible items/effects from image #2, and text-free surfaces/icons from image #1. Create normalized multi-frame `idle`, `happy`, `angry`, and `special` ghost animations from the selected character art; preserve live Flutter localization rather than baked image text; replace or supplement generated audio only after loop, loudness, and lifecycle checks. **Accept:** all four ghosts visibly animate from state in Flame with stable bounds/anchors; the cutaway and supported UI use cleaned assets without baked localized text or unintended currencies; audio remains optional and lifecycle-safe; asset provenance and manifest are documented; tests/analyzer and Android debug build pass with no gameplay-rule changes.
 - [ ] **HK-028** Consent/privacy settings, error logging, crash-reporting integration when configured. **Accept:** offline game playable if external services fail.
 - [ ] **HK-029** Unit/widget/integration/lifecycle/device regression testing and performance pass. **Accept:** agreed target devices responsive; no high-severity known save/economy issues.
 - [ ] **HK-030** App icon, screenshots, localization, privacy policy, Android closed test build. **Accept:** store material and functioning closed beta package prepared.
@@ -541,6 +542,17 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 `M1 foundation → M2 tenant logic → M3 economy + M4 incidents (may overlap) → M5 tutorial → M6 polish/ads/beta`.
 
 **Estimated solo part-time planning:** M1 1–2 weeks, M2 2 weeks, M3 1–2 weeks, M4 2 weeks, M5 1–2 weeks, M6 2–3 weeks. Rough total: **9–13 weeks**, highly dependent on art, time availability, and test scope.
+
+### HK-027-B asset-production boundaries
+
+1. Treat the supplied composite images as source sheets, not ready-made sprite atlases. Preserve the originals and generate individual transparent runtime PNGs plus an asset manifest.
+2. Remove labels, colored edge contamination, sheet backgrounds, and baked UI text. Normalize per-animation canvas size, ground line, pivot/anchor, scale, safe padding, and frame order before Flame integration.
+3. Image #4 supplies character identity and key poses. Produce coherent in-between frames for subtle idle motion and state-specific loops while preserving silhouette, costume, palette, proportions, and facing direction across every frame. Special effects may use a larger documented canvas but must not move the character anchor.
+4. Image #3 is the primary environment source. Separate modular room/building parts from decorative props and keep interactive furniture independently addressable where gameplay requires it.
+5. Image #2 supplies only mechanics that already exist. Do not introduce `Rp`, cash, premium gems, or energy merely because those symbols appear on the sheet; the game continues to use Koin Arwah and its documented systems.
+6. Image #1 supplies text-free UI surfaces, icons, and portraits only. Indonesian and English labels, values, dialogue, and accessibility semantics remain Flutter-rendered.
+7. Evaluate the attached audio pack in-game before replacement. Normalize effect levels, verify music loop seams and repetition, retain mute/volume/lifecycle behavior, and keep missing/playback failures cosmetic.
+8. This ticket changes presentation assets and adapters only. Deterministic simulation values, save/economy rules, monetization, and HK-028 consent/privacy scope remain unchanged.
 
 ## 12. First playable vertical slice (P0)
 

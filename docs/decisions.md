@@ -260,3 +260,12 @@ Date: 2026-10-14
 - The daily limit counts only successful bonuses and uses the local day captured at offer start. Failed, dismissed, unavailable, and interrupted offers do not consume one of the three allowances.
 - The production adapter uses Google's Android/iOS sample application IDs and rewarded test-unit IDs with non-personalized requests. Replacing them with production identifiers is gated on HK-028 consent/privacy work and release configuration.
 - Google Mobile Ads remains outside `lib/simulation`; the service is injected at the application boundary, and adapter errors are treated as recoverable base-only outcomes.
+
+## HK-027-B asset-production decisions
+
+Date: 2026-10-14
+
+- HK-027-B is inserted before HK-028 because the supplied production-style art and audio need an explicit preparation/integration pass before privacy, regression, and beta packaging.
+- Image #3 defines the environment direction and image #4 defines the four ghost identities. Images #1 and #2 are selective sources only: functional UI remains localized Flutter, and visual symbols do not create new currencies or mechanics.
+- Image #4 contains key poses rather than movement frames. Runtime animation therefore requires cleaned cutouts plus newly produced, art-directed in-between frames with normalized bounds, ground lines, anchors, and state mappings; simple rectangular slicing is insufficient.
+- Asset changes remain presentation-only. They must not alter pure-Dart simulation, economy balance, saves, rewarded claims, or consent behavior.

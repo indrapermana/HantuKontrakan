@@ -419,7 +419,7 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-028 and all later tickets.
+- HK-027-B and all later tickets.
 - Furniture purchasing/inventory, automatic damage generation, tenant departures, IAP, cloud/network services, and final artwork.
 
 ## Verification evidence
@@ -654,4 +654,22 @@ Verification:
 Remaining validation:
 
 - No emulator or physical device was attached, so a real test-ad load/dismiss/earn session and iOS runtime integration remain unverified. Automated adapter/domain/UI tests and the Android debug build provide the current local evidence.
-- HK-028 remains next and owns the full consent/privacy settings and optional external error/crash-reporting integration. No HK-028 implementation is included here.
+- HK-027-B is now next; HK-028 remains deferred and continues to own the full consent/privacy settings and optional external error/crash-reporting integration.
+
+### HK-027-B — Production-style visual/audio asset integration
+
+Status: planned on 2026-10-14; implementation has not started.
+
+- Inserted as the next M6 ticket after HK-027 and before HK-028.
+- Selected image #3 as the primary cutaway/environment source, image #4 as the four-ghost character source, compatible items/effects from image #2, and text-free UI surfaces/icons/portraits from image #1.
+- The old pixel-art ZIP remains prototype reference material rather than the target art direction.
+- Planned character work includes clean RGBA extraction, consistent canvas/ground line/anchor/scale, state-specific animation frames, Flame animation mapping, and visual regression coverage for `idle`, `happy`, `angry`, and `special` on all four ghosts.
+- Planned UI work keeps Indonesian/English strings, values, dialogue, and accessibility in Flutter. Text and example counters baked into the source sheets will not be shipped as functional UI.
+- Planned asset filtering excludes the sheet's `Rp`, cash, gem, and energy symbols unless a later approved design explicitly introduces the corresponding mechanic. Koin Arwah remains the current currency.
+- Planned audio work evaluates the supplied 16 WAV effects and two short music loops for seams, loudness, repetition, lifecycle behavior, and bundle size before replacing the existing generated placeholders.
+- Required delivery evidence: documented provenance/manifest, cleaned individual runtime assets, state-driven Flame animations, localized Flutter UI, relevant tests, `flutter analyze`, full `flutter test`, and Android debug build.
+
+Implementation boundary:
+
+- HK-027-B is currently documentation and scope only. No supplied image/audio file has been copied into the repository, no animation has been generated, and no runtime code has changed.
+- HK-028 remains deferred until HK-027-B meets its acceptance criteria.
