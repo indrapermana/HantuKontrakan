@@ -282,3 +282,12 @@ Date: 2026-10-14
 - Framework and uncaught asynchronous errors are routed through an injectable error-reporting boundary. No crash vendor is configured in this repository; production can inject one behind the boundary without importing it into simulation. Provider failures are swallowed by the consent-aware wrapper.
 - Consent state is save schema 20. Version-19 saves migrate with external error reporting disabled. The settings dialog keeps existing audio controls first and places privacy controls in a localized expandable section.
 - UMP, ads, and diagnostics are application/service concerns. `lib/simulation` remains free of Flutter, Flame, Google Mobile Ads, and provider SDK imports.
+
+## HK-029 regression and performance decisions
+
+Date: 2026-10-14
+
+- The local phone target matrix is a compact 360×640 logical viewport, a large 430×932 logical viewport, and the connected physical iPhone running iOS 26.6.2. Android packaging is validated with a debug APK; Android physical-device runtime remains separate evidence because no Android device was connected.
+- Severe performance regression guards use broad deterministic budgets: 10,000 one-second simulation commands must complete within five seconds on the test host, and the physical-device launch/asset-load/collect/settings smoke flow must complete within ten seconds. These are responsiveness tripwires, not release frame-time benchmarks.
+- The compact-screen failure found during the pass was resolved by changing the top economy summary from a fixed row to a wrapping layout. No simulation or economy behavior changed.
+- Integration tests use injected in-memory saves and unavailable external adapters so device responsiveness and core offline behavior do not depend on network, consent-provider, ad, audio, or crash-reporting availability.

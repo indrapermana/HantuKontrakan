@@ -78,26 +78,35 @@ class HomeScreen extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-                  child: Row(
+                  child: Wrap(
+                    spacing: 10,
+                    runSpacing: 4,
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Image.asset(
-                        GameAssets.spiritCoin,
-                        width: 28,
-                        height: 28,
-                        semanticLabel: strings.spiritCoins(state.walletCoins),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            GameAssets.spiritCoin,
+                            width: 28,
+                            height: 28,
+                            semanticLabel: strings.spiritCoins(
+                              state.walletCoins,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            strings.spiritCoins(state.walletCoins),
+                            key: const Key('wallet-coins'),
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        strings.spiritCoins(state.walletCoins),
-                        key: const Key('wallet-coins'),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(width: 10),
                       Text(
                         strings.mysticalCrystals(state.mysticalCrystals),
                         key: const Key('mystical-crystals'),
                       ),
-                      const Spacer(),
                       Text(
                         strings.ghostHappinessSummary(
                           'Pocong',

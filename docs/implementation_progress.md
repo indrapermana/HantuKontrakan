@@ -724,3 +724,36 @@ Remaining validation:
 - No emulator or physical device was attached, so the live Google UMP form/privacy-options flow and device-level framework crash capture remain unverified.
 - No external crash-reporting vendor is configured. Vendor console delivery can only be integration-validated after the owner selects a provider and supplies its platform configuration.
 - HK-029 is now the next unfinished ticket.
+
+### HK-029 — Regression, lifecycle, device, and performance pass
+
+Status: implemented and locally/device verified on 2026-10-14.
+
+- Added an integration-test target for a bounded offline device smoke flow covering application launch, Flame asset loading, visible wallet state, rent collection and persistence, and opening settings without framework exceptions.
+- Added compact 360×640 and large 430×932 phone viewport regressions for the home and settings surfaces.
+- Added deterministic performance and economy stress coverage: 10,000 one-second simulation commands under a five-second guard, exact JSON continuation, 100 repeated save/reload cycles, fractional-rent preservation, and duplicate claim rejection.
+- Fixed the compact-width overflow discovered by the new test. The wallet, crystal, and happiness summary now wraps responsively instead of forcing one horizontal row.
+- Existing lifecycle, offline snapshot, rewarded-claim, migration, incident, mission, progression, asset, localization, and analytics/privacy coverage remains part of the complete regression suite.
+
+Implementation decisions and assumptions:
+
+- With no previously documented device matrix, local acceptance uses 360×640 and 430×932 logical phone viewports plus the connected physical iPhone running iOS 26.6.2. Android runtime validation requires a connected Android target; Android compilation/package integration is covered by the debug APK build.
+- Timing limits are intentionally coarse regression tripwires rather than claims of 60/120 FPS profiling. HK-029 does not add production telemetry or change game balance to improve a benchmark.
+- The device integration test injects local services so external consent, ads, audio, and reporting cannot make the core offline smoke flow flaky.
+
+Verification:
+
+- Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test`: all 178 tests passed.
+- `flutter test integration_test/hk029_device_test.dart -d <connected iPhone>`: one device integration test passed, including automatic signing, Xcode build, installation, launch, and interaction.
+- `flutter build apk --debug`: succeeded at `build/app/outputs/flutter-apk/app-debug.apk`.
+- The focused HK-029 suite passes both target viewport layouts, the 10,000-command performance guard, exact reload continuation, repeated serialization, fractional economy preservation, and duplicate-claim protection.
+- No high-severity save or economy defect is known after the complete regression pass.
+- The implementation-plan HK-029 checkbox is synchronized with this tracker.
+
+Remaining validation:
+
+- No Android phone or emulator was connected, so physical Android interaction/frame behavior remains unverified despite the successful Android debug build.
+- The device smoke provides a broad responsiveness guard, not detailed raster/UI frame timing or long-duration thermal profiling across low-end hardware.
+- HK-030 is now the next unfinished ticket.
