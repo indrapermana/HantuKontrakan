@@ -188,5 +188,10 @@
   "propertyActionsTitle": "Kamar dan peningkatan",
   "offlineReturnTitle": "Selamat datang kembali!",
   "offlineReturnBody": "Para penyewa menghasilkan {coins} koin saat kamu pergi.",
-  "collectLabel": "Ambil"
+  "offlineRoomContribution": "Kamar {number}: +{coins} koin",
+  "collectLabel": "Ambil",
+  "roomRentBubbleLabel": "Ambil {coins} koin dari kamar {number}",
+  "rentCollectedTitle": "Uang sewa diterima!",
+  "allRentCollected": "Kamu menerima {coins} koin dari semua kamar yang siap.",
+  "roomRentCollected": "Kamar {number} membayar {coins} koin."
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_initializing_formals
+
 import '../constants/game_balance.dart';
 import '../content/progression_definitions.dart';
 import 'ghost.dart';
@@ -22,8 +24,10 @@ class GameState {
     this.musicVolume = 0.35,
     this.soundVolume = 0.7,
     this.reputation = GameBalance.initialReputation,
-    this.pendingRentMicrocoins = 0,
+    int pendingRentMicrocoins = 0,
+    Map<String, int>? pendingRentMicrocoinsByRoom,
     this.rentAccrualRemainder = 0,
+    Map<String, int>? rentAccrualRemainderByRoom,
     Set<String> completedRentClaimIds = const {},
     this.pendingRewardedRentClaim,
     Set<String> completedRewardedRentClaimIds = const {},
@@ -46,7 +50,22 @@ class GameState {
     required List<RoomState> rooms,
     required this.complaintResolved,
     this.resolutionId,
-  }) : completedRentClaimIds = Set.unmodifiable(completedRentClaimIds),
+  }) : pendingRentMicrocoins = pendingRentMicrocoins,
+       pendingRentMicrocoinsByRoom = Map.unmodifiable(
+         _normalizeRoomRent(
+           pendingRentMicrocoins,
+           pendingRentMicrocoinsByRoom,
+           rooms,
+         ),
+       ),
+       rentAccrualRemainderByRoom = Map.unmodifiable(
+         _normalizeRoomRent(
+           rentAccrualRemainder,
+           rentAccrualRemainderByRoom,
+           rooms,
+         ),
+       ),
+       completedRentClaimIds = Set.unmodifiable(completedRentClaimIds),
        completedRewardedRentClaimIds = Set.unmodifiable(
          completedRewardedRentClaimIds,
        ),
@@ -63,8 +82,14 @@ class GameState {
        ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
+        this.pendingRentMicrocoinsByRoom.values.any((value) => value < 0) ||
+        this.pendingRentMicrocoinsByRoom.values.fold<int>(0, (a, b) => a + b) !=
+            pendingRentMicrocoins ||
         rentAccrualRemainder < 0 ||
         rentAccrualRemainder >= GameBalance.secondsPerMinute ||
+        this.rentAccrualRemainderByRoom.values.any(
+          (value) => value < 0 || value >= GameBalance.secondsPerMinute,
+        ) ||
         playerLevel < 1 ||
         playerLevel > ProgressionDefinitions.levels.length ||
         playerExperience < 0 ||
@@ -110,7 +135,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 20;
+  static const int currentSchemaVersion = 21;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -128,7 +153,9 @@ class GameState {
   final double soundVolume;
   final int reputation;
   final int pendingRentMicrocoins;
+  final Map<String, int> pendingRentMicrocoinsByRoom;
   final int rentAccrualRemainder;
+  final Map<String, int> rentAccrualRemainderByRoom;
   final Set<String> completedRentClaimIds;
   final RewardedRentClaim? pendingRewardedRentClaim;
   final Set<String> completedRewardedRentClaimIds;
@@ -213,6 +240,12 @@ class GameState {
     return null;
   }
 
+  int pendingRentMicrocoinsForRoom(String roomId) =>
+      pendingRentMicrocoinsByRoom[roomId] ?? 0;
+
+  int pendingRentCoinsForRoom(String roomId) =>
+      pendingRentMicrocoinsForRoom(roomId) ~/ GameBalance.microcoinsPerCoin;
+
   void _validateOccupancy() {
     final ghostIds = ghosts.map((ghost) => ghost.id).toSet();
     if (ghostIds.length != ghosts.length) {
@@ -268,7 +301,9 @@ class GameState {
     double? soundVolume,
     int? reputation,
     int? pendingRentMicrocoins,
+    Map<String, int>? pendingRentMicrocoinsByRoom,
     int? rentAccrualRemainder,
+    Map<String, int>? rentAccrualRemainderByRoom,
     Set<String>? completedRentClaimIds,
     Object? pendingRewardedRentClaim = _notProvided,
     Set<String>? completedRewardedRentClaimIds,
@@ -312,8 +347,23 @@ class GameState {
     musicVolume: musicVolume ?? this.musicVolume,
     soundVolume: soundVolume ?? this.soundVolume,
     reputation: reputation ?? this.reputation,
-    pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
+    pendingRentMicrocoins:
+        pendingRentMicrocoins ??
+        (pendingRentMicrocoinsByRoom == null
+            ? this.pendingRentMicrocoins
+            : pendingRentMicrocoinsByRoom.values.fold<int>(
+                0,
+                (total, value) => total + value,
+              )),
+    pendingRentMicrocoinsByRoom:
+        pendingRentMicrocoinsByRoom ??
+        (pendingRentMicrocoins == null
+            ? this.pendingRentMicrocoinsByRoom
+            : null),
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
+    rentAccrualRemainderByRoom:
+        rentAccrualRemainderByRoom ??
+        (rentAccrualRemainder == null ? this.rentAccrualRemainderByRoom : null),
     completedRentClaimIds: completedRentClaimIds ?? this.completedRentClaimIds,
     pendingRewardedRentClaim: identical(pendingRewardedRentClaim, _notProvided)
         ? this.pendingRewardedRentClaim
@@ -376,7 +426,9 @@ class GameState {
     'soundVolume': soundVolume,
     'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
+    'pendingRentMicrocoinsByRoom': pendingRentMicrocoinsByRoom,
     'rentAccrualRemainder': rentAccrualRemainder,
+    'rentAccrualRemainderByRoom': rentAccrualRemainderByRoom,
     'completedRentClaimIds': completedRentClaimIds.toList(growable: false),
     'pendingRewardedRentClaim': pendingRewardedRentClaim?.toJson(),
     'completedRewardedRentClaimIds': completedRewardedRentClaimIds.toList(
@@ -431,7 +483,8 @@ class GameState {
       17 => GameState._fromVersion17Json(json),
       18 => GameState._fromVersion18Json(json),
       19 => GameState._fromVersion19Json(json),
-      currentSchemaVersion => GameState._fromVersion20Json(json),
+      20 => GameState._fromVersion20Json(json),
+      currentSchemaVersion => GameState._fromVersion21Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -673,6 +726,34 @@ class GameState {
         errorReportingConsentGranted:
             json['errorReportingConsentGranted']! as bool,
       );
+
+  factory GameState._fromVersion21Json(Map<String, Object?> json) =>
+      GameState._fromVersion20Json(json).copyWith(
+        pendingRentMicrocoinsByRoom:
+            (json['pendingRentMicrocoinsByRoom']! as Map<String, Object?>).map(
+              (roomId, value) => MapEntry(roomId, value! as int),
+            ),
+        rentAccrualRemainderByRoom:
+            (json['rentAccrualRemainderByRoom']! as Map<String, Object?>).map(
+              (roomId, value) => MapEntry(roomId, value! as int),
+            ),
+      );
+
+  static Map<String, int> _normalizeRoomRent(
+    int total,
+    Map<String, int>? byRoom,
+    List<RoomState> rooms,
+  ) {
+    if (byRoom != null) return byRoom;
+    if (total == 0) return const {};
+    final eligible =
+        rooms
+            .where((room) => room.unlocked && room.occupantId != null)
+            .toList(growable: false)
+          ..sort((left, right) => left.id.compareTo(right.id));
+    final roomId = eligible.isEmpty ? rooms.first.id : eligible.first.id;
+    return {roomId: total};
+  }
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
       (json['ghosts']! as List<Object?>)

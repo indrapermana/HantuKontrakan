@@ -229,6 +229,23 @@ void main() {
     expect((result as SaveLoaded).state.errorReportingConsentGranted, isFalse);
   });
 
+  test('version 20 global rent migrates into one deterministic room', () async {
+    final version20 =
+        GameState.seeded().copyWith(pendingRentMicrocoins: 3250000).toJson()
+          ..['schemaVersion'] = 20
+          ..remove('pendingRentMicrocoinsByRoom');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version20),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(migrated.pendingRentMicrocoins, 3250000);
+    expect(migrated.pendingRentMicrocoinsByRoom, {'room_01': 3250000});
+  });
+
   test('version 1 save migrates to current debug state defaults', () async {
     final version1 = GameState.seeded().toJson()
       ..['schemaVersion'] = 1

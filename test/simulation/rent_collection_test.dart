@@ -50,4 +50,35 @@ void main() {
     expect(second.pendingRentMicrocoins, 750000);
     expect(second.completedRentClaimIds, {'claim-1', 'claim-2'});
   });
+
+  test('room claim plus collect all cannot duplicate another room', () {
+    final initial = GameState.seeded().copyWith(
+      walletCoins: 100,
+      pendingRentMicrocoinsByRoom: const {
+        'room_01': 2250000,
+        'room_02': 1750000,
+      },
+    );
+
+    final roomCollected = GameRules.collectRoomRent(
+      initial,
+      'room_01',
+      'room-claim',
+    );
+    final allCollected = GameRules.collectAllRent(roomCollected, 'all-claim');
+
+    expect(roomCollected.walletCoins, 102);
+    expect(roomCollected.pendingRentMicrocoinsForRoom('room_01'), 250000);
+    expect(roomCollected.pendingRentMicrocoinsForRoom('room_02'), 1750000);
+    expect(allCollected.walletCoins, 103);
+    expect(allCollected.pendingRentMicrocoinsForRoom('room_01'), 250000);
+    expect(allCollected.pendingRentMicrocoinsForRoom('room_02'), 750000);
+    expect(
+      identical(
+        GameRules.collectRoomRent(allCollected, 'room_01', 'room-claim'),
+        allCollected,
+      ),
+      isTrue,
+    );
+  });
 }

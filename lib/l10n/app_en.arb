@@ -154,5 +154,10 @@
   "propertyActionsTitle": "Rooms and improvements",
   "offlineReturnTitle": "Welcome back!",
   "offlineReturnBody": "Your tenants earned {coins} coins while you were away.",
-  "collectLabel": "Collect"
+  "offlineRoomContribution": "Room {number}: +{coins} coins",
+  "collectLabel": "Collect",
+  "roomRentBubbleLabel": "Collect {coins} coins from room {number}",
+  "rentCollectedTitle": "Rent collected!",
+  "allRentCollected": "You collected {coins} coins from all ready rooms.",
+  "roomRentCollected": "Room {number} paid {coins} coins."
 }

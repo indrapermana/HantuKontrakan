@@ -4,30 +4,49 @@ import '../models/rewarded_rent_claim.dart';
 import 'tutorial_system.dart';
 
 abstract final class RewardedRentSystem {
-  static bool canBegin(GameState state, String localDayKey) =>
+  static bool canBegin(
+    GameState state,
+    String localDayKey, [
+    int? bonusCoins,
+  ]) =>
       localDayKey.trim().isNotEmpty &&
       state.pendingRewardedRentClaim == null &&
-      state.pendingRentMicrocoins >= GameBalance.microcoinsPerCoin &&
+      (bonusCoins ??
+              state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin) >
+          0 &&
       _countForDay(state, localDayKey) <
           GameBalance.maximumRewardedRentBonusesPerDay;
 
-  static GameState begin(GameState state, String claimId, String localDayKey) {
+  static GameState begin(
+    GameState state,
+    String claimId,
+    String localDayKey, [
+    int? bonusCoins,
+  ]) {
     if (claimId.trim().isEmpty ||
-        state.completedRentClaimIds.contains(claimId) ||
+        (bonusCoins == null && state.completedRentClaimIds.contains(claimId)) ||
         state.completedRewardedRentClaimIds.contains(claimId) ||
-        !canBegin(state, localDayKey)) {
+        !canBegin(state, localDayKey, bonusCoins)) {
       return state;
     }
-    final wholeCoins =
+    final legacyBaseCollection = bonusCoins == null;
+    final resolvedBonusCoins =
+        bonusCoins ??
         state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
+    final remainders = <String, int>{
+      for (final entry in state.pendingRentMicrocoinsByRoom.entries)
+        entry.key: entry.value % GameBalance.microcoinsPerCoin,
+    };
     final collected = state.copyWith(
-      walletCoins: state.walletCoins + wholeCoins,
-      pendingRentMicrocoins:
-          state.pendingRentMicrocoins % GameBalance.microcoinsPerCoin,
+      walletCoins:
+          state.walletCoins + (legacyBaseCollection ? resolvedBonusCoins : 0),
+      pendingRentMicrocoinsByRoom: legacyBaseCollection
+          ? remainders
+          : state.pendingRentMicrocoinsByRoom,
       completedRentClaimIds: {...state.completedRentClaimIds, claimId},
       pendingRewardedRentClaim: RewardedRentClaim(
         id: claimId,
-        bonusCoins: wholeCoins,
+        bonusCoins: resolvedBonusCoins,
         localDayKey: localDayKey,
       ),
     );

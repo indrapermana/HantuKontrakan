@@ -43,8 +43,19 @@ class GameStateController {
         _state,
         claimId,
       ),
-      BeginRewardedRentClaim(:final claimId, :final localDayKey) =>
-        GameRules.beginRewardedRentClaim(_state, claimId, localDayKey),
+      CollectRoomRent(:final roomId, :final claimId) =>
+        GameRules.collectRoomRent(_state, roomId, claimId),
+      BeginRewardedRentClaim(
+        :final claimId,
+        :final localDayKey,
+        :final bonusCoins,
+      ) =>
+        GameRules.beginRewardedRentClaim(
+          _state,
+          claimId,
+          localDayKey,
+          bonusCoins,
+        ),
       GrantRewardedRentBonus(:final claimId) =>
         GameRules.grantRewardedRentBonus(_state, claimId),
       CancelRewardedRentClaim(:final claimId) =>

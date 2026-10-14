@@ -1022,11 +1022,41 @@ abstract class AppLocalizations {
   /// **'Para penyewa menghasilkan {coins} koin saat kamu pergi.'**
   String offlineReturnBody(Object coins);
 
+  /// No description provided for @offlineRoomContribution.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar {number}: +{coins} koin'**
+  String offlineRoomContribution(Object coins, Object number);
+
   /// No description provided for @collectLabel.
   ///
   /// In id, this message translates to:
   /// **'Ambil'**
   String get collectLabel;
+
+  /// No description provided for @roomRentBubbleLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Ambil {coins} koin dari kamar {number}'**
+  String roomRentBubbleLabel(Object coins, Object number);
+
+  /// No description provided for @rentCollectedTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Uang sewa diterima!'**
+  String get rentCollectedTitle;
+
+  /// No description provided for @allRentCollected.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamu menerima {coins} koin dari semua kamar yang siap.'**
+  String allRentCollected(Object coins);
+
+  /// No description provided for @roomRentCollected.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar {number} membayar {coins} koin.'**
+  String roomRentCollected(Object coins, Object number);
 }
 
 class _AppLocalizationsDelegate

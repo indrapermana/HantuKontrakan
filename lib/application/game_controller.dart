@@ -53,6 +53,8 @@ class GameController extends ChangeNotifier {
   int _repairSequence = 0;
   int _rewardedRentSequence = 0;
   int _pendingOfflineEarningsCoins = 0;
+  Map<String, int> _pendingOfflineEarningsCoinsByRoom = const {};
+  int _pendingRewardOfferCoins = 0;
   Future<void> _lifecycleOperation = Future<void>.value();
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
@@ -78,16 +80,36 @@ class GameController extends ChangeNotifier {
       HappinessSystem.compatibilityFor(state, ghostId);
   int get pendingRentCoins =>
       state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
+  int pendingRentCoinsForRoom(String roomId) =>
+      state.pendingRentCoinsForRoom(roomId);
+  Map<String, int> get pendingRentCoinsByRoom => {
+    for (final room in state.rooms)
+      room.id: state.pendingRentCoinsForRoom(room.id),
+  };
   int repairCostFor(String roomId) => RepairSystem.costFor(state, roomId);
   int get rewardedRentBonusesRemaining =>
       RewardedRentSystem.remainingForDay(state, _localDayKey(_clock.now()));
   bool get canCollectRewardedRent =>
-      RewardedRentSystem.canBegin(state, _localDayKey(_clock.now()));
+      _pendingRewardOfferCoins > 0 &&
+      RewardedRentSystem.canBegin(
+        state,
+        _localDayKey(_clock.now()),
+        _pendingRewardOfferCoins,
+      );
+  int get pendingRewardOfferCoins => _pendingRewardOfferCoins;
 
   int takePendingOfflineEarningsCoins() {
-    final coins = _pendingOfflineEarningsCoins;
+    return takePendingOfflineEarnings().totalCoins;
+  }
+
+  OfflineEarningsPresentation takePendingOfflineEarnings() {
+    final presentation = OfflineEarningsPresentation(
+      totalCoins: _pendingOfflineEarningsCoins,
+      coinsByRoom: _pendingOfflineEarningsCoinsByRoom,
+    );
     _pendingOfflineEarningsCoins = 0;
-    return coins;
+    _pendingOfflineEarningsCoinsByRoom = const {};
+    return presentation;
   }
 
   Future<void> initialize() async {
@@ -111,6 +133,10 @@ class GameController extends ChangeNotifier {
     _pendingOfflineEarningsCoins =
         (state.pendingRentMicrocoins - beforeResume.pendingRentMicrocoins) ~/
         GameBalance.microcoinsPerCoin;
+    _pendingOfflineEarningsCoinsByRoom = _offlineRoomCoinDeltas(
+      beforeResume,
+      state,
+    );
     if (resumed) await _saveService.save(state);
     _isReady = true;
     _syncErrorReportingConsent();
@@ -240,21 +266,40 @@ class GameController extends ChangeNotifier {
     await _dispatch(AdvanceSimulation(seconds: elapsedSeconds));
   }
 
-  Future<void> collectAllRent({String? claimId}) async {
+  Future<int> collectAllRent({String? claimId}) async {
     final resolvedClaimId =
         claimId ??
         'rent-${_clock.now().microsecondsSinceEpoch}-$revision-${_rentClaimSequence++}';
+    final walletBefore = state.walletCoins;
     await _dispatch(CollectAllRent(claimId: resolvedClaimId));
+    final collected = state.walletCoins - walletBefore;
+    if (collected > 0) _pendingRewardOfferCoins = collected;
+    return collected;
   }
 
-  Future<RewardedRentCollectionResult> collectAllRentWithRewardedAd() async {
+  Future<int> collectRoomRent(String roomId, {String? claimId}) async {
+    final resolvedClaimId =
+        claimId ??
+        'rent-$roomId-${_clock.now().microsecondsSinceEpoch}-$revision-${_rentClaimSequence++}';
+    final walletBefore = state.walletCoins;
+    await _dispatch(CollectRoomRent(roomId: roomId, claimId: resolvedClaimId));
+    final collected = state.walletCoins - walletBefore;
+    if (collected > 0) _pendingRewardOfferCoins = collected;
+    return collected;
+  }
+
+  Future<RewardedRentCollectionResult> collectAllRentWithRewardedAd({
+    int? bonusCoins,
+  }) async {
     final claimId =
         'rewarded-rent-${_clock.now().microsecondsSinceEpoch}-$revision-${_rewardedRentSequence++}';
-    final bonusCoins = pendingRentCoins;
+    final baseCoins = bonusCoins ?? await collectAllRent(claimId: claimId);
+    if (baseCoins <= 0) return RewardedRentCollectionResult.noClaim;
     final began = await _dispatch(
       BeginRewardedRentClaim(
         claimId: claimId,
         localDayKey: _localDayKey(_clock.now()),
+        bonusCoins: baseCoins,
       ),
     );
     if (!began) return RewardedRentCollectionResult.noClaim;
@@ -295,11 +340,13 @@ class GameController extends ChangeNotifier {
           'reason_code': outcome.name,
         }),
       );
-      return RewardedRentCollectionResult.baseOnly(baseCoins: bonusCoins);
+      _pendingRewardOfferCoins = 0;
+      return RewardedRentCollectionResult.baseOnly(baseCoins: baseCoins);
     }
+    _pendingRewardOfferCoins = 0;
     return RewardedRentCollectionResult.bonusEarned(
-      baseCoins: bonusCoins,
-      bonusCoins: bonusCoins,
+      baseCoins: baseCoins,
+      bonusCoins: baseCoins,
     );
   }
 
@@ -342,12 +389,17 @@ class GameController extends ChangeNotifier {
     final timestampMillis = _clock.now().millisecondsSinceEpoch;
     _lifecycleOperation = _lifecycleOperation.then((_) async {
       final pendingBefore = state.pendingRentMicrocoins;
+      final stateBefore = state;
       await _dispatch(ResumeFromOffline(timestampMillis: timestampMillis));
       final earnedCoins =
           (state.pendingRentMicrocoins - pendingBefore) ~/
           GameBalance.microcoinsPerCoin;
       if (earnedCoins > 0) {
         _pendingOfflineEarningsCoins = earnedCoins;
+        _pendingOfflineEarningsCoinsByRoom = _offlineRoomCoinDeltas(
+          stateBefore,
+          state,
+        );
         notifyListeners();
       }
       await _runAudio(_audioService.resumeBackground);
@@ -392,6 +444,7 @@ class GameController extends ChangeNotifier {
     } else {
       cue = switch (command) {
         CollectAllRent() ||
+        CollectRoomRent() ||
         BeginRewardedRentClaim() ||
         GrantRewardedRentBonus() => AudioCue.coin,
         UpgradeRoom() => AudioCue.upgrade,
@@ -505,7 +558,13 @@ class GameController extends ChangeNotifier {
             'coins': after.walletCoins - before.walletCoins,
           }),
         );
-      case BeginRewardedRentClaim():
+      case CollectRoomRent():
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.rentCollected, {
+            'coins': after.walletCoins - before.walletCoins,
+          }),
+        );
+      case BeginRewardedRentClaim() when after.walletCoins > before.walletCoins:
         events.add(
           GameplayAnalyticsEvent(GameplayAnalyticsEventName.rentCollected, {
             'coins': after.walletCoins - before.walletCoins,
@@ -567,6 +626,28 @@ class GameController extends ChangeNotifier {
     super.dispose();
   }
 }
+
+class OfflineEarningsPresentation {
+  const OfflineEarningsPresentation({
+    required this.totalCoins,
+    required this.coinsByRoom,
+  });
+
+  final int totalCoins;
+  final Map<String, int> coinsByRoom;
+}
+
+Map<String, int> _offlineRoomCoinDeltas(GameState before, GameState after) => {
+  for (final room in after.rooms)
+    if ((after.pendingRentMicrocoinsForRoom(room.id) -
+                before.pendingRentMicrocoinsForRoom(room.id)) ~/
+            GameBalance.microcoinsPerCoin >
+        0)
+      room.id:
+          (after.pendingRentMicrocoinsForRoom(room.id) -
+              before.pendingRentMicrocoinsForRoom(room.id)) ~/
+          GameBalance.microcoinsPerCoin,
+};
 
 sealed class RewardedRentCollectionResult {
   const RewardedRentCollectionResult();

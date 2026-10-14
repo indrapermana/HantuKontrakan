@@ -36,14 +36,22 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(find.byKey(const Key('wallet-coins')), findsOneWidget);
+    expect(find.byKey(const Key('room-rent-room_01')), findsOneWidget);
     stopwatch.stop();
     final screenshot = await binding.takeScreenshot('iphone_home');
     expect(screenshot, isNotEmpty);
     stopwatch.start();
 
     await tester.tap(find.byKey(const Key('collect-rent')));
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 300));
     expect(saves.storedState?.walletCoins, 202);
+    expect(find.byKey(const Key('rent-collected-panel')), findsOneWidget);
+    final collectionScreenshot = await binding.takeScreenshot(
+      'iphone_rent_collected',
+    );
+    expect(collectionScreenshot, isNotEmpty);
+    await tester.tap(find.text('Close'));
+    await tester.pump(const Duration(milliseconds: 200));
 
     await tester.tap(find.byKey(const Key('settings-button')));
     await tester.pump(const Duration(milliseconds: 500));

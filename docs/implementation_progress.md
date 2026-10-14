@@ -885,3 +885,40 @@ Status: locally verified on 2026-10-14.
   `git diff --check` passed.
 - HK-030-C is the next unfinished ticket. This work does not add per-room rent,
   coin bubbles, collect-one state, or any save migration reserved for HK-030-C.
+
+### HK-030-C — In-world rent collection
+
+Status: locally verified on 2026-10-15.
+
+- Replaced the single claimable-rent bucket with schema-v21 persisted per-room
+  microcoin balances and per-room fractional accrual remainders. Existing
+  aggregate accessors remain compatibility views over those room balances.
+- Added deterministic v20 migration that assigns the legacy aggregate balance
+  to the first eligible room in stable room-ID order. Save/reload preserves
+  every room balance and remainder exactly.
+- Rent ticks and offline earnings distribute their exact aggregate microcoins
+  across eligible rooms in stable order. Regression coverage proves totals are
+  chunk-independent and equal before and after reload.
+- Added accessible Flutter coin bubbles anchored over the Flame rooms. A player
+  can collect one room or all rooms; both paths preserve sub-coin fractions,
+  persist atomically, and share claim-ID duplicate protection.
+- Added themed collection feedback and a one-time offline-return breakdown by
+  room. The controller holds only transient presentation deltas; simulation and
+  persistence remain independent from Flame rendering.
+- Normal rent is credited before any rewarded prompt is offered. The optional
+  ad action applies only a snapshotted bonus, so unavailable, dismissed,
+  interrupted, or duplicate callbacks cannot withhold or duplicate base rent.
+- Physical-iPhone integration evidence captured the home, collection result,
+  and settings flows on 2026-10-15. Review found readable panels and a visible
+  room-to-HUD flow; a follow-up layout patch shortened visible HUD labels while
+  retaining full semantic labels, moved bubbles clear of room titles, and
+  raised collect-all above bottom navigation. That final patch passes widget
+  layout tests. Recapture attempts compiled, signed, installed, and launched;
+  one was denied Xcode automation (`osascript: -2`) and the retry could not
+  discover the Dart VM service over the wireless connection.
+- Validation evidence: formatting completed; `flutter analyze` reported no
+  issues; all 186 `flutter test` tests passed; Android debug build succeeded;
+  the earlier iPhone integration run passed; `git diff --check` passed.
+- HK-030-D is the next unfinished ticket. No recurring contracts, tenant
+  requests, daily chest state, portfolio progression, or audio redesign was
+  added in HK-030-C.

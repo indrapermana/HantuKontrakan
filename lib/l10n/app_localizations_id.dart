@@ -555,5 +555,28 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String offlineRoomContribution(Object coins, Object number) {
+    return 'Kamar $number: +$coins koin';
+  }
+
+  @override
   String get collectLabel => 'Ambil';
+
+  @override
+  String roomRentBubbleLabel(Object coins, Object number) {
+    return 'Ambil $coins koin dari kamar $number';
+  }
+
+  @override
+  String get rentCollectedTitle => 'Uang sewa diterima!';
+
+  @override
+  String allRentCollected(Object coins) {
+    return 'Kamu menerima $coins koin dari semua kamar yang siap.';
+  }
+
+  @override
+  String roomRentCollected(Object coins, Object number) {
+    return 'Kamar $number membayar $coins koin.';
+  }
 }

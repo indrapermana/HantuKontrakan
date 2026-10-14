@@ -14,7 +14,9 @@ class HomeGameHud extends StatelessWidget {
     required this.levelLabel,
     required this.experienceProgress,
     required this.coinLabel,
+    required this.coinSemanticsLabel,
     required this.crystalLabel,
+    required this.crystalSemanticsLabel,
     required this.happinessLabel,
     required this.settingsTooltip,
     required this.languageTooltip,
@@ -26,7 +28,9 @@ class HomeGameHud extends StatelessWidget {
   final String levelLabel;
   final double experienceProgress;
   final String coinLabel;
+  final String coinSemanticsLabel;
   final String crystalLabel;
+  final String crystalSemanticsLabel;
   final String happinessLabel;
   final String settingsTooltip;
   final String languageTooltip;
@@ -56,6 +60,7 @@ class HomeGameHud extends StatelessWidget {
                   key: const Key('wallet-coins'),
                   imageAsset: GameAssets.spiritCoin,
                   label: coinLabel,
+                  semanticsLabel: coinSemanticsLabel,
                 ),
               ),
               const SizedBox(width: 6),
@@ -65,6 +70,7 @@ class HomeGameHud extends StatelessWidget {
                   icon: Icons.diamond_rounded,
                   iconColor: const Color(0xFFB96CFF),
                   label: crystalLabel,
+                  semanticsLabel: crystalSemanticsLabel,
                 ),
               ),
               const SizedBox(width: 4),
@@ -147,7 +153,7 @@ class WorldActionOverlay extends StatelessWidget {
     children: [
       Positioned(
         right: 12,
-        bottom: 90,
+        bottom: 120,
         child: FilledButton.icon(
           key: const Key('collect-rent'),
           style: FilledButton.styleFrom(
@@ -219,6 +225,78 @@ class WorldActionOverlay extends StatelessWidget {
         ),
       ),
     ],
+  );
+}
+
+class RoomRentBubbleOverlay extends StatelessWidget {
+  const RoomRentBubbleOverlay({
+    required this.coinsByRoom,
+    required this.labelFor,
+    required this.onCollect,
+    super.key,
+  });
+
+  final Map<String, int> coinsByRoom;
+  final String Function(String roomId, int coins) labelFor;
+  final void Function(String roomId) onCollect;
+
+  static const _anchors = <String, Alignment>{
+    'room_03': Alignment(-0.48, -0.55),
+    'room_04': Alignment(0.48, -0.55),
+    'room_01': Alignment(-0.48, 0.20),
+    'room_02': Alignment(0.48, 0.20),
+  };
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    ignoring: coinsByRoom.values.every((coins) => coins <= 0),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.maxWidth < constraints.maxHeight
+            ? constraints.maxWidth
+            : constraints.maxHeight;
+        return Center(
+          child: SizedBox.square(
+            dimension: size,
+            child: Stack(
+              children: [
+                for (final entry in coinsByRoom.entries)
+                  if (entry.value > 0 && _anchors.containsKey(entry.key))
+                    Align(
+                      alignment: _anchors[entry.key]!,
+                      child: Semantics(
+                        button: true,
+                        label: labelFor(entry.key, entry.value),
+                        child: FilledButton.icon(
+                          key: Key('room-rent-${entry.key}'),
+                          onPressed: () => onCollect(entry.key),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: _gold,
+                            foregroundColor: _wood,
+                            minimumSize: const Size(54, 38),
+                            padding: const EdgeInsets.symmetric(horizontal: 9),
+                            side: const BorderSide(color: _parchment, width: 2),
+                            shape: const StadiumBorder(),
+                            elevation: 8,
+                          ),
+                          icon: Image.asset(
+                            GameAssets.spiritCoin,
+                            width: 20,
+                            height: 20,
+                          ),
+                          label: Text(
+                            '${entry.value}',
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                      ),
+                    ),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
   );
 }
 
@@ -350,6 +428,7 @@ class _LevelBadge extends StatelessWidget {
 class _ResourceChip extends StatelessWidget {
   const _ResourceChip({
     required this.label,
+    required this.semanticsLabel,
     this.imageAsset,
     this.icon,
     this.iconColor,
@@ -357,39 +436,44 @@ class _ResourceChip extends StatelessWidget {
   });
 
   final String label;
+  final String semanticsLabel;
   final String? imageAsset;
   final IconData? icon;
   final Color? iconColor;
 
   @override
-  Widget build(BuildContext context) => Container(
-    constraints: const BoxConstraints(minHeight: 42),
-    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-    decoration: BoxDecoration(
-      color: _wood,
-      borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _woodLight, width: 2),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (imageAsset != null)
-          Image.asset(imageAsset!, width: 24, height: 24)
-        else
-          Icon(icon, size: 22, color: iconColor ?? _gold),
-        const SizedBox(width: 4),
-        Flexible(
-          child: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) => Semantics(
+    label: semanticsLabel,
+    excludeSemantics: true,
+    child: Container(
+      constraints: const BoxConstraints(minHeight: 42),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+      decoration: BoxDecoration(
+        color: _wood,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: _woodLight, width: 2),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (imageAsset != null)
+            Image.asset(imageAsset!, width: 24, height: 24)
+          else
+            Icon(icon, size: 22, color: iconColor ?? _gold),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }

@@ -68,14 +68,23 @@ final class CollectAllRent extends GameCommand {
   final String claimId;
 }
 
+final class CollectRoomRent extends GameCommand {
+  const CollectRoomRent({required this.roomId, required this.claimId});
+
+  final String roomId;
+  final String claimId;
+}
+
 final class BeginRewardedRentClaim extends GameCommand {
   const BeginRewardedRentClaim({
     required this.claimId,
     required this.localDayKey,
+    required this.bonusCoins,
   });
 
   final String claimId;
   final String localDayKey;
+  final int bonusCoins;
 }
 
 final class GrantRewardedRentBonus extends GameCommand {

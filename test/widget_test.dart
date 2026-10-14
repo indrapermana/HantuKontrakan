@@ -77,7 +77,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('200 Koin Arwah'), findsOneWidget);
+    expect(find.text('200'), findsOneWidget);
     expect(find.text('Pocong 35'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('complaint-button')));
@@ -85,7 +85,7 @@ void main() {
     await tester.tap(find.byKey(const Key('choice-soundproof')));
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.text('150 Koin Arwah'), findsOneWidget);
+    expect(find.text('150'), findsOneWidget);
     expect(find.text('Pocong 55'), findsOneWidget);
     expect(find.text('Keluhan selesai dan tersimpan'), findsOneWidget);
     expect(saves.storedState?.complaintResolved, isTrue);
@@ -106,7 +106,7 @@ void main() {
     await tester.tap(find.byKey(const Key('collect-rent')));
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('202 Koin Arwah'), findsOneWidget);
+    expect(find.text('202'), findsOneWidget);
     expect(find.text('Ambil Semua · 0 koin'), findsOneWidget);
     expect(saves.storedState?.pendingRentMicrocoins, 250000);
     expect(saves.storedState?.completedRentClaimIds, hasLength(1));
@@ -133,18 +133,45 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    await tester.tap(find.byKey(const Key('action-center-button')));
+    await tester.tap(find.byKey(const Key('collect-rent')));
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Watch test ad · 2 + 2 coins (3/3 left)'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('collect-rent-rewarded')));
+    await tester.tap(find.byKey(const Key('post-collect-rewarded-offer')));
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('204 Spirit Coins'), findsOneWidget);
+    expect(find.text('204'), findsOneWidget);
     expect(find.text('Ad reward earned: +2 bonus coins'), findsOneWidget);
     expect(saves.storedState?.pendingRentMicrocoins, 250000);
-    expect(saves.storedState?.completedRentClaimIds, hasLength(1));
+    expect(saves.storedState?.completedRentClaimIds, hasLength(2));
     expect(saves.storedState?.completedRewardedRentClaimIds, hasLength(1));
     expect(saves.storedState?.rewardedRentBonusCount, 1);
+  });
+
+  testWidgets('room bubble collects only its room before collect all', (
+    tester,
+  ) async {
+    final state = GameState.seeded().copyWith(
+      pendingRentMicrocoinsByRoom: const {
+        'room_01': 2250000,
+        'room_02': 1750000,
+      },
+    );
+    final saves = MemorySaveService(initialResult: SaveLoaded(state));
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('en')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byKey(const Key('room-rent-room_01')), findsOneWidget);
+    expect(find.byKey(const Key('room-rent-room_02')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('room-rent-room_01')));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Room 01 paid 2 coins.'), findsOneWidget);
+    expect(saves.storedState?.walletCoins, 202);
+    expect(saves.storedState?.pendingRentCoinsForRoom('room_01'), 0);
+    expect(saves.storedState?.pendingRentCoinsForRoom('room_02'), 1);
   });
 
   testWidgets('new player completes the HK-021 tutorial vertical slice', (
@@ -168,6 +195,8 @@ void main() {
     await tester.tap(find.byKey(const Key('collect-rent')));
     await tester.pump();
     expect(saves.storedState?.walletCoins, 210);
+    await tester.tap(find.text('Close'));
+    await tester.pump();
 
     await tester.tap(find.byKey(const Key('tutorial-placeKuntilanak-action')));
     await tester.pump();
@@ -209,7 +238,7 @@ void main() {
     await tester.tap(find.byKey(const Key('claim-mission-place_pocong')));
     await tester.pump();
 
-    expect(find.text('225 Spirit Coins'), findsOneWidget);
+    expect(find.text('225'), findsOneWidget);
     expect(find.text('Claimed'), findsOneWidget);
     expect(saves.storedState?.completedMissionIds, {'place_pocong'});
     expect(saves.storedState?.playerExperience, 25);

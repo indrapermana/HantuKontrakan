@@ -35,12 +35,11 @@ class HomeScreen extends StatelessWidget {
           );
         }
         final state = controller.state;
-        final offlineEarningsCoins = controller
-            .takePendingOfflineEarningsCoins();
-        if (offlineEarningsCoins > 0) {
+        final offlineEarnings = controller.takePendingOfflineEarnings();
+        if (offlineEarnings.totalCoins > 0) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) {
-              _showOfflineReturn(context, offlineEarningsCoins);
+              _showOfflineReturn(context, offlineEarnings);
             }
           });
         }
@@ -92,8 +91,10 @@ class HomeScreen extends StatelessWidget {
                   child: HomeGameHud(
                     levelLabel: 'Lv. ${state.playerLevel}',
                     experienceProgress: levelProgress,
-                    coinLabel: strings.spiritCoins(state.walletCoins),
-                    crystalLabel: strings.mysticalCrystals(
+                    coinLabel: '${state.walletCoins}',
+                    coinSemanticsLabel: strings.spiritCoins(state.walletCoins),
+                    crystalLabel: '${state.mysticalCrystals}',
+                    crystalSemanticsLabel: strings.mysticalCrystals(
                       state.mysticalCrystals,
                     ),
                     happinessLabel: strings.ghostHappinessSummary(
@@ -138,12 +139,18 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              RoomRentBubbleOverlay(
+                coinsByRoom: controller.pendingRentCoinsByRoom,
+                labelFor: (roomId, coins) =>
+                    strings.roomRentBubbleLabel(coins, _roomNumber(roomId)),
+                onCollect: (roomId) => _collectRoomRent(context, roomId),
+              ),
               WorldActionOverlay(
                 collectLabel: strings.collectAllRent(
                   controller.pendingRentCoins,
                 ),
                 canCollect: controller.pendingRentCoins > 0,
-                onCollect: controller.collectAllRent,
+                onCollect: () => _collectAllRent(context),
                 complaintLabel: controller.hasPendingComplaint
                     ? strings.pendingComplaint
                     : strings.resolvedComplaint,
@@ -192,7 +199,7 @@ class HomeScreen extends StatelessWidget {
           title: controller.rewardedRentBonusesRemaining == 0
               ? strings.rewardedRentDailyLimit
               : strings.rewardedRentButton(
-                  controller.pendingRentCoins,
+                  controller.pendingRewardOfferCoins,
                   controller.rewardedRentBonusesRemaining,
                 ),
           subtitle: '',
@@ -286,7 +293,9 @@ class HomeScreen extends StatelessWidget {
   }
 
   Future<void> _collectRewardedRent(BuildContext context) async {
-    final result = await controller.collectAllRentWithRewardedAd();
+    final result = await controller.collectAllRentWithRewardedAd(
+      bonusCoins: controller.pendingRewardOfferCoins,
+    );
     if (!context.mounted) return;
     final strings = AppLocalizations.of(context);
     final message = switch (result) {
@@ -305,7 +314,70 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _showOfflineReturn(BuildContext context, int coins) async {
+  Future<void> _collectAllRent(BuildContext context) async {
+    final collected = await controller.collectAllRent();
+    if (!context.mounted || collected <= 0) return;
+    await _showRentCollected(
+      context,
+      title: AppLocalizations.of(context).rentCollectedTitle,
+      message: AppLocalizations.of(context).allRentCollected(collected),
+      collectedCoins: collected,
+    );
+  }
+
+  Future<void> _collectRoomRent(BuildContext context, String roomId) async {
+    final collected = await controller.collectRoomRent(roomId);
+    if (!context.mounted || collected <= 0) return;
+    final strings = AppLocalizations.of(context);
+    await _showRentCollected(
+      context,
+      title: strings.rentCollectedTitle,
+      message: strings.roomRentCollected(collected, _roomNumber(roomId)),
+      collectedCoins: collected,
+    );
+  }
+
+  Future<void> _showRentCollected(
+    BuildContext context, {
+    required String title,
+    required String message,
+    required int collectedCoins,
+  }) async {
+    final strings = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => GameDialog(
+        key: const Key('rent-collected-panel'),
+        title: title,
+        icon: Icons.savings_rounded,
+        // ignore: sort_child_properties_last
+        child: Text(message, textAlign: TextAlign.center),
+        secondaryAction: GameSecondaryButton(
+          label: strings.closeLabel,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
+        primaryAction: controller.canCollectRewardedRent
+            ? GamePrimaryButton(
+                key: const Key('post-collect-rewarded-offer'),
+                label: strings.rewardedRentButton(
+                  collectedCoins,
+                  controller.rewardedRentBonusesRemaining,
+                ),
+                icon: Icons.ondemand_video_rounded,
+                onPressed: () async {
+                  Navigator.pop(dialogContext);
+                  await _collectRewardedRent(context);
+                },
+              )
+            : null,
+      ),
+    );
+  }
+
+  Future<void> _showOfflineReturn(
+    BuildContext context,
+    OfflineEarningsPresentation earnings,
+  ) async {
     final strings = AppLocalizations.of(context);
     await showDialog<void>(
       context: context,
@@ -321,10 +393,20 @@ class HomeScreen extends StatelessWidget {
             const Icon(Icons.savings_rounded, size: 54, color: gamePanelGold),
             const SizedBox(height: 12),
             Text(
-              strings.offlineReturnBody(coins),
+              strings.offlineReturnBody(earnings.totalCoins),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
+            for (final entry in earnings.coinsByRoom.entries) ...[
+              const SizedBox(height: 6),
+              Text(
+                strings.offlineRoomContribution(
+                  entry.value,
+                  _roomNumber(entry.key),
+                ),
+                key: Key('offline-room-${entry.key}'),
+              ),
+            ],
           ],
         ),
         primaryAction: GamePrimaryButton(

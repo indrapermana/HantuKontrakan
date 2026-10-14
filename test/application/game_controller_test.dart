@@ -494,8 +494,14 @@ void main() {
     clock.value = clock.value.add(const Duration(hours: 1));
     await controller.resumeFromOffline();
 
-    expect(controller.takePendingOfflineEarningsCoins(), greaterThan(0));
-    expect(controller.takePendingOfflineEarningsCoins(), 0);
+    final presentation = controller.takePendingOfflineEarnings();
+    expect(presentation.totalCoins, greaterThan(0));
+    expect(presentation.coinsByRoom.keys, containsAll(['room_01', 'room_02']));
+    expect(
+      presentation.coinsByRoom.values.fold<int>(0, (sum, value) => sum + value),
+      lessThanOrEqualTo(presentation.totalCoins),
+    );
+    expect(controller.takePendingOfflineEarnings().totalCoins, 0);
   });
 
   test('ability cooldown continues after controller reload', () async {

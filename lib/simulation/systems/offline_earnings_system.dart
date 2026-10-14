@@ -29,7 +29,10 @@ abstract final class OfflineEarningsSystem {
         (GameBalance.millisecondsPerMinute * 100);
 
     return state.copyWith(
-      pendingRentMicrocoins: state.pendingRentMicrocoins + earnedMicrocoins,
+      pendingRentMicrocoinsByRoom: RentSystem.distributeMicrocoinsByRoom(
+        state,
+        earnedMicrocoins,
+      ),
       offlineRateSnapshotMicrocoinsPerMinute: null,
       lastOfflineAccrualTimestampMillis: timestampMillis,
     );

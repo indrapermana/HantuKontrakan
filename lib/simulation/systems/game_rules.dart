@@ -87,13 +87,39 @@ abstract final class GameRules {
         state.completedRentClaimIds.contains(claimId)) {
       return state;
     }
-    final wholeCoins =
-        state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
+    final remainders = <String, int>{};
+    var wholeCoins = 0;
+    for (final entry in state.pendingRentMicrocoinsByRoom.entries) {
+      wholeCoins += entry.value ~/ GameBalance.microcoinsPerCoin;
+      remainders[entry.key] = entry.value % GameBalance.microcoinsPerCoin;
+    }
     if (wholeCoins <= 0) return state;
     final collected = state.copyWith(
       walletCoins: state.walletCoins + wholeCoins,
-      pendingRentMicrocoins:
-          state.pendingRentMicrocoins % GameBalance.microcoinsPerCoin,
+      pendingRentMicrocoinsByRoom: remainders,
+      completedRentClaimIds: {...state.completedRentClaimIds, claimId},
+    );
+    return TutorialSystem.afterRentCollection(collected);
+  }
+
+  static GameState collectRoomRent(
+    GameState state,
+    String roomId,
+    String claimId,
+  ) {
+    if (claimId.trim().isEmpty ||
+        state.completedRentClaimIds.contains(claimId) ||
+        !state.rooms.any((room) => room.id == roomId)) {
+      return state;
+    }
+    final pending = state.pendingRentMicrocoinsForRoom(roomId);
+    final wholeCoins = pending ~/ GameBalance.microcoinsPerCoin;
+    if (wholeCoins <= 0) return state;
+    final byRoom = Map<String, int>.of(state.pendingRentMicrocoinsByRoom)
+      ..[roomId] = pending % GameBalance.microcoinsPerCoin;
+    final collected = state.copyWith(
+      walletCoins: state.walletCoins + wholeCoins,
+      pendingRentMicrocoinsByRoom: byRoom,
       completedRentClaimIds: {...state.completedRentClaimIds, claimId},
     );
     return TutorialSystem.afterRentCollection(collected);
@@ -102,8 +128,9 @@ abstract final class GameRules {
   static GameState beginRewardedRentClaim(
     GameState state,
     String claimId,
-    String localDayKey,
-  ) => RewardedRentSystem.begin(state, claimId, localDayKey);
+    String localDayKey, [
+    int? bonusCoins,
+  ]) => RewardedRentSystem.begin(state, claimId, localDayKey, bonusCoins);
 
   static GameState grantRewardedRentBonus(GameState state, String claimId) =>
       RewardedRentSystem.grant(state, claimId);

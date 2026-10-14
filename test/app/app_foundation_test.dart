@@ -21,7 +21,7 @@ void main() {
   ) async {
     await pumpApp(tester, locale: const Locale('id'));
 
-    expect(find.text('200 Koin Arwah'), findsOneWidget);
+    expect(find.text('200'), findsOneWidget);
     final homeContext = tester.element(find.byType(HomeScreen));
     expect(ModalRoute.of(homeContext)?.settings.name, '/');
   });
@@ -29,7 +29,7 @@ void main() {
   testWidgets('English localization is wired through the app', (tester) async {
     await pumpApp(tester, locale: const Locale('en'));
 
-    expect(find.text('200 Spirit Coins'), findsOneWidget);
+    expect(find.text('200'), findsOneWidget);
     expect(find.text('YOUR NEW KONTRAKAN'), findsOneWidget);
   });
 
@@ -48,7 +48,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('200 Spirit Coins'), findsOneWidget);
+    expect(find.text('200'), findsOneWidget);
     expect(find.text('Incident: Electricity Outage'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('language-button')));
@@ -57,7 +57,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('200 Koin Arwah'), findsOneWidget);
+    expect(find.text('200'), findsOneWidget);
     expect(find.text('Insiden: Listrik Padam'), findsOneWidget);
     expect(saves.storedState?.languageCode, 'id');
 
@@ -75,7 +75,7 @@ void main() {
     await tester.pumpWidget(HantuKontrakanApp(saveService: saves));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('200 Koin Arwah'), findsOneWidget);
+    expect(find.text('200'), findsOneWidget);
   });
 
   testWidgets('audio settings are localized and persist mute controls', (

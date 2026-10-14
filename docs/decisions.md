@@ -370,3 +370,26 @@ Date: 2026-10-14
   into raster assets.
 - Existing gameplay values and action availability are preserved. Per-room rent
   ownership and collection remain explicitly deferred to HK-030-C.
+
+### HK-030-C in-world rent decisions
+
+- Per-room claimable value and fractional accrual remainders are persisted as
+  integer microcoins. This avoids floating-point drift and makes tick chunking,
+  offline distribution, and save/reload continuation deterministic.
+- Schema-v20 aggregate rent migrates to the first eligible room in sorted room
+  order. This preserves every legacy microcoin without inventing a historical
+  room allocation that old saves never recorded.
+- Pure-Dart simulation owns room accrual, distribution, and claim idempotency.
+  Flutter renders accessible room bubbles and feedback over the Flame world;
+  Flame does not participate in economy rules.
+- Individual claims consume only the chosen room's whole coins. Collect-all
+  consumes each room's whole coins, leaving each fractional remainder in its
+  original room; combining both paths therefore cannot duplicate value.
+- Rewarded rent is a post-collection bonus offer. Base rent is already saved
+  before the prompt appears, and ad availability or completion can never gate
+  normal income.
+- Per-room offline contribution is transient presentation state derived from
+  the already-persisted resume result. It is shown once and does not add a
+  second source of truth to the save.
+- Compact numeric HUD text is paired with full localized semantic labels. This
+  prevents narrow-device truncation without reducing screen-reader context.
