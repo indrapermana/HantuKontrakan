@@ -801,3 +801,36 @@ Follow-up configuration on 2026-10-14:
 - Did not apply that exact value to iOS because Apple bundle identifiers reject underscores. A valid Apple-compatible alternative remains an explicit owner decision before the App Store identifier is registered.
 - Replaced the privacy draft with canonical `docs/store/PRIVACY_POLICY.md`, including the confirmed publisher, support contact, local-data behavior, optional diagnostics, rewarded-ad processing, deletion behavior, security, and publication instructions. The localized in-app privacy dialog now mirrors those material disclosures.
 - Added `docs/store/ADMOB_SETUP.md` with platform app-ID, rewarded-unit, test-device, UMP, app-ads.txt, store-declaration, and closed-track verification steps. Production identifiers remain intentionally unset.
+
+### Pre-beta gameplay and UX review
+
+Status: review complete on 2026-10-14; redesign implementation not started.
+
+- Audited the physical-device home screenshot, Flutter/Flame composition,
+  mission/progression content, rent presentation, room panels, incident cadence,
+  furniture choices, and audio assets after player feedback reported a
+  prototype-like UI and five-minute boredom.
+- Confirmed the issue is both presentation and game design: the world is boxed
+  inside an application shell, primary actions live in administrative controls,
+  and the current one-time content cannot sustain repeat 10–30 minute sessions.
+- Added the canonical redesign proposal at `docs/GAMEPLAY_UX_REVIEW.md` and a
+  high-fidelity direction concept at `docs/gameplay_ux_redesign_concept.png`.
+- Recommended UX-R1 through UX-R6 before final HK-030 closed-beta acceptance.
+  No gameplay code, deterministic balance, saves, or release configuration was
+  changed by this review.
+
+Roadmap preparation follow-up:
+
+- Converted the proposal into ordered pre-beta tickets HK-030-A through
+  HK-030-F in the implementation plan, with HK-030-A as the next unfinished
+  implementation task.
+- Added the agreed property-portfolio direction: the existing four-room
+  kontrakan is Chapter 1; full occupancy leads to optimization and expansion,
+  earlier properties remain useful, and at least one second playable property
+  or progression stage is required before monetized beta.
+- Prepared HK-030-A boundaries and acceptance criteria. It changes only the
+  full-screen shell, HUD, navigation, and action reachability; per-room economy,
+  panel redesign, recurring goals, portfolio state, and new audio remain in
+  their later tickets.
+- HK-030-A implementation has not started. The working tree contains only the
+  approved review, roadmap documentation, and concept image from this review.

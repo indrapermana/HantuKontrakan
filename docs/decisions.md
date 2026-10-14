@@ -305,3 +305,34 @@ Date: 2026-10-14
 - Android uses the owner-confirmed `com.indesyakaryadigital.hantu_kontrakan` identity. The same literal value is not applied to iOS because Apple bundle identifiers cannot contain underscores; iOS remains unchanged until the owner selects a valid permanent alternative.
 - `docs/store/PRIVACY_POLICY.md` is the canonical source for the public HTML policy. The localized in-app policy is a compact rendering of the same material data practices and contact information.
 - Production AdMob identifiers stay out of the release candidate until the owner completes AdMob setup. Development continues using Google's dedicated test identifiers; `docs/store/ADMOB_SETUP.md` is the release procedure.
+
+## Pre-beta gameplay and UX review decisions
+
+Date: 2026-10-14
+
+- HK-030 store submission is paused for a retention and presentation redesign.
+  Passing engineering tests and having valid store art do not prove that the
+  current product loop is engaging enough for a monetized audience.
+- The kontrakan becomes the persistent full-screen interface. Rent, tenant
+  needs, repairs, and incidents should be anchored to world objects; Flutter
+  remains responsible for accessible HUD, navigation, and layered panels.
+- The existing ten missions remain useful Chapter 1 content but cannot be the
+  repeat loop. Saved daily contracts and character-specific tenant requests are
+  the recommended recurring layers.
+- The generated redesign image is a composition reference, not a production
+  asset or authorization to bake localized text into raster UI.
+- The current 19.2-second track remains prototype fallback. Premium audio needs
+  a longer musical identity, ambience, adaptive incident tension, and a broader
+  feedback set; synthesized placeholders are not an acceptable final substitute.
+- IAP and live ads remain deferred until the free core loop is satisfying and
+  real-player retention validation has been completed.
+- The first four-room kontrakan is Chapter 1 rather than the complete game.
+  Full occupancy opens optimization and portfolio expansion; prior properties
+  keep earning and remain revisitable instead of being discarded by a hard
+  prestige reset.
+- At least one second playable property or equivalent progression stage is a
+  pre-monetization requirement. Later property names and exact room counts stay
+  provisional until the recurring loop has been playtested.
+- The redesign is tracked as HK-030-A through HK-030-F before final HK-030
+  acceptance. HK-030-A is deliberately presentation-only so the full-screen
+  foundation can be reviewed before economy and save-schema expansion.

@@ -535,11 +535,55 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 - [x] **HK-027-B** Prepare and integrate the selected production-style image/audio assets before privacy and beta work. Extract clean transparent assets from image sheets #1–#4; use image #3 for the cutaway/environment, image #4 for the four ghosts, selected compatible items/effects from image #2, and text-free surfaces/icons from image #1. Create normalized multi-frame `idle`, `happy`, `angry`, and `special` ghost animations from the selected character art; preserve live Flutter localization rather than baked image text; replace or supplement generated audio only after loop, loudness, and lifecycle checks. **Accept:** all four ghosts visibly animate from state in Flame with stable bounds/anchors; the cutaway and supported UI use cleaned assets without baked localized text or unintended currencies; audio remains optional and lifecycle-safe; asset provenance and manifest are documented; tests/analyzer and Android debug build pass with no gameplay-rule changes.
 - [x] **HK-028** Consent/privacy settings, error logging, crash-reporting integration when configured. **Accept:** offline game playable if external services fail.
 - [x] **HK-029** Unit/widget/integration/lifecycle/device regression testing and performance pass. **Accept:** agreed target devices responsive; no high-severity known save/economy issues.
-- [ ] **HK-030** App icon, screenshots, localization, privacy policy, Android closed test build. **Accept:** store material and functioning closed beta package prepared. **Status:** locally prepared and verified; Android ID confirmed; blocked on an Apple-compatible iOS ID, public privacy URL, production ad IDs, upload signing, paid developer accounts, and store closed-track validation.
+- [ ] **HK-030** App icon, screenshots, localization, privacy policy, Android closed test build. **Accept:** store material and functioning closed beta package prepared. **Status:** local release preparation is verified and the Android ID is confirmed, but submission is paused until HK-030-A through HK-030-F pass; it then remains dependent on an Apple-compatible iOS ID, public privacy URL, production ad IDs, upload signing, paid developer accounts, and store closed-track validation.
+
+**Pre-beta product review (2026-10-14):** player testing found that the current
+app-shell UI, linear one-time missions, global collection controls, sparse repeat
+actions, and 19.2-second static music loop do not yet meet the intended commercial
+tycoon experience. Pause HK-030 submission work and execute the UX-R1 through
+UX-R6 proposal in `docs/GAMEPLAY_UX_REVIEW.md` before final closed-beta acceptance.
+The proposal does not authorize IAP or live advertising; those remain gated on a
+satisfying free core loop and retention validation.
+
+### Milestone M6-R — Retention and presentation redesign
+
+M6-R is required before HK-030 can be accepted. Complete these tickets in order;
+do not combine the presentation shell, new economy state, recurring content, and
+audio into one change.
+
+- [ ] **HK-030-A / UX-R1 — Full-screen world shell.** Replace the application-like home layout with an edge-to-edge, aspect-aware kontrakan scene; add a compact themed top HUD, a four-destination bottom navigation shell, anchored prototype markers, and safe-area/responsive behavior. Remove the persistent title bar, black/empty framing bands, and stacked rent/ad/complaint buttons from the main composition while keeping every existing action reachable. **Accept:** the kontrakan is the dominant surface on compact and large portrait phones; HUD values remain localized and accessible; rooms and ghosts remain tappable; settings, missions, language, collection, rewarded collection, incidents, and complaints still have reachable temporary routes; no simulation, balance, save schema, ad-claim, or audio behavior changes; widget/Flame regression tests, analyzer, and Android debug build pass.
+- [ ] **HK-030-B / UX-R2 — Themed interaction system.** Build shared game-panel primitives and redesign room, ghost, mission, incident, complaint, offline-return, and result flows with clear hierarchy, previews, and one primary action. **Accept:** no primary gameplay flow uses a generic unstyled `AlertDialog`; all panels handle Indonesian/English, compact/large portrait layouts, keyboard/text scaling, and duplicate-tap safety.
+- [ ] **HK-030-C / UX-R3 — In-world rent collection.** Introduce deterministic per-room claimable balances, room coin bubbles, collect-one/collect-all feedback, offline contribution summary, and an optional rewarded offer only after normal collection. **Accept:** total earnings remain chunk-independent and reload-safe; individual plus collect-all claims cannot duplicate value; ads never gate base rent; room-to-HUD feedback is visible and accessible.
+- [ ] **HK-030-D / UX-R4 — Repeatable session goals.** Present existing missions as Chapter 1, then add saved daily contracts, tenant requests, progress feedback, and a daily reward chest selected only from unlocked mechanics. **Accept:** a returning player has at least three meaningful available actions; goals cannot require ads, locked content, or undoing a valid layout; refresh/claim behavior is deterministic, localized, and reload-safe.
+- [ ] **HK-030-E / UX-R5 — Visible progression and property portfolio.** Add owned furniture, visible room tiers, deliberate crystal sinks, ghost collection/story progression, and the portfolio foundation in which the original four-room kontrakan is the first property rather than the whole game. Add at least one second playable property/progression stage before monetized beta. **Accept:** filling all four initial rooms unlocks optimization and expansion rather than an end state; prior properties retain value and can be revisited; property IDs, balances, unlocks, and saves are deterministic; purchases are not required.
+- [ ] **HK-030-F / UX-R6 — Audio identity and game feel.** Replace the short static presentation with longer horror-comedy music, ambient and incident layers, expanded UI/tenant feedback, particles, optional haptics, reduced-motion handling, and final loudness/device checks. **Accept:** a 20-minute session does not expose an obvious short-loop experience; lifecycle/mute/volume behavior remains correct; missing cosmetic effects cannot block play.
+
+### HK-030-A implementation brief
+
+1. Preserve the pure-Dart simulation and current save schema. This ticket is a
+   presentation and navigation re-composition only.
+2. Keep `HantuGame`/Flame responsible for the interactive world and Flutter
+   responsible for safe areas, HUD, navigation, semantic controls, and panels.
+3. Make the world viewport aspect-aware. Do not solve full-screen layout by
+   stretching the 360×360 art or cropping room hit targets outside the safe
+   interaction region.
+4. Introduce reusable themed HUD/navigation primitives using Flutter-drawn
+   surfaces first. Raster decorations may be generated later after layout,
+   localization, and accessibility behavior are proven.
+5. Prototype room markers from existing state only. Per-room persisted rent is
+   explicitly HK-030-C; HK-030-A must not invent or migrate economy state.
+6. Temporary routes may reuse current panels during HK-030-A. Their visual
+   replacement belongs to HK-030-B, but every current action must remain
+   reachable throughout the transition.
+7. Add golden/screenshot-style structural assertions only where stable; retain
+   behavioral widget tests for actions, semantics, safe areas, compact/large
+   viewports, and Flame room/ghost taps.
+8. Use `docs/gameplay_ux_redesign_concept.png` as hierarchy and composition
+   direction, not pixel-perfect output and not a source of baked localized text.
 
 ### Milestone ordering/dependencies
 
-`M1 foundation → M2 tenant logic → M3 economy + M4 incidents (may overlap) → M5 tutorial → M6 polish/ads/beta`.
+`M1 foundation → M2 tenant logic → M3 economy + M4 incidents (may overlap) → M5 tutorial → M6 polish/privacy → M6-R retention and presentation → HK-030 closed beta`.
 
 **Estimated solo part-time planning:** M1 1–2 weeks, M2 2 weeks, M3 1–2 weeks, M4 2 weeks, M5 1–2 weeks, M6 2–3 weeks. Rough total: **9–13 weeks**, highly dependent on art, time availability, and test scope.
 
