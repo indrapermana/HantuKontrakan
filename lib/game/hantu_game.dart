@@ -1,7 +1,11 @@
+import 'dart:ui' as ui;
+
 import 'package:flame/camera.dart';
 import 'package:flame/game.dart';
 
+import 'assets/game_assets.dart';
 import '../simulation/models/game_state.dart';
+import '../simulation/models/ghost.dart';
 import '../simulation/systems/happiness_system.dart';
 import 'world/kontrakan_world.dart';
 
@@ -27,6 +31,11 @@ class HantuGame extends FlameGame {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    final cutawayImage = await images.load(GameAssets.cutaway);
+    final ghostAtlases = <GhostKind, ui.Image>{
+      for (final entry in GameAssets.ghostAtlases.entries)
+        entry.key: await images.load(entry.value),
+    };
     world.add(
       KontrakanWorld(
         state: state,
@@ -36,6 +45,8 @@ class HantuGame extends FlameGame {
         roomLabelFor: roomLabelFor,
         happinessLabelFor: happinessLabelFor,
         lockedLabel: lockedLabel,
+        cutawayImage: cutawayImage,
+        ghostAtlases: ghostAtlases,
       ),
     );
   }

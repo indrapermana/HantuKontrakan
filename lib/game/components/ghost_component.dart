@@ -14,12 +14,18 @@ class GhostComponent extends PositionComponent with TapCallbacks {
     required this.happiness,
     required super.position,
     required this.onTap,
-  }) : super(size: Vector2(82, 100), anchor: Anchor.center);
+    this.atlasImage,
+  }) : super(size: Vector2(110, 100), anchor: Anchor.center);
 
   final GhostState ghost;
   final int happiness;
   final void Function() onTap;
+  final Image? atlasImage;
   double _elapsed = 0;
+  SpriteAnimationComponent? _spriteComponent;
+  Map<GhostAnimationState, SpriteAnimation> _animations = const {};
+
+  bool get usesAtlas => _spriteComponent != null;
 
   GhostAnimationState get animationState {
     if (ghost.specialActionActive) return GhostAnimationState.special;
@@ -36,8 +42,54 @@ class GhostComponent extends PositionComponent with TapCallbacks {
   };
 
   @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    final image = atlasImage;
+    if (image == null) return;
+    final cellSize = Vector2(image.width / 4, image.height / 4);
+    _animations = {
+      for (final state in GhostAnimationState.values)
+        state: SpriteAnimation.spriteList(
+          [
+            for (var column = 0; column < 4; column++)
+              Sprite(
+                image,
+                srcPosition: Vector2(
+                  column * cellSize.x,
+                  state.index * cellSize.y,
+                ),
+                srcSize: cellSize,
+              ),
+          ],
+          stepTime: switch (state) {
+            GhostAnimationState.idle => 0.24,
+            GhostAnimationState.happy => 0.16,
+            GhostAnimationState.angry => 0.13,
+            GhostAnimationState.special => 0.14,
+          },
+        ),
+    };
+    _spriteComponent = SpriteAnimationComponent(
+      animation: _animations[animationState],
+      position: Vector2(0, 8),
+      size: Vector2(110, 82),
+    );
+    add(_spriteComponent!);
+  }
+
+  @override
   void update(double dt) {
     _elapsed += dt;
+    final sprite = _spriteComponent;
+    if (sprite != null) {
+      final target = _animations[animationState];
+      if (target != null && !identical(sprite.animation, target)) {
+        sprite.animation = target;
+      }
+      angle = 0;
+      super.update(dt);
+      return;
+    }
     angle = switch (animationState) {
       GhostAnimationState.idle => math.sin(_elapsed * 3) * 0.025,
       GhostAnimationState.happy => math.sin(_elapsed * 5) * 0.04,
@@ -49,6 +101,10 @@ class GhostComponent extends PositionComponent with TapCallbacks {
 
   @override
   void render(Canvas canvas) {
+    if (_spriteComponent != null) {
+      super.render(canvas);
+      return;
+    }
     final state = animationState;
     final bounce = switch (state) {
       GhostAnimationState.idle => math.sin(_elapsed * 2) * 1.5,

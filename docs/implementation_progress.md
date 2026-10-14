@@ -419,8 +419,8 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-027-B and all later tickets.
-- Furniture purchasing/inventory, automatic damage generation, tenant departures, IAP, cloud/network services, and final artwork.
+- HK-028 and all later tickets.
+- Furniture purchasing/inventory, automatic damage generation, tenant departures, IAP, cloud/network services, and final art refinement.
 
 ## Verification evidence
 
@@ -658,18 +658,37 @@ Remaining validation:
 
 ### HK-027-B — Production-style visual/audio asset integration
 
-Status: planned on 2026-10-14; implementation has not started.
+Status: implemented and locally verified on 2026-10-14.
 
-- Inserted as the next M6 ticket after HK-027 and before HK-028.
-- Selected image #3 as the primary cutaway/environment source, image #4 as the four-ghost character source, compatible items/effects from image #2, and text-free UI surfaces/icons/portraits from image #1.
-- The old pixel-art ZIP remains prototype reference material rather than the target art direction.
-- Planned character work includes clean RGBA extraction, consistent canvas/ground line/anchor/scale, state-specific animation frames, Flame animation mapping, and visual regression coverage for `idle`, `happy`, `angry`, and `special` on all four ghosts.
-- Planned UI work keeps Indonesian/English strings, values, dialogue, and accessibility in Flutter. Text and example counters baked into the source sheets will not be shipped as functional UI.
-- Planned asset filtering excludes the sheet's `Rp`, cash, gem, and energy symbols unless a later approved design explicitly introduces the corresponding mechanic. Koin Arwah remains the current currency.
-- Planned audio work evaluates the supplied 16 WAV effects and two short music loops for seams, loudness, repetition, lifecycle behavior, and bundle size before replacing the existing generated placeholders.
-- Required delivery evidence: documented provenance/manifest, cleaned individual runtime assets, state-driven Flame animations, localized Flutter UI, relevant tests, `flutter analyze`, full `flutter test`, and Android debug build.
+- Used the built-in image-generation workflow with the user-supplied composite sheets as identity/style references. Generated four transparent 4×4 atlases: Pocong, Kuntilanak, Tuyul, and Genderuwo, each with four left-to-right frames for `idle`, `happy`, `angry`, and `special`.
+- Normalized every atlas to 1448×1084 RGBA pixels, producing exact 362×271 cells. Flame slices the state rows deterministically and changes the active loop from existing ghost state/happiness without changing simulation rules.
+- Added a transparent 2×2 Indonesian kontrakan cutaway derived from image #3's environment direction. The existing room IDs, hit areas, localization labels, locked overlays, and tap routing remain independent components above the art.
+- Added an original text-free 128×128 Koin Arwah icon derived from image #2's rendering direction and a text-free 128×128 settings button derived from image #1. Wallet values, tooltips, and semantics remain live localized Flutter content; `Rp`, cash, gems, energy, and baked example counters were not imported.
+- Replaced the generated audio tones with the selected supplied `cozy_night_loop.wav` plus coin, upgrade, unlock, incident, repair, and ghost WAV cues. The existing injectable audio service, independent music/effect volume, mute behavior, lifecycle pause/resume, low-latency effects, and failure isolation are unchanged.
+- Added a checked-in asset manifest documenting source notes, atlas layout, state order, anchor contract, runtime paths, selected audio, and excluded concepts. Original composite source sheets remain outside the repository.
+- Retained the procedural ghost renderer as a test/degraded fallback when no atlas is injected; production `HantuGame` preloads and injects all generated assets.
 
-Implementation boundary:
+Implementation decisions and assumptions:
 
-- HK-027-B is currently documentation and scope only. No supplied image/audio file has been copied into the repository, no animation has been generated, and no runtime code has changed.
-- HK-028 remains deferred until HK-027-B meets its acceptance criteria.
+- Image generation created state loops from the selected key-pose art rather than claiming the composite sheet already contained movement frames. Subtle pose variation is intentional; exact pixel interpolation between independently painted frames is not assumed.
+- The 4×4 atlas contract is presentation-only: row order is stable and documented, while animation timing differs by emotional state. All special effects remain within the same cell and character component anchor.
+- The environment is one composited background because HK-027-B does not add furniture purchasing or placement. Existing room components remain independently selectable, and future interactive furniture can be layered separately.
+- Only audio cues already represented by `AudioCue` were adopted. Unused pack concepts do not create new commands, content, or gameplay behavior.
+- Full production mastering, additional UI-surface replacement, and art polish can continue without changing these asset IDs or the simulation boundary.
+
+Verification:
+
+- Image-generation outputs were visually inspected before integration; each final workspace atlas preserves the intended ghost identity and contains sixteen transparent frames.
+- Focused asset, Flame, controller, app, and widget suite: all 38 tests passed after correcting nested Flutter asset registration.
+- `flutter test`: all 169 tests passed.
+- Asset tests verify the four-kind manifest, exact 4×4 RGBA dimensions, state order, bundled cutaway/icon, valid RIFF/WAVE headers, mono 44.1 kHz 16-bit music, and silent loop boundaries.
+- `flutter analyze`: no issues found.
+- `flutter build apk --debug`: succeeded at `build/app/outputs/flutter-apk/app-debug.apk`, validating Android asset and audio packaging.
+- `rg 'package:(flutter|flame|audioplayers)' lib/simulation`: no matches; no deterministic rule, save schema, economy value, or monetization flow changed.
+- The implementation-plan HK-027-B checkbox is synchronized with this tracker.
+
+Remaining validation:
+
+- No emulator or physical device was attached. Atlas scale/readability, perceived animation smoothness, music repetition, effect loudness, and audible loop quality still require an actual-device art/audio review.
+- The selected audio remains prototype material per its supplied README. Final mastering or replacement can retain the current paths and adapter contract.
+- HK-028 is now the next unfinished ticket.

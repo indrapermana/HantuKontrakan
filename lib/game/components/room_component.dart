@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,8 @@ class RoomComponent extends PositionComponent with TapCallbacks {
     required this.lockedLabel,
     required super.position,
     required this.onTap,
+    this.ghostAtlas,
+    this.usesCutawayArt = false,
     this.onGhostTap,
     this.locked = false,
   }) : super(size: Vector2(170, 132));
@@ -27,6 +31,8 @@ class RoomComponent extends PositionComponent with TapCallbacks {
   final String lockedLabel;
   final void Function() onTap;
   final void Function()? onGhostTap;
+  final ui.Image? ghostAtlas;
+  final bool usesCutawayArt;
   final bool locked;
   final Paint _wallPaint = Paint()..color = const Color(0xFF554572);
   final Paint _floorPaint = Paint()..color = const Color(0xFF8A6650);
@@ -50,6 +56,7 @@ class RoomComponent extends PositionComponent with TapCallbacks {
           happiness: happiness!,
           position: Vector2(size.x / 2, 72),
           onTap: onGhostTap ?? onTap,
+          atlasImage: ghostAtlas,
         )..scale = Vector2.all(0.72),
       );
     }
@@ -57,12 +64,14 @@ class RoomComponent extends PositionComponent with TapCallbacks {
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(size.toRect(), const Radius.circular(8)),
-      _wallPaint,
-    );
-    canvas.drawRect(Rect.fromLTWH(0, size.y - 24, size.x, 24), _floorPaint);
-    canvas.drawRect(const Rect.fromLTWH(16, 35, 30, 35), _windowPaint);
+    if (!usesCutawayArt) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(size.toRect(), const Radius.circular(8)),
+        _wallPaint,
+      );
+      canvas.drawRect(Rect.fromLTWH(0, size.y - 24, size.x, 24), _floorPaint);
+      canvas.drawRect(const Rect.fromLTWH(16, 35, 30, 35), _windowPaint);
+    }
     _labelPaint.render(canvas, roomLabel, Vector2(10, 9));
     if (ghost != null) {
       _labelPaint.render(canvas, happinessLabel!, Vector2(10, 107));

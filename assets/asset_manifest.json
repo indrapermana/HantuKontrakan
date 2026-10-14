@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "ticket": "HK-027-B",
+  "createdOn": "2026-10-14",
+  "sourceNotes": {
+    "images": "Derived with the built-in OpenAI image generation tool from user-supplied composite sheets dated 2026-10-14. Original composites remain outside the repository.",
+    "audio": "Selected unchanged from the user-supplied HANTU_KONTRAKAN_AUDIO_ASSET_PACK.zip, whose README describes the files as original synthesized prototype assets."
+  },
+  "ghostAtlases": {
+    "layout": {"columns": 4, "rows": 4, "pixelSize": [1448, 1084], "cellSize": [362, 271]},
+    "rowOrder": ["idle", "happy", "angry", "special"],
+    "frameOrder": "left-to-right",
+    "anchor": "center with a stable bottom baseline inside each cell",
+    "files": [
+      "images/ghosts/pocong_atlas.png",
+      "images/ghosts/kuntilanak_atlas.png",
+      "images/ghosts/tuyul_atlas.png",
+      "images/ghosts/genderuwo_atlas.png"
+    ]
+  },
+  "environment": ["images/environment/kontrakan_cutaway.png"],
+  "ui": [
+    {"file": "images/ui/koin_arwah.png", "pixelSize": [128, 128], "containsText": false, "sourceDirection": "image #2"},
+    {"file": "images/ui/settings.png", "pixelSize": [128, 128], "containsText": false, "sourceDirection": "image #1"}
+  ],
+  "audio": {
+    "music": ["audio/music/cozy_night_loop.wav"],
+    "effects": [
+      "audio/sfx/coin_collect.wav",
+      "audio/sfx/room_upgrade.wav",
+      "audio/sfx/room_unlock.wav",
+      "audio/sfx/event_alert.wav",
+      "audio/sfx/repair.wav",
+      "audio/sfx/ghost_appear.wav"
+    ]
+  },
+  "excludedSheetConcepts": ["Rp", "cash", "premium gem", "energy"]
+}

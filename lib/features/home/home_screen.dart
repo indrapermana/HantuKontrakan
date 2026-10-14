@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../application/game_controller.dart';
 import '../../features/debug/debug_hud.dart';
 import '../../game/hantu_game.dart';
+import '../../game/assets/game_assets.dart';
 import '../../l10n/app_localizations.dart';
 import '../../simulation/constants/game_balance.dart';
 import '../../simulation/content/incident_definitions.dart';
@@ -49,7 +50,11 @@ class HomeScreen extends StatelessWidget {
                   context: context,
                   builder: (_) => AudioSettingsDialog(controller: controller),
                 ),
-                icon: const Icon(Icons.settings),
+                icon: Image.asset(
+                  GameAssets.settingsIcon,
+                  width: 30,
+                  height: 30,
+                ),
               ),
               IconButton(
                 key: const Key('language-button'),
@@ -75,7 +80,12 @@ class HomeScreen extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
                   child: Row(
                     children: [
-                      const Icon(Icons.monetization_on, color: Colors.amber),
+                      Image.asset(
+                        GameAssets.spiritCoin,
+                        width: 28,
+                        height: 28,
+                        semanticLabel: strings.spiritCoins(state.walletCoins),
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         strings.spiritCoins(state.walletCoins),
