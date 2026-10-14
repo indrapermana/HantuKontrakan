@@ -531,7 +531,7 @@ Complete each ticket with tests and explicit acceptance criteria. Use these stab
 ### Milestone M6 — Polish, ads, beta
 
 - [x] **HK-026** SFX/music with mute and volume settings. **Accept:** background/resume audio works and settings persist.
-- [ ] **HK-027** Rewarded ad integration behind platform adapter, test units, safe claims. **Accept:** ad callbacks grant bonus exactly once and failure never blocks collecting.
+- [x] **HK-027** Rewarded ad integration behind platform adapter, test units, safe claims. **Accept:** ad callbacks grant bonus exactly once and failure never blocks collecting.
 - [ ] **HK-028** Consent/privacy settings, error logging, crash-reporting integration when configured. **Accept:** offline game playable if external services fail.
 - [ ] **HK-029** Unit/widget/integration/lifecycle/device regression testing and performance pass. **Accept:** agreed target devices responsive; no high-severity known save/economy issues.
 - [ ] **HK-030** App icon, screenshots, localization, privacy policy, Android closed test build. **Accept:** store material and functioning closed beta package prepared.

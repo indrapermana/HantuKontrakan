@@ -3,6 +3,7 @@ import 'package:hantu_kontrakan/application/game_controller.dart';
 import 'package:hantu_kontrakan/application/simulation_runtime.dart';
 import 'package:hantu_kontrakan/services/analytics_service.dart';
 import 'package:hantu_kontrakan/services/audio_service.dart';
+import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/models/ghost.dart';
@@ -132,6 +133,92 @@ void main() {
       expect(controller.state.walletCoins, 202);
       expect(saves.storedState?.walletCoins, 202);
       expect(saves.storedState?.completedRentClaimIds, {'safe-claim'});
+    },
+  );
+
+  test('duplicate earned callbacks grant one snapshotted bonus', () async {
+    final analytics = _RecordingAnalyticsService();
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(
+        GameState.seeded().copyWith(
+          analyticsConsentGranted: true,
+          pendingRentMicrocoins: 2500000,
+        ),
+      ),
+    );
+    final controller = GameController(
+      saveService: saves,
+      analyticsService: analytics,
+      rewardedAdService: _DuplicateEarnedAdService(),
+      clock: _FixedClock(DateTime(2026, 10, 14, 12)),
+    );
+    await controller.initialize();
+    analytics.events.clear();
+
+    final result = await controller.collectAllRentWithRewardedAd();
+
+    expect(result, isA<RewardedRentBonusEarned>());
+    expect(controller.state.walletCoins, 204);
+    expect(controller.state.pendingRentMicrocoins, 500000);
+    expect(controller.state.completedRentClaimIds, hasLength(1));
+    expect(controller.state.completedRewardedRentClaimIds, hasLength(1));
+    expect(controller.state.rewardedRentBonusCount, 1);
+    expect(controller.state.pendingRewardedRentClaim, isNull);
+    expect(analytics.events.map((event) => event.name), [
+      GameplayAnalyticsEventName.rentCollected,
+      GameplayAnalyticsEventName.adOfferShown,
+      GameplayAnalyticsEventName.adStarted,
+      GameplayAnalyticsEventName.adRewardEarned,
+    ]);
+  });
+
+  test(
+    'unavailable or throwing ads retain base payout and clear pending bonus',
+    () async {
+      for (final adService in <RewardedAdService>[
+        const UnavailableRewardedAdService(),
+        _ThrowingRewardedAdService(),
+      ]) {
+        final saves = MemorySaveService(
+          initialResult: SaveLoaded(
+            GameState.seeded().copyWith(pendingRentMicrocoins: 2500000),
+          ),
+        );
+        final controller = GameController(
+          saveService: saves,
+          rewardedAdService: adService,
+        );
+        await controller.initialize();
+
+        final result = await controller.collectAllRentWithRewardedAd();
+
+        expect(result, isA<RewardedRentBaseOnly>());
+        expect(controller.state.walletCoins, 202);
+        expect(controller.state.pendingRentMicrocoins, 500000);
+        expect(controller.state.pendingRewardedRentClaim, isNull);
+        expect(controller.state.completedRewardedRentClaimIds, isEmpty);
+      }
+    },
+  );
+
+  test(
+    'reload cancels an interrupted ad without losing its base payout',
+    () async {
+      final initial = GameRules.beginRewardedRentClaim(
+        GameState.seeded().copyWith(pendingRentMicrocoins: 2000000),
+        'interrupted',
+        '2026-10-14',
+      );
+      final saves = MemorySaveService(initialResult: SaveLoaded(initial));
+
+      final controller = GameController(saveService: saves);
+      await controller.initialize();
+
+      expect(controller.state.walletCoins, 202);
+      expect(controller.state.pendingRewardedRentClaim, isNull);
+      expect(controller.state.completedRentClaimIds, {'interrupted'});
+      expect(controller.state.completedRewardedRentClaimIds, isEmpty);
+      expect(saves.storedState?.pendingRewardedRentClaim, isNull);
     },
   );
 
@@ -476,6 +563,26 @@ class _FailingAnalyticsService implements AnalyticsService {
   @override
   Future<void> record(GameplayAnalyticsEvent event) async {
     throw StateError('offline');
+  }
+}
+
+class _DuplicateEarnedAdService implements RewardedAdService {
+  @override
+  Future<RewardedAdOutcome> showRewardedAd({
+    required Future<void> Function() onRewardEarned,
+  }) async {
+    await onRewardEarned();
+    await onRewardEarned();
+    return RewardedAdOutcome.earned;
+  }
+}
+
+class _ThrowingRewardedAdService implements RewardedAdService {
+  @override
+  Future<RewardedAdOutcome> showRewardedAd({
+    required Future<void> Function() onRewardEarned,
+  }) {
+    throw StateError('ad SDK failed');
   }
 }
 

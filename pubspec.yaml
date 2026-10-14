@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   flame: ^1.35.1
   audioplayers: ^6.7.1
+  google_mobile_ads: ^5.1.0
   shared_preferences: ^2.5.5
 
 dev_dependencies:

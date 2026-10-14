@@ -11,6 +11,7 @@ import 'offline_earnings_system.dart';
 import 'progression_system.dart';
 import 'rent_system.dart';
 import 'repair_system.dart';
+import 'rewarded_rent_system.dart';
 import 'tutorial_system.dart';
 
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
@@ -97,6 +98,18 @@ abstract final class GameRules {
     );
     return TutorialSystem.afterRentCollection(collected);
   }
+
+  static GameState beginRewardedRentClaim(
+    GameState state,
+    String claimId,
+    String localDayKey,
+  ) => RewardedRentSystem.begin(state, claimId, localDayKey);
+
+  static GameState grantRewardedRentBonus(GameState state, String claimId) =>
+      RewardedRentSystem.grant(state, claimId);
+
+  static GameState cancelRewardedRentClaim(GameState state, String claimId) =>
+      RewardedRentSystem.cancel(state, claimId);
 
   static GameState resolveIncident(
     GameState state,

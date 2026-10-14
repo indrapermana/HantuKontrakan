@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../services/analytics_service.dart';
 import '../services/audio_service.dart';
+import '../services/rewarded_ad_service.dart';
 import '../services/save_service.dart';
 import '../simulation/commands/game_command.dart';
 import '../simulation/constants/game_balance.dart';
@@ -14,6 +15,7 @@ import '../simulation/models/tutorial_step.dart';
 import '../simulation/systems/game_rules.dart';
 import '../simulation/systems/happiness_system.dart';
 import '../simulation/systems/repair_system.dart';
+import '../simulation/systems/rewarded_rent_system.dart';
 import 'simulation_runtime.dart';
 
 class GameController extends ChangeNotifier {
@@ -21,21 +23,25 @@ class GameController extends ChangeNotifier {
     required SaveService saveService,
     AnalyticsService analyticsService = const NoopAnalyticsService(),
     AudioService audioService = const NoopAudioService(),
+    RewardedAdService rewardedAdService = const UnavailableRewardedAdService(),
     GameClock clock = const SystemGameClock(),
     int randomSeed = GameBalance.defaultRandomSeed,
   }) : _saveService = saveService,
        _analyticsService = analyticsService,
        _audioService = audioService,
+       _rewardedAdService = rewardedAdService,
        _clock = clock,
        _randomSource = SeededRandomSource(randomSeed);
 
   final SaveService _saveService;
   final AnalyticsService _analyticsService;
   final AudioService _audioService;
+  final RewardedAdService _rewardedAdService;
   final GameClock _clock;
   final SeededRandomSource _randomSource;
   int _rentClaimSequence = 0;
   int _repairSequence = 0;
+  int _rewardedRentSequence = 0;
   Future<void> _lifecycleOperation = Future<void>.value();
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
@@ -62,6 +68,10 @@ class GameController extends ChangeNotifier {
   int get pendingRentCoins =>
       state.pendingRentMicrocoins ~/ GameBalance.microcoinsPerCoin;
   int repairCostFor(String roomId) => RepairSystem.costFor(state, roomId);
+  int get rewardedRentBonusesRemaining =>
+      RewardedRentSystem.remainingForDay(state, _localDayKey(_clock.now()));
+  bool get canCollectRewardedRent =>
+      RewardedRentSystem.canBegin(state, _localDayKey(_clock.now()));
 
   Future<void> initialize() async {
     _loadResult = await _saveService.load();
@@ -70,6 +80,13 @@ class GameController extends ChangeNotifier {
       SaveNotFound() => GameState.newGame(),
       SaveRejected() => GameState.seeded(),
     });
+    final interruptedRewardedClaim = state.pendingRewardedRentClaim;
+    if (interruptedRewardedClaim != null) {
+      _domainController.dispatch(
+        CancelRewardedRentClaim(claimId: interruptedRewardedClaim.id),
+      );
+      await _saveService.save(state);
+    }
     final beforeResume = state;
     final resumed = _domainController.dispatch(
       ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
@@ -185,6 +202,62 @@ class GameController extends ChangeNotifier {
     await _dispatch(CollectAllRent(claimId: resolvedClaimId));
   }
 
+  Future<RewardedRentCollectionResult> collectAllRentWithRewardedAd() async {
+    final claimId =
+        'rewarded-rent-${_clock.now().microsecondsSinceEpoch}-$revision-${_rewardedRentSequence++}';
+    final bonusCoins = pendingRentCoins;
+    final began = await _dispatch(
+      BeginRewardedRentClaim(
+        claimId: claimId,
+        localDayKey: _localDayKey(_clock.now()),
+      ),
+    );
+    if (!began) return RewardedRentCollectionResult.noClaim;
+
+    await _record(
+      GameplayAnalyticsEvent(GameplayAnalyticsEventName.adOfferShown, {
+        'placement': 'double_rent',
+      }),
+    );
+    await _record(
+      GameplayAnalyticsEvent(GameplayAnalyticsEventName.adStarted, {
+        'placement': 'double_rent',
+      }),
+    );
+
+    var bonusGranted = false;
+    RewardedAdOutcome outcome;
+    try {
+      outcome = await _rewardedAdService.showRewardedAd(
+        onRewardEarned: () async {
+          final granted = await _dispatch(
+            GrantRewardedRentBonus(claimId: claimId),
+          );
+          bonusGranted = bonusGranted || granted;
+        },
+      );
+    } on Object {
+      outcome = RewardedAdOutcome.failed;
+    }
+
+    if (state.pendingRewardedRentClaim?.id == claimId) {
+      await _dispatch(CancelRewardedRentClaim(claimId: claimId));
+    }
+    if (!bonusGranted) {
+      await _record(
+        GameplayAnalyticsEvent(GameplayAnalyticsEventName.adFailed, {
+          'placement': 'double_rent',
+          'reason_code': outcome.name,
+        }),
+      );
+      return RewardedRentCollectionResult.baseOnly(baseCoins: bonusCoins);
+    }
+    return RewardedRentCollectionResult.bonusEarned(
+      baseCoins: bonusCoins,
+      bonusCoins: bonusCoins,
+    );
+  }
+
   Future<bool> resolveIncident(
     String incidentId,
     String choiceId, {
@@ -265,7 +338,9 @@ class GameController extends ChangeNotifier {
       cue = AudioCue.incident;
     } else {
       cue = switch (command) {
-        CollectAllRent() => AudioCue.coin,
+        CollectAllRent() ||
+        BeginRewardedRentClaim() ||
+        GrantRewardedRentBonus() => AudioCue.coin,
         UpgradeRoom() => AudioCue.upgrade,
         UnlockRoom() => AudioCue.unlock,
         RepairRoom() => AudioCue.repair,
@@ -342,6 +417,19 @@ class GameController extends ChangeNotifier {
             'coins': after.walletCoins - before.walletCoins,
           }),
         );
+      case BeginRewardedRentClaim():
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.rentCollected, {
+            'coins': after.walletCoins - before.walletCoins,
+          }),
+        );
+      case GrantRewardedRentBonus():
+        events.add(
+          GameplayAnalyticsEvent(GameplayAnalyticsEventName.adRewardEarned, {
+            'placement': 'double_rent',
+            'coins': after.walletCoins - before.walletCoins,
+          }),
+        );
       case ResolveIncident(:final incidentId, :final choiceId):
         events
           ..add(
@@ -390,6 +478,47 @@ class GameController extends ChangeNotifier {
     unawaited(_runAudio(_audioService.dispose));
     super.dispose();
   }
+}
+
+sealed class RewardedRentCollectionResult {
+  const RewardedRentCollectionResult();
+
+  static const noClaim = RewardedRentNoClaim();
+
+  factory RewardedRentCollectionResult.baseOnly({required int baseCoins}) =
+      RewardedRentBaseOnly;
+
+  factory RewardedRentCollectionResult.bonusEarned({
+    required int baseCoins,
+    required int bonusCoins,
+  }) = RewardedRentBonusEarned;
+}
+
+final class RewardedRentNoClaim extends RewardedRentCollectionResult {
+  const RewardedRentNoClaim();
+}
+
+final class RewardedRentBaseOnly extends RewardedRentCollectionResult {
+  const RewardedRentBaseOnly({required this.baseCoins});
+
+  final int baseCoins;
+}
+
+final class RewardedRentBonusEarned extends RewardedRentCollectionResult {
+  const RewardedRentBonusEarned({
+    required this.baseCoins,
+    required this.bonusCoins,
+  });
+
+  final int baseCoins;
+  final int bonusCoins;
+}
+
+String _localDayKey(DateTime value) {
+  final local = value.toLocal();
+  return '${local.year.toString().padLeft(4, '0')}-'
+      '${local.month.toString().padLeft(2, '0')}-'
+      '${local.day.toString().padLeft(2, '0')}';
 }
 
 extension on TutorialStep {

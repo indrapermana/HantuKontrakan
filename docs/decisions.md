@@ -250,3 +250,13 @@ Date: 2026-10-14
 Date: 2026-10-14
 
 - Production audio uses an injected `audioplayers` adapter with original generated placeholder WAV tones. Persisted mute/volume rules stay pure Dart, playback failures stay cosmetic, and lifecycle playback is serialized with offline pause/resume operations.
+
+## HK-027 rewarded-rent decisions
+
+Date: 2026-10-14
+
+- A rewarded collection is persisted in two stages: the base rent is committed before the platform request, while a separate pending bonus record stores the same claim ID, snapshotted whole-coin amount, and local day. This guarantees ad failure cannot block or undo collection and prevents later rent accrual from changing the advertised bonus.
+- The earned callback is the only path that grants the bonus. Completed rewarded IDs make duplicate or delayed callbacks no-ops, and application restart cancels an interrupted pending bonus without touching the committed base.
+- The daily limit counts only successful bonuses and uses the local day captured at offer start. Failed, dismissed, unavailable, and interrupted offers do not consume one of the three allowances.
+- The production adapter uses Google's Android/iOS sample application IDs and rewarded test-unit IDs with non-personalized requests. Replacing them with production identifiers is gated on HK-028 consent/privacy work and release configuration.
+- Google Mobile Ads remains outside `lib/simulation`; the service is injected at the application boundary, and adapter errors are treated as recoverable base-only outcomes.

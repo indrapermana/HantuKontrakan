@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/constants/game_balance.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
+import 'package:hantu_kontrakan/simulation/models/rewarded_rent_claim.dart';
 import 'package:hantu_kontrakan/simulation/models/room.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,7 +35,19 @@ void main() {
       reputation: 77,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
-      completedRentClaimIds: const {'rent-claim-1'},
+      completedRentClaimIds: const {
+        'rent-claim-1',
+        'reward-pending',
+        'reward-done',
+      },
+      pendingRewardedRentClaim: const RewardedRentClaim(
+        id: 'reward-pending',
+        bonusCoins: 12,
+        localDayKey: '2026-10-14',
+      ),
+      completedRewardedRentClaimIds: const {'reward-done'},
+      rewardedRentBonusDayKey: '2026-10-14',
+      rewardedRentBonusCount: 1,
       abilityCooldownSeconds: const {'pocong_01': 123},
       offlineRateSnapshotMicrocoinsPerMinute: 42000000,
       lastOfflineAccrualTimestampMillis: 1791864000000,
@@ -97,7 +110,16 @@ void main() {
     expect(loaded.activeSimulationSeconds, 0);
     expect(loaded.pendingRentMicrocoins, 12345678);
     expect(loaded.rentAccrualRemainder, 37);
-    expect(loaded.completedRentClaimIds, {'rent-claim-1'});
+    expect(loaded.completedRentClaimIds, {
+      'rent-claim-1',
+      'reward-pending',
+      'reward-done',
+    });
+    expect(loaded.pendingRewardedRentClaim?.id, 'reward-pending');
+    expect(loaded.pendingRewardedRentClaim?.bonusCoins, 12);
+    expect(loaded.completedRewardedRentClaimIds, {'reward-done'});
+    expect(loaded.rewardedRentBonusDayKey, '2026-10-14');
+    expect(loaded.rewardedRentBonusCount, 1);
     expect(loaded.abilityCooldownSeconds, {'pocong_01': 123});
     expect(loaded.offlineRateSnapshotMicrocoinsPerMinute, 42000000);
     expect(loaded.lastOfflineAccrualTimestampMillis, 1791864000000);
@@ -170,6 +192,26 @@ void main() {
     expect(migrated.soundMuted, isFalse);
     expect(migrated.musicVolume, 0.35);
     expect(migrated.soundVolume, 0.7);
+  });
+
+  test('version 18 save migrates with empty rewarded-ad claim state', () async {
+    final version18 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 18
+      ..remove('pendingRewardedRentClaim')
+      ..remove('completedRewardedRentClaimIds')
+      ..remove('rewardedRentBonusDayKey')
+      ..remove('rewardedRentBonusCount');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version18),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.pendingRewardedRentClaim, isNull);
+    expect(migrated.completedRewardedRentClaimIds, isEmpty);
+    expect(migrated.rewardedRentBonusDayKey, isNull);
+    expect(migrated.rewardedRentBonusCount, 0);
   });
 
   test('version 1 save migrates to current debug state defaults', () async {

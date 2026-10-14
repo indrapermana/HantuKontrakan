@@ -143,6 +143,25 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          key: const Key('collect-rent-rewarded'),
+                          onPressed: controller.canCollectRewardedRent
+                              ? () => _collectRewardedRent(context)
+                              : null,
+                          icon: const Icon(Icons.ondemand_video),
+                          label: Text(
+                            controller.rewardedRentBonusesRemaining == 0
+                                ? strings.rewardedRentDailyLimit
+                                : strings.rewardedRentButton(
+                                    controller.pendingRentCoins,
+                                    controller.rewardedRentBonusesRemaining,
+                                  ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       if (activeIncident != null) ...[
                         SizedBox(
                           width: double.infinity,
@@ -188,6 +207,26 @@ class HomeScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _collectRewardedRent(BuildContext context) async {
+    final result = await controller.collectAllRentWithRewardedAd();
+    if (!context.mounted) return;
+    final strings = AppLocalizations.of(context);
+    final message = switch (result) {
+      RewardedRentBonusEarned(:final bonusCoins) => strings.rewardedRentEarned(
+        bonusCoins,
+      ),
+      RewardedRentBaseOnly(:final baseCoins) => strings.rewardedRentBaseOnly(
+        baseCoins,
+      ),
+      RewardedRentNoClaim() => null,
+    };
+    if (message != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
+    }
   }
 
   Future<void> _showRoomDetails(BuildContext context, String roomId) async {

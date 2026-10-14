@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'app/app.dart';
 import 'services/audio_service.dart';
+import 'services/rewarded_ad_service.dart';
 import 'services/save_service.dart';
 
 Future<void> main() async {
@@ -15,6 +16,7 @@ Future<void> main() async {
     HantuKontrakanApp(
       saveService: SharedPreferencesSaveService(),
       audioService: AudioplayersAudioService(),
+      rewardedAdService: GoogleTestRewardedAdService(),
     ),
   );
 }

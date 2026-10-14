@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/app/app.dart';
+import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 
@@ -56,6 +57,33 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  testWidgets('rewarded collect grants base and earned bonus exactly once', (
+    tester,
+  ) async {
+    final state = GameState.seeded().copyWith(pendingRentMicrocoins: 2250000);
+    final saves = MemorySaveService(initialResult: SaveLoaded(state));
+    await tester.pumpWidget(
+      HantuKontrakanApp(
+        saveService: saves,
+        rewardedAdService: _EarnedRewardedAdService(),
+        locale: const Locale('en'),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('Watch test ad · 2 + 2 coins (3/3 left)'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('collect-rent-rewarded')));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('204 Spirit Coins'), findsOneWidget);
+    expect(find.text('Ad reward earned: +2 bonus coins'), findsOneWidget);
+    expect(saves.storedState?.pendingRentMicrocoins, 250000);
+    expect(saves.storedState?.completedRentClaimIds, hasLength(1));
+    expect(saves.storedState?.completedRewardedRentClaimIds, hasLength(1));
+    expect(saves.storedState?.rewardedRentBonusCount, 1);
   });
 
   testWidgets('new player completes the HK-021 tutorial vertical slice', (
@@ -209,4 +237,15 @@ void main() {
     expect(find.byKey(const Key('incident-button')), findsNothing);
     expect(saves.storedState?.walletCoins, 175);
   });
+}
+
+class _EarnedRewardedAdService implements RewardedAdService {
+  @override
+  Future<RewardedAdOutcome> showRewardedAd({
+    required Future<void> Function() onRewardEarned,
+  }) async {
+    await onRewardEarned();
+    await onRewardEarned();
+    return RewardedAdOutcome.earned;
+  }
 }

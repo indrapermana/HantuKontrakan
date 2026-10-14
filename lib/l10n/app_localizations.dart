@@ -122,6 +122,30 @@ abstract class AppLocalizations {
   /// **'Ambil Semua · {count} koin'**
   String collectAllRent(int count);
 
+  /// No description provided for @rewardedRentButton.
+  ///
+  /// In id, this message translates to:
+  /// **'Tonton iklan uji · {coins} + {coins} koin (sisa {remaining}/3)'**
+  String rewardedRentButton(int coins, int remaining);
+
+  /// No description provided for @rewardedRentDailyLimit.
+  ///
+  /// In id, this message translates to:
+  /// **'Batas bonus iklan harian tercapai'**
+  String get rewardedRentDailyLimit;
+
+  /// No description provided for @rewardedRentEarned.
+  ///
+  /// In id, this message translates to:
+  /// **'Hadiah iklan diterima: bonus +{coins} koin'**
+  String rewardedRentEarned(int coins);
+
+  /// No description provided for @rewardedRentBaseOnly.
+  ///
+  /// In id, this message translates to:
+  /// **'Iklan tidak tersedia atau dilewati. {coins} koin dasar tetap diambil.'**
+  String rewardedRentBaseOnly(int coins);
+
   /// No description provided for @ghostHappinessSummary.
   ///
   /// In id, this message translates to:

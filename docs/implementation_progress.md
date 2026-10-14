@@ -419,8 +419,8 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-027 and all later tickets.
-- Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, and final artwork.
+- HK-028 and all later tickets.
+- Furniture purchasing/inventory, automatic damage generation, tenant departures, IAP, cloud/network services, and final artwork.
 
 ## Verification evidence
 
@@ -618,3 +618,40 @@ Verification:
 Remaining validation:
 
 - No emulator or physical device was attached, so audible output, device volume interaction, and interruption behavior were validated through the adapter contract, lifecycle tests, and Android build rather than a manual listening session.
+
+### HK-027 — Rewarded ad integration and safe rent claims
+
+Status: implemented and verified on 2026-10-14.
+
+- Added an injectable rewarded-ad service boundary and a production Google Mobile Ads adapter restricted to Android/iOS. Development uses Google's published sample application IDs and rewarded test-unit IDs only.
+- Added a localized opt-in action that doubles one pending Collect All payout, with a maximum of three successfully earned bonuses per local calendar day. The normal Collect All action remains independent and available without an ad.
+- Added a pure-Dart two-stage rewarded-rent system. Beginning the flow snapshots whole pending coins, commits the base payout, and persists a unique pending bonus claim before asking the platform adapter to load an ad.
+- Earned-reward callbacks grant the snapshotted bonus exactly once. Duplicate callbacks, mismatched IDs, completed claims, overlapping claims, and claims above the daily cap are identity-preserving no-ops.
+- Ad load failure, dismissal, unavailability, or adapter exceptions clear only the pending bonus. They never reverse or block the already-persisted base payout. A restart also clears an interrupted pending bonus while retaining its base payout.
+- Save schema version 19 persists pending/completed rewarded claims and daily successful-bonus state, with explicit version-18 migration defaults.
+- Existing consent-aware analytics now records the rewarded flow using the previously allowlisted `ad_offer_shown`, `ad_started`, `ad_reward_earned`, and `ad_failed` schemas. Ad requests are non-personalized; the complete consent/privacy settings work remains HK-028.
+
+Implementation decisions and assumptions:
+
+- The rewarded base and bonus are modeled as one base rent claim plus a separate idempotent bonus record. The bonus never re-claims the pending-rent balance, which may continue accruing while the ad is visible.
+- Only successful earned-reward callbacks consume the three-per-day allowance. Failed, unavailable, dismissed, and interrupted attempts do not consume it.
+- The local day key is captured when the claim begins, so a callback crossing midnight belongs to the day on which its offer started.
+- Test IDs are deliberately hard-coded in the adapter/platform manifests for this ticket. Production ad identifiers and personalized-ad consent must not be introduced before the HK-028 privacy gate and release configuration.
+- Mobile Ads initialization is lazy and failures are isolated behind the adapter. The deterministic simulation has no Flutter, Flame, or ads-SDK imports.
+
+Verification:
+
+- `flutter pub get` completed with `google_mobile_ads 5.3.1` resolved from the declared compatible constraint.
+- Localization generation and Dart formatting completed successfully.
+- Focused rewarded-rent, ad-adapter, persistence, controller, widget, and localization suite: all 55 tests passed.
+- `flutter test`: all 165 tests passed.
+- `flutter analyze`: no issues found.
+- `flutter build apk --debug`: succeeded at `build/app/outputs/flutter-apk/app-debug.apk`, validating the Android plugin and manifest integration.
+- Tests cover success, load failure/unavailability, adapter exception, cancellation semantics, duplicate earned callbacks, daily cap/reset, fractional-rent preservation, schema-19 round trip, version-18 migration, interrupted-restart recovery, analytics order, official test identifiers, and visible localized collection feedback.
+- `rg 'package:(flutter|flame|google_mobile_ads)' lib/simulation`: no matches; rewarded claim rules remain pure Dart.
+- The implementation-plan HK-027 checkbox is synchronized with this tracker as requested.
+
+Remaining validation:
+
+- No emulator or physical device was attached, so a real test-ad load/dismiss/earn session and iOS runtime integration remain unverified. Automated adapter/domain/UI tests and the Android debug build provide the current local evidence.
+- HK-028 remains next and owns the full consent/privacy settings and optional external error/crash-reporting integration. No HK-028 implementation is included here.

@@ -25,6 +25,24 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String rewardedRentButton(int coins, int remaining) {
+    return 'Tonton iklan uji · $coins + $coins koin (sisa $remaining/3)';
+  }
+
+  @override
+  String get rewardedRentDailyLimit => 'Batas bonus iklan harian tercapai';
+
+  @override
+  String rewardedRentEarned(int coins) {
+    return 'Hadiah iklan diterima: bonus +$coins koin';
+  }
+
+  @override
+  String rewardedRentBaseOnly(int coins) {
+    return 'Iklan tidak tersedia atau dilewati. $coins koin dasar tetap diambil.';
+  }
+
+  @override
   String ghostHappinessSummary(String ghostName, int happiness) {
     return '$ghostName $happiness';
   }

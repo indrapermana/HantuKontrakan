@@ -1,4 +1,5 @@
 abstract final class GameBalance {
+  static const int maximumRewardedRentBonusesPerDay = 3;
   static const int initialCoins = 200;
   static const int initialChaos = 40;
   static const int minimumChaos = 0;

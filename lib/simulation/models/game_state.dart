@@ -1,6 +1,7 @@
 import '../constants/game_balance.dart';
 import '../content/progression_definitions.dart';
 import 'ghost.dart';
+import 'rewarded_rent_claim.dart';
 import 'room.dart';
 import 'tutorial_step.dart';
 
@@ -23,6 +24,10 @@ class GameState {
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
     Set<String> completedRentClaimIds = const {},
+    this.pendingRewardedRentClaim,
+    Set<String> completedRewardedRentClaimIds = const {},
+    this.rewardedRentBonusDayKey,
+    this.rewardedRentBonusCount = 0,
     Map<String, int> abilityCooldownSeconds = const {},
     this.offlineRateSnapshotMicrocoinsPerMinute,
     this.lastOfflineAccrualTimestampMillis,
@@ -41,6 +46,9 @@ class GameState {
     required this.complaintResolved,
     this.resolutionId,
   }) : completedRentClaimIds = Set.unmodifiable(completedRentClaimIds),
+       completedRewardedRentClaimIds = Set.unmodifiable(
+         completedRewardedRentClaimIds,
+       ),
        abilityCooldownSeconds = Map.unmodifiable(abilityCooldownSeconds),
        unscriptedIncidentSpawnTimes = List.unmodifiable(
          unscriptedIncidentSpawnTimes,
@@ -64,6 +72,19 @@ class GameState {
         musicVolume > 1 ||
         soundVolume < 0 ||
         soundVolume > 1 ||
+        rewardedRentBonusCount < 0 ||
+        rewardedRentBonusCount > GameBalance.maximumRewardedRentBonusesPerDay ||
+        (rewardedRentBonusCount > 0 &&
+            (rewardedRentBonusDayKey == null ||
+                rewardedRentBonusDayKey!.trim().isEmpty)) ||
+        (pendingRewardedRentClaim != null &&
+            (pendingRewardedRentClaim!.id.trim().isEmpty ||
+                pendingRewardedRentClaim!.bonusCoins <= 0 ||
+                pendingRewardedRentClaim!.localDayKey.trim().isEmpty ||
+                !completedRentClaimIds.contains(pendingRewardedRentClaim!.id) ||
+                completedRewardedRentClaimIds.contains(
+                  pendingRewardedRentClaim!.id,
+                ))) ||
         (languageCode != null &&
             languageCode != 'id' &&
             languageCode != 'en') ||
@@ -88,7 +109,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 18;
+  static const int currentSchemaVersion = 19;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -107,6 +128,10 @@ class GameState {
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
   final Set<String> completedRentClaimIds;
+  final RewardedRentClaim? pendingRewardedRentClaim;
+  final Set<String> completedRewardedRentClaimIds;
+  final String? rewardedRentBonusDayKey;
+  final int rewardedRentBonusCount;
   final Map<String, int> abilityCooldownSeconds;
   final int? offlineRateSnapshotMicrocoinsPerMinute;
   final int? lastOfflineAccrualTimestampMillis;
@@ -242,6 +267,10 @@ class GameState {
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
     Set<String>? completedRentClaimIds,
+    Object? pendingRewardedRentClaim = _notProvided,
+    Set<String>? completedRewardedRentClaimIds,
+    Object? rewardedRentBonusDayKey = _notProvided,
+    int? rewardedRentBonusCount,
     Map<String, int>? abilityCooldownSeconds,
     Object? offlineRateSnapshotMicrocoinsPerMinute = _notProvided,
     Object? lastOfflineAccrualTimestampMillis = _notProvided,
@@ -281,6 +310,16 @@ class GameState {
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
     completedRentClaimIds: completedRentClaimIds ?? this.completedRentClaimIds,
+    pendingRewardedRentClaim: identical(pendingRewardedRentClaim, _notProvided)
+        ? this.pendingRewardedRentClaim
+        : pendingRewardedRentClaim as RewardedRentClaim?,
+    completedRewardedRentClaimIds:
+        completedRewardedRentClaimIds ?? this.completedRewardedRentClaimIds,
+    rewardedRentBonusDayKey: identical(rewardedRentBonusDayKey, _notProvided)
+        ? this.rewardedRentBonusDayKey
+        : rewardedRentBonusDayKey as String?,
+    rewardedRentBonusCount:
+        rewardedRentBonusCount ?? this.rewardedRentBonusCount,
     abilityCooldownSeconds:
         abilityCooldownSeconds ?? this.abilityCooldownSeconds,
     offlineRateSnapshotMicrocoinsPerMinute:
@@ -333,6 +372,12 @@ class GameState {
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
     'completedRentClaimIds': completedRentClaimIds.toList(growable: false),
+    'pendingRewardedRentClaim': pendingRewardedRentClaim?.toJson(),
+    'completedRewardedRentClaimIds': completedRewardedRentClaimIds.toList(
+      growable: false,
+    ),
+    'rewardedRentBonusDayKey': rewardedRentBonusDayKey,
+    'rewardedRentBonusCount': rewardedRentBonusCount,
     'abilityCooldownSeconds': abilityCooldownSeconds,
     'offlineRateSnapshotMicrocoinsPerMinute':
         offlineRateSnapshotMicrocoinsPerMinute,
@@ -378,7 +423,8 @@ class GameState {
       15 => GameState._fromVersion15Json(json),
       16 => GameState._fromVersion16Json(json),
       17 => GameState._fromVersion17Json(json),
-      currentSchemaVersion => GameState._fromVersion18Json(json),
+      18 => GameState._fromVersion18Json(json),
+      currentSchemaVersion => GameState._fromVersion19Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -598,6 +644,21 @@ class GameState {
         soundMuted: json['soundMuted']! as bool,
         musicVolume: (json['musicVolume']! as num).toDouble(),
         soundVolume: (json['soundVolume']! as num).toDouble(),
+      );
+
+  factory GameState._fromVersion19Json(Map<String, Object?> json) =>
+      GameState._fromVersion18Json(json).copyWith(
+        pendingRewardedRentClaim: json['pendingRewardedRentClaim'] == null
+            ? null
+            : RewardedRentClaim.fromJson(
+                json['pendingRewardedRentClaim']! as Map<String, Object?>,
+              ),
+        completedRewardedRentClaimIds:
+            (json['completedRewardedRentClaimIds']! as List<Object?>)
+                .cast<String>()
+                .toSet(),
+        rewardedRentBonusDayKey: json['rewardedRentBonusDayKey'] as String?,
+        rewardedRentBonusCount: json['rewardedRentBonusCount']! as int,
       );
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>
