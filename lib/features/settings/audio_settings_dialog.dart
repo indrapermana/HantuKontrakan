@@ -105,6 +105,25 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
               title: Text(strings.privacySettingsTitle),
               children: [
                 Text(strings.privacyOfflineExplanation),
+                TextButton(
+                  key: const Key('privacy-policy'),
+                  onPressed: () => showDialog<void>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(strings.privacyPolicyTitle),
+                      content: SingleChildScrollView(
+                        child: Text(strings.privacyPolicyBody),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(strings.closeLabel),
+                        ),
+                      ],
+                    ),
+                  ),
+                  child: Text(strings.privacyPolicyLabel),
+                ),
                 SwitchListTile(
                   key: const Key('analytics-consent'),
                   title: Text(strings.analyticsConsentLabel),

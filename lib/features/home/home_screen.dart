@@ -130,6 +130,11 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     child: GameWidget(
                       key: ValueKey(controller.revision),
+                      loadingBuilder: (context) => const ColoredBox(
+                        key: Key('game-loading'),
+                        color: Colors.black,
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                       game: HantuGame(
                         state: state,
                         onRoomTap: (roomId) =>

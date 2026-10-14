@@ -29,12 +29,24 @@ void main() {
 
       expect(find.text('Privacy'), findsOneWidget);
       await tester.tap(find.byKey(const Key('privacy-settings-section')));
-      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       expect(
         find.textContaining('offline game remains playable'),
         findsOneWidget,
       );
       expect(find.byKey(const Key('ad-privacy-options')), findsOneWidget);
+      expect(find.byKey(const Key('privacy-policy')), findsOneWidget);
+      tester
+          .widget<TextButton>(find.byKey(const Key('privacy-policy')))
+          .onPressed!();
+      await tester.pump();
+      expect(find.text('Privacy policy'), findsOneWidget);
+      expect(
+        find.textContaining('Game progress, economy state'),
+        findsOneWidget,
+      );
+      await tester.tap(find.text('Close').last);
+      await tester.pump();
 
       tester
           .widget<SwitchListTile>(find.byKey(const Key('analytics-consent')))

@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.hantu_kontrakan"
+    namespace = "com.indesyakaryadigital.hantu_kontrakan"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,7 +21,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.hantu_kontrakan"
+        applicationId = "com.indesyakaryadigital.hantu_kontrakan"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -32,9 +32,8 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Upload signing is intentionally owner-supplied before closed testing.
+            // Never substitute the debug key for a Play-distributed build.
         }
     }
 }

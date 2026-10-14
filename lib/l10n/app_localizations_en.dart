@@ -443,6 +443,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adPrivacyOptionsLabel => 'Manage ad privacy choices';
 
   @override
+  String get privacyPolicyLabel => 'Read privacy policy';
+
+  @override
+  String get privacyPolicyTitle => 'Privacy policy';
+
+  @override
+  String get privacyPolicyBody =>
+      'Effective 14 October 2026. Hantu Kontrakan is provided by PT Indesya Karya Digital. Game progress, economy state, settings, language, and consent choices are stored locally on this device. The game has no player account or cloud save. Local data remains until you reset the game, clear app data, or uninstall the app. Optional analytics and external crash reporting are separate, disabled by default, and no provider is currently configured. Optional rewarded ads use Google Mobile Ads and UMP; Google and its partners may process device or advertising identifiers, consent, IP/network information, approximate location inferred from the network, ad interactions, and diagnostics under their policies. Core offline play does not require watching ads. We do not sell player data. Contact: support@indesyakaryadigital.com. The complete current policy is published on the Indesya Karya Digital website.';
+
+  @override
   String get musicMutedLabel => 'Mute music';
 
   @override

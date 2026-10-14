@@ -812,6 +812,24 @@ abstract class AppLocalizations {
   /// **'Kelola pilihan privasi iklan'**
   String get adPrivacyOptionsLabel;
 
+  /// No description provided for @privacyPolicyLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Baca kebijakan privasi'**
+  String get privacyPolicyLabel;
+
+  /// No description provided for @privacyPolicyTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Kebijakan privasi'**
+  String get privacyPolicyTitle;
+
+  /// No description provided for @privacyPolicyBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Berlaku 14 Oktober 2026. Hantu Kontrakan disediakan oleh PT Indesya Karya Digital. Progres permainan, keadaan ekonomi, pengaturan, bahasa, dan pilihan persetujuan disimpan secara lokal di perangkat ini. Game tidak memiliki akun pemain atau penyimpanan cloud. Data lokal tersimpan sampai Anda mengatur ulang game, menghapus data aplikasi, atau menghapus aplikasi. Analitik dan laporan kerusakan eksternal bersifat terpisah, nonaktif secara bawaan, dan saat ini belum memakai penyedia layanan. Iklan berhadiah opsional menggunakan Google Mobile Ads dan UMP; Google dan mitranya dapat memproses pengenal perangkat atau iklan, persetujuan, informasi IP/jaringan, perkiraan lokasi dari jaringan, interaksi iklan, dan diagnostik sesuai kebijakan mereka. Permainan offline inti tidak mewajibkan menonton iklan. Kami tidak menjual data pemain. Kontak: support@indesyakaryadigital.com. Kebijakan lengkap terbaru diterbitkan di situs web Indesya Karya Digital.'**
+  String get privacyPolicyBody;
+
   /// No description provided for @musicMutedLabel.
   ///
   /// In id, this message translates to:

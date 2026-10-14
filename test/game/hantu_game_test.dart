@@ -1,9 +1,26 @@
+import 'package:flame/components.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hantu_kontrakan/game/hantu_game.dart';
 import 'package:hantu_kontrakan/game/world/kontrakan_world.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/systems/happiness_system.dart';
 
 void main() {
+  test('camera centers the complete 360x360 cutaway world', () {
+    final game = HantuGame(
+      state: GameState.seeded(),
+      onRoomTap: (_) {},
+      onGhostTap: (_) {},
+      roomLabelFor: (id) => id,
+      happinessLabelFor: (value) => '$value',
+      lockedLabel: 'locked',
+    );
+
+    expect(game.camera.viewfinder.anchor, Anchor.center);
+    expect(game.camera.viewfinder.position.x, 180);
+    expect(game.camera.viewfinder.position.y, 180);
+  });
+
   test('2x2 cutaway creates four selectable room IDs at fixed positions', () {
     final selectedRoomIds = <String>[];
     final selectedGhostIds = <String>[];

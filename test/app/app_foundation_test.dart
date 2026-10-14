@@ -114,6 +114,27 @@ void main() {
     expect(iosManifest, isNot(contains('UIInterfaceOrientationLandscape')));
   });
 
+  test('Android release identity uses the confirmed application ID', () {
+    final gradle = File('android/app/build.gradle.kts').readAsStringSync();
+    final activity = File(
+      'android/app/src/main/kotlin/com/indesyakaryadigital/'
+      'hantu_kontrakan/MainActivity.kt',
+    ).readAsStringSync();
+
+    expect(
+      gradle,
+      contains('applicationId = "com.indesyakaryadigital.hantu_kontrakan"'),
+    );
+    expect(
+      gradle,
+      contains('namespace = "com.indesyakaryadigital.hantu_kontrakan"'),
+    );
+    expect(
+      activity,
+      contains('package com.indesyakaryadigital.hantu_kontrakan'),
+    );
+  });
+
   testWidgets('debug HUD exposes state and supports tick and reset', (
     tester,
   ) async {

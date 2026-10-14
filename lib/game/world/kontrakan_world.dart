@@ -7,7 +7,7 @@ import '../../simulation/models/ghost.dart';
 import '../../simulation/models/room.dart';
 import '../components/room_component.dart';
 
-class KontrakanWorld extends World {
+class KontrakanWorld extends PositionComponent {
   KontrakanWorld({
     required this.state,
     required this.happinessFor,

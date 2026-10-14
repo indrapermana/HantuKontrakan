@@ -291,3 +291,17 @@ Date: 2026-10-14
 - Severe performance regression guards use broad deterministic budgets: 10,000 one-second simulation commands must complete within five seconds on the test host, and the physical-device launch/asset-load/collect/settings smoke flow must complete within ten seconds. These are responsiveness tripwires, not release frame-time benchmarks.
 - The compact-screen failure found during the pass was resolved by changing the top economy summary from a fixed row to a wrapping layout. No simulation or economy behavior changed.
 - Integration tests use injected in-memory saves and unavailable external adapters so device responsiveness and core offline behavior do not depend on network, consent-provider, ad, audio, or crash-reporting availability.
+
+## HK-030 store and closed-test decisions
+
+Date: 2026-10-14
+
+- The black game area was a rendering defect, not expected unfinished content. A `World` disables normal rendering unless it is the camera's selected root; therefore the cutaway container is a `PositionComponent` inside the existing game world. The fixed-resolution camera centers the full 360×360 cutaway.
+- The launcher icon uses a generated friendly Pocong-and-kontrakan composition with no text, keeps important content inside the adaptive crop safe area, and is the source for Android and iOS icon sizes.
+- Store screenshots come from a real physical-iPhone profile build and contain no debug HUD. Screenshot transfer is excluded from the HK-029 responsiveness stopwatch because it measures the test harness/driver rather than gameplay responsiveness.
+- Release builds must never reuse debug signing. Local unsigned AAB compilation proves buildability only; it does not satisfy closed-test acceptance.
+- Package IDs are permanent store identity choices and remain owner-confirmed. Public contact details, privacy-policy URLs, production ad IDs, and signing credentials are also owner-owned inputs and are not invented or committed.
+- The privacy policy accurately distinguishes local save/settings data, optional disabled-by-default diagnostics, and Google advertising/consent SDK processing. Any later SDK or provider change requires policy and Play Data safety review.
+- Android uses the owner-confirmed `com.indesyakaryadigital.hantu_kontrakan` identity. The same literal value is not applied to iOS because Apple bundle identifiers cannot contain underscores; iOS remains unchanged until the owner selects a valid permanent alternative.
+- `docs/store/PRIVACY_POLICY.md` is the canonical source for the public HTML policy. The localized in-app policy is a compact rendering of the same material data practices and contact information.
+- Production AdMob identifiers stay out of the release candidate until the owner completes AdMob setup. Development continues using Google's dedicated test identifiers; `docs/store/ADMOB_SETUP.md` is the release procedure.

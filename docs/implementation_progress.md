@@ -757,3 +757,47 @@ Remaining validation:
 - No Android phone or emulator was connected, so physical Android interaction/frame behavior remains unverified despite the successful Android debug build.
 - The device smoke provides a broad responsiveness guard, not detailed raster/UI frame timing or long-duration thermal profiling across low-end hardware.
 - HK-030 is now the next unfinished ticket.
+
+### HK-030 — Store material and Android closed-test preparation
+
+Status: locally prepared and verified on 2026-10-14; acceptance remains blocked on owner-controlled release inputs.
+
+- Fixed the reported black Flame game area. `KontrakanWorld` was incorrectly nested as a second Flame `World`, whose normal render tree Flame intentionally suppresses. It is now a `PositionComponent`, the camera is centered on the 360×360 scene, and asset failures retain procedural fallback rendering.
+- Added a bounded-frame physical-device screenshot harness. The latest iPhone development capture visibly contains the cutaway building, rooms, Pocong, and Tuyul; it proves the blank-screen defect is resolved.
+- Added a generated 1024×1024 launcher icon and propagated it to all existing Android mipmap and iOS AppIcon slots.
+- Added localized Indonesian/English in-app privacy-policy text and a tested settings entry, plus store-listing, privacy-policy, and closed-test drafts under `docs/store/`.
+- Changed the Android launcher label to `Hantu Kontrakan` and removed release use of the debug signing key. An unsigned release AAB compiles successfully and is explicitly not represented as uploadable.
+
+Implementation decisions and assumptions:
+
+- Android now uses the owner-confirmed `com.indesyakaryadigital.hantu_kontrakan` application ID. iOS remains unchanged because Apple does not allow the underscore in that exact identifier; selecting its permanent Apple-compatible form remains an owner decision.
+- The canonical privacy policy uses the confirmed publisher contact. Its public HTTPS URL, production Google Mobile Ads IDs, and Play upload key remain owner-controlled release inputs.
+- Store screenshots must contain real app UI and no debug HUD. Physical-iPhone profile captures now cover gameplay and settings; they still require final Android release-candidate confirmation before Play upload.
+- Deterministic simulation and balance were not changed.
+
+Verification:
+
+- `flutter gen-l10n`: completed successfully.
+- Dart formatting: completed with no remaining changes.
+- `flutter analyze`: no issues found.
+- `flutter test`: all 180 tests passed, including the Android application-ID guard and localized in-app privacy-policy coverage.
+- Focused Flame tests: 2 passed, including 360×360 camera framing.
+- Debug `flutter drive ... -d <connected iPhone>`: passed on iOS 26.6.2; the captured 1125×2436 image visibly shows the rendered cutaway and ghost sprites.
+- Profile device capture: built, installed, launched, and passed on iOS 26.6.2. Visually inspected 1125×2436 gameplay and settings screenshots contain real app UI, no debug HUD, the rendered cutaway, ghost sprites, and the privacy settings entry. The harness waits for Flame's loading marker to disappear and advances bounded frames before capture; screenshot transfer is excluded from the debug responsiveness timer.
+- `flutter build appbundle --release`: succeeded at `build/app/outputs/bundle/release/app-release.aab` (57.6 MB).
+- `jarsigner -verify ...`: reports `jar is unsigned`, confirming that no debug or fabricated production signature was used.
+- `rg 'package:(flutter|flame|google_mobile_ads)' lib/simulation`: no matches.
+
+Remaining acceptance work:
+
+- Owner must select the Apple-compatible permanent iOS bundle identifier and publish the canonical policy at a public HTTPS URL.
+- Owner must supply Play upload signing outside version control and Play Console access, replace test ad IDs, complete Data safety/ads/content declarations, and install-test the Play-delivered closed-track build.
+- Capture final non-debug Android phone screenshots from that signed release candidate.
+- HK-030 remains unchecked in the implementation plan because a functioning closed beta package has not yet been uploaded and validated.
+
+Follow-up configuration on 2026-10-14:
+
+- Applied the confirmed Android namespace/application ID `com.indesyakaryadigital.hantu_kontrakan` and moved `MainActivity` to its matching Kotlin package.
+- Did not apply that exact value to iOS because Apple bundle identifiers reject underscores. A valid Apple-compatible alternative remains an explicit owner decision before the App Store identifier is registered.
+- Replaced the privacy draft with canonical `docs/store/PRIVACY_POLICY.md`, including the confirmed publisher, support contact, local-data behavior, optional diagnostics, rewarded-ad processing, deletion behavior, security, and publication instructions. The localized in-app privacy dialog now mirrors those material disclosures.
+- Added `docs/store/ADMOB_SETUP.md` with platform app-ID, rewarded-unit, test-device, UMP, app-ads.txt, store-declaration, and closed-track verification steps. Production identifiers remain intentionally unset.

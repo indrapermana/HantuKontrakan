@@ -1,7 +1,8 @@
 import 'dart:ui' as ui;
 
-import 'package:flame/camera.dart';
+import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 
 import 'assets/game_assets.dart';
 import '../simulation/models/game_state.dart';
@@ -19,7 +20,9 @@ class HantuGame extends FlameGame {
     required this.lockedLabel,
   }) : super(
          camera: CameraComponent.withFixedResolution(width: 360, height: 360),
-       );
+       ) {
+    _frameCutawayWorld();
+  }
 
   final GameState state;
   final void Function(String roomId) onRoomTap;
@@ -31,11 +34,21 @@ class HantuGame extends FlameGame {
   @override
   Future<void> onLoad() async {
     await super.onLoad();
-    final cutawayImage = await images.load(GameAssets.cutaway);
-    final ghostAtlases = <GhostKind, ui.Image>{
-      for (final entry in GameAssets.ghostAtlases.entries)
-        entry.key: await images.load(entry.value),
-    };
+    _frameCutawayWorld();
+    ui.Image? cutawayImage;
+    try {
+      cutawayImage = await images.load(GameAssets.cutaway);
+    } on Object catch (error) {
+      debugPrint('Unable to load cutaway art: $error');
+    }
+    final ghostAtlases = <GhostKind, ui.Image>{};
+    for (final entry in GameAssets.ghostAtlases.entries) {
+      try {
+        ghostAtlases[entry.key] = await images.load(entry.value);
+      } on Object catch (error) {
+        debugPrint('Unable to load ${entry.key.name} atlas: $error');
+      }
+    }
     world.add(
       KontrakanWorld(
         state: state,
@@ -49,5 +62,11 @@ class HantuGame extends FlameGame {
         ghostAtlases: ghostAtlases,
       ),
     );
+  }
+
+  void _frameCutawayWorld() {
+    camera.viewfinder
+      ..anchor = Anchor.center
+      ..position = Vector2(180, 180);
   }
 }
