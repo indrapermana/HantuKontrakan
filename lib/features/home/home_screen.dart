@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
             actions: [
               IconButton(
                 key: const Key('settings-button'),
-                tooltip: strings.audioSettingsTitle,
+                tooltip: strings.settingsTitle,
                 onPressed: () => showDialog<void>(
                   context: context,
                   builder: (_) => AudioSettingsDialog(controller: controller),

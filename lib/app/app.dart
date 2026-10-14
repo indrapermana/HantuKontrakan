@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import '../application/game_controller.dart';
 import '../l10n/app_localizations.dart';
 import '../services/audio_service.dart';
+import '../services/error_reporting_service.dart';
+import '../services/privacy_consent_service.dart';
 import '../services/rewarded_ad_service.dart';
 import '../services/save_service.dart';
 import 'routing/app_router.dart';
@@ -15,6 +17,8 @@ class HantuKontrakanApp extends StatefulWidget {
   const HantuKontrakanApp({
     required this.saveService,
     this.audioService,
+    this.errorReportingService,
+    this.privacyConsentService,
     this.rewardedAdService,
     this.locale,
     super.key,
@@ -22,6 +26,8 @@ class HantuKontrakanApp extends StatefulWidget {
 
   final SaveService saveService;
   final AudioService? audioService;
+  final ErrorReportingService? errorReportingService;
+  final PrivacyConsentService? privacyConsentService;
   final RewardedAdService? rewardedAdService;
   final Locale? locale;
 
@@ -40,6 +46,11 @@ class _HantuKontrakanAppState extends State<HantuKontrakanApp>
     controller = GameController(
       saveService: widget.saveService,
       audioService: widget.audioService ?? const NoopAudioService(),
+      errorReportingService:
+          widget.errorReportingService ?? const NoopErrorReportingService(),
+      privacyConsentService:
+          widget.privacyConsentService ??
+          const UnavailablePrivacyConsentService(),
       rewardedAdService:
           widget.rewardedAdService ?? const UnavailableRewardedAdService(),
     )..initialize();

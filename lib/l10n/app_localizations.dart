@@ -776,6 +776,42 @@ abstract class AppLocalizations {
   /// **'Pengaturan audio'**
   String get audioSettingsTitle;
 
+  /// No description provided for @settingsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Pengaturan'**
+  String get settingsTitle;
+
+  /// No description provided for @privacySettingsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Privasi'**
+  String get privacySettingsTitle;
+
+  /// No description provided for @privacyOfflineExplanation.
+  ///
+  /// In id, this message translates to:
+  /// **'Analitik dan laporan kerusakan bersifat opsional. Game offline tetap dapat dimainkan saat dimatikan atau tidak tersedia.'**
+  String get privacyOfflineExplanation;
+
+  /// No description provided for @analyticsConsentLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Bagikan analitik permainan anonim'**
+  String get analyticsConsentLabel;
+
+  /// No description provided for @errorReportingConsentLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Bagikan laporan kerusakan dan kesalahan'**
+  String get errorReportingConsentLabel;
+
+  /// No description provided for @adPrivacyOptionsLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Kelola pilihan privasi iklan'**
+  String get adPrivacyOptionsLabel;
+
   /// No description provided for @musicMutedLabel.
   ///
   /// In id, this message translates to:

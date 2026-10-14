@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 
 import '../services/analytics_service.dart';
 import '../services/audio_service.dart';
+import '../services/error_reporting_service.dart';
+import '../services/privacy_consent_service.dart';
 import '../services/rewarded_ad_service.dart';
 import '../services/save_service.dart';
 import '../simulation/commands/game_command.dart';
@@ -23,12 +25,18 @@ class GameController extends ChangeNotifier {
     required SaveService saveService,
     AnalyticsService analyticsService = const NoopAnalyticsService(),
     AudioService audioService = const NoopAudioService(),
+    ErrorReportingService errorReportingService =
+        const NoopErrorReportingService(),
+    PrivacyConsentService privacyConsentService =
+        const UnavailablePrivacyConsentService(),
     RewardedAdService rewardedAdService = const UnavailableRewardedAdService(),
     GameClock clock = const SystemGameClock(),
     int randomSeed = GameBalance.defaultRandomSeed,
   }) : _saveService = saveService,
        _analyticsService = analyticsService,
        _audioService = audioService,
+       _errorReportingService = errorReportingService,
+       _privacyConsentService = privacyConsentService,
        _rewardedAdService = rewardedAdService,
        _clock = clock,
        _randomSource = SeededRandomSource(randomSeed);
@@ -36,6 +44,8 @@ class GameController extends ChangeNotifier {
   final SaveService _saveService;
   final AnalyticsService _analyticsService;
   final AudioService _audioService;
+  final ErrorReportingService _errorReportingService;
+  final PrivacyConsentService _privacyConsentService;
   final RewardedAdService _rewardedAdService;
   final GameClock _clock;
   final SeededRandomSource _randomSource;
@@ -93,7 +103,9 @@ class GameController extends ChangeNotifier {
     );
     if (resumed) await _saveService.save(state);
     _isReady = true;
+    _syncErrorReportingConsent();
     notifyListeners();
+    unawaited(_initializePrivacy());
     await _runAudio(() => _audioService.initialize(_audioPreferences));
     if (resumed) {
       await _recordTransition(
@@ -125,6 +137,29 @@ class GameController extends ChangeNotifier {
 
   Future<bool> setAnalyticsConsent(bool granted) =>
       _dispatch(SetAnalyticsConsent(granted: granted));
+
+  Future<bool> setErrorReportingConsent(bool granted) async {
+    final changed = await _dispatch(SetErrorReportingConsent(granted: granted));
+    _syncErrorReportingConsent();
+    return changed;
+  }
+
+  Future<bool> isPrivacyOptionsRequired() async {
+    try {
+      return await _privacyConsentService.isPrivacyOptionsRequired();
+    } on Object catch (error, stackTrace) {
+      await _report(error, stackTrace, reason: 'privacy_options_status');
+      return false;
+    }
+  }
+
+  Future<void> showPrivacyOptions() async {
+    try {
+      await _privacyConsentService.showPrivacyOptions();
+    } on Object catch (error, stackTrace) {
+      await _report(error, stackTrace, reason: 'privacy_options_form');
+    }
+  }
 
   Future<bool> setAudioPreferences({
     required bool musicMuted,
@@ -359,6 +394,41 @@ class GameController extends ChangeNotifier {
       await operation();
     } on Object {
       // Audio is cosmetic and must never interrupt deterministic gameplay.
+    }
+  }
+
+  Future<void> _initializePrivacy() async {
+    try {
+      await _privacyConsentService.initialize();
+      notifyListeners();
+    } on Object catch (error, stackTrace) {
+      await _report(error, stackTrace, reason: 'privacy_consent_initialize');
+    }
+  }
+
+  Future<void> _report(
+    Object error,
+    StackTrace stackTrace, {
+    required String reason,
+    bool fatal = false,
+  }) async {
+    if (!state.errorReportingConsentGranted) return;
+    try {
+      await _errorReportingService.record(
+        error,
+        stackTrace,
+        reason: reason,
+        fatal: fatal,
+      );
+    } on Object {
+      // Diagnostics are optional and cannot affect local gameplay.
+    }
+  }
+
+  void _syncErrorReportingConsent() {
+    final service = _errorReportingService;
+    if (service is ConsentAwareErrorReportingService) {
+      service.setEnabled(state.errorReportingConsentGranted);
     }
   }
 

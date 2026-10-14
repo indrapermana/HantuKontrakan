@@ -237,6 +237,11 @@ abstract final class GameRules {
     return state.copyWith(analyticsConsentGranted: granted);
   }
 
+  static GameState setErrorReportingConsent(GameState state, bool granted) {
+    if (state.errorReportingConsentGranted == granted) return state;
+    return state.copyWith(errorReportingConsentGranted: granted);
+  }
+
   static GameState setAudioPreferences(
     GameState state, {
     required bool musicMuted,

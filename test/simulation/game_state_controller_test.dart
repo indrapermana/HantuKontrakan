@@ -126,6 +126,25 @@ void main() {
     expect(controller.state.analyticsConsentGranted, isFalse);
   });
 
+  test('error-reporting consent is an explicit idempotent domain command', () {
+    final controller = GameStateController(GameState.seeded());
+
+    expect(
+      controller.dispatch(const SetErrorReportingConsent(granted: true)),
+      isTrue,
+    );
+    expect(controller.state.errorReportingConsentGranted, isTrue);
+    expect(
+      controller.dispatch(const SetErrorReportingConsent(granted: true)),
+      isFalse,
+    );
+    expect(
+      controller.dispatch(const SetErrorReportingConsent(granted: false)),
+      isTrue,
+    );
+    expect(controller.state.errorReportingConsentGranted, isFalse);
+  });
+
   test('audio settings validate ranges and update atomically', () {
     final controller = GameStateController(GameState.seeded());
 

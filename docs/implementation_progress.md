@@ -692,3 +692,35 @@ Remaining validation:
 - No emulator or physical device was attached. Atlas scale/readability, perceived animation smoothness, music repetition, effect loudness, and audible loop quality still require an actual-device art/audio review.
 - The selected audio remains prototype material per its supplied README. Final mastering or replacement can retain the current paths and adapter contract.
 - HK-028 is now the next unfinished ticket.
+
+### HK-028 — Consent, privacy, and optional crash reporting
+
+Status: implemented and locally verified on 2026-10-14.
+
+- Added localized privacy settings beside the existing audio settings. Analytics and external crash/error reporting are independently opt-in, persist across reload, default off, and explain that the offline game remains playable without external services.
+- Added a Google UMP adapter that refreshes consent information at launch, loads a required consent form, reports whether ads may be requested, and exposes the privacy-options form only when required.
+- Gated the Google rewarded-ad adapter on UMP `canRequestAds`. Consent failure or unavailable external services return the existing safe unavailable/base-only path and do not block local collection or play.
+- Added an injectable error-reporting boundary plus consent-aware wrapper. Flutter framework errors and uncaught platform-dispatcher errors are wired at bootstrap when a provider is configured; this repository deliberately ships a no-op delegate because no crash provider credentials/configuration were supplied.
+- Added save schema 20 for crash-reporting consent with explicit version-19 migration to disabled. Consent commands and persistence remain pure Dart.
+
+Implementation decisions and assumptions:
+
+- Analytics consent is not treated as ad consent. Google UMP independently owns ad eligibility and required privacy choices.
+- External diagnostic transmission is denied until the saved opt-in is loaded. Adapter errors are best-effort and never allowed to alter deterministic game state or stop startup.
+- A provider-specific crash SDK, production ad IDs, privacy-policy URL, and store declarations remain release configuration rather than invented local defaults. The provider boundary is ready for that configuration.
+
+Verification:
+
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- `flutter test`: all 175 tests passed.
+- `flutter build apk --debug`: succeeded at `build/app/outputs/flutter-apk/app-debug.apk`.
+- New tests cover schema-20 round trip, version-19 disabled migration, idempotent pure-Dart consent commands, reporter opt-in/failure isolation, persisted localized settings, required ad privacy entry, and continued offline play when the privacy adapter throws.
+- `rg 'package:(flutter|flame|google_mobile_ads)' lib/simulation`: no matches; deterministic simulation remains platform-independent.
+- The implementation-plan HK-028 checkbox is synchronized with this tracker.
+
+Remaining validation:
+
+- No emulator or physical device was attached, so the live Google UMP form/privacy-options flow and device-level framework crash capture remain unverified.
+- No external crash-reporting vendor is configured. Vendor console delivery can only be integration-validated after the owner selects a provider and supplies its platform configuration.
+- HK-029 is now the next unfinished ticket.

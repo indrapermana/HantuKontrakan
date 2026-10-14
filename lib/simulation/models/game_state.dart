@@ -16,6 +16,7 @@ class GameState {
     this.mysticalCrystals = 0,
     this.languageCode,
     this.analyticsConsentGranted = false,
+    this.errorReportingConsentGranted = false,
     this.musicMuted = false,
     this.soundMuted = false,
     this.musicVolume = 0.35,
@@ -109,7 +110,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 19;
+  static const int currentSchemaVersion = 20;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -120,6 +121,7 @@ class GameState {
   final int mysticalCrystals;
   final String? languageCode;
   final bool analyticsConsentGranted;
+  final bool errorReportingConsentGranted;
   final bool musicMuted;
   final bool soundMuted;
   final double musicVolume;
@@ -259,6 +261,7 @@ class GameState {
     int? mysticalCrystals,
     Object? languageCode = _notProvided,
     bool? analyticsConsentGranted,
+    bool? errorReportingConsentGranted,
     bool? musicMuted,
     bool? soundMuted,
     double? musicVolume,
@@ -302,6 +305,8 @@ class GameState {
         : languageCode as String?,
     analyticsConsentGranted:
         analyticsConsentGranted ?? this.analyticsConsentGranted,
+    errorReportingConsentGranted:
+        errorReportingConsentGranted ?? this.errorReportingConsentGranted,
     musicMuted: musicMuted ?? this.musicMuted,
     soundMuted: soundMuted ?? this.soundMuted,
     musicVolume: musicVolume ?? this.musicVolume,
@@ -364,6 +369,7 @@ class GameState {
     'mysticalCrystals': mysticalCrystals,
     'languageCode': languageCode,
     'analyticsConsentGranted': analyticsConsentGranted,
+    'errorReportingConsentGranted': errorReportingConsentGranted,
     'musicMuted': musicMuted,
     'soundMuted': soundMuted,
     'musicVolume': musicVolume,
@@ -424,7 +430,8 @@ class GameState {
       16 => GameState._fromVersion16Json(json),
       17 => GameState._fromVersion17Json(json),
       18 => GameState._fromVersion18Json(json),
-      currentSchemaVersion => GameState._fromVersion19Json(json),
+      19 => GameState._fromVersion19Json(json),
+      currentSchemaVersion => GameState._fromVersion20Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -659,6 +666,12 @@ class GameState {
                 .toSet(),
         rewardedRentBonusDayKey: json['rewardedRentBonusDayKey'] as String?,
         rewardedRentBonusCount: json['rewardedRentBonusCount']! as int,
+      );
+
+  factory GameState._fromVersion20Json(Map<String, Object?> json) =>
+      GameState._fromVersion19Json(json).copyWith(
+        errorReportingConsentGranted:
+            json['errorReportingConsentGranted']! as bool,
       );
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>

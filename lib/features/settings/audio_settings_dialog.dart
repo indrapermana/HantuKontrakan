@@ -17,6 +17,9 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
   late bool soundMuted;
   late double musicVolume;
   late double soundVolume;
+  late bool analyticsConsentGranted;
+  late bool errorReportingConsentGranted;
+  bool privacyOptionsRequired = false;
 
   @override
   void initState() {
@@ -26,6 +29,14 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
     soundMuted = state.soundMuted;
     musicVolume = state.musicVolume;
     soundVolume = state.soundVolume;
+    analyticsConsentGranted = state.analyticsConsentGranted;
+    errorReportingConsentGranted = state.errorReportingConsentGranted;
+    _loadPrivacyOptionsStatus();
+  }
+
+  Future<void> _loadPrivacyOptionsStatus() async {
+    final required = await widget.controller.isPrivacyOptionsRequired();
+    if (mounted) setState(() => privacyOptionsRequired = required);
   }
 
   Future<void> _save() => widget.controller.setAudioPreferences(
@@ -39,11 +50,18 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
     return AlertDialog(
-      title: Text(strings.audioSettingsTitle),
+      title: Text(strings.settingsTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                strings.audioSettingsTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
             SwitchListTile(
               key: const Key('music-muted'),
               title: Text(strings.musicMutedLabel),
@@ -79,6 +97,39 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
               label: '${(soundVolume * 100).round()}%',
               onChanged: (value) => setState(() => soundVolume = value),
               onChangeEnd: (_) => _save(),
+            ),
+            const Divider(),
+            ExpansionTile(
+              key: const Key('privacy-settings-section'),
+              tilePadding: EdgeInsets.zero,
+              title: Text(strings.privacySettingsTitle),
+              children: [
+                Text(strings.privacyOfflineExplanation),
+                SwitchListTile(
+                  key: const Key('analytics-consent'),
+                  title: Text(strings.analyticsConsentLabel),
+                  value: analyticsConsentGranted,
+                  onChanged: (value) {
+                    setState(() => analyticsConsentGranted = value);
+                    widget.controller.setAnalyticsConsent(value);
+                  },
+                ),
+                SwitchListTile(
+                  key: const Key('error-reporting-consent'),
+                  title: Text(strings.errorReportingConsentLabel),
+                  value: errorReportingConsentGranted,
+                  onChanged: (value) {
+                    setState(() => errorReportingConsentGranted = value);
+                    widget.controller.setErrorReportingConsent(value);
+                  },
+                ),
+                if (privacyOptionsRequired)
+                  OutlinedButton(
+                    key: const Key('ad-privacy-options'),
+                    onPressed: widget.controller.showPrivacyOptions,
+                    child: Text(strings.adPrivacyOptionsLabel),
+                  ),
+              ],
             ),
           ],
         ),

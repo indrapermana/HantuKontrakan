@@ -272,3 +272,13 @@ Date: 2026-10-14
 - Final ghost outputs use one normalized 4×4 RGBA atlas per kind with rows ordered `idle`, `happy`, `angry`, and `special`; every row contains four frames. Production Flame components receive decoded images from `HantuGame`, while a procedural fallback keeps isolated component tests and degraded rendering independent from asset loading.
 - The generated cutaway is composited environment art under the existing room components rather than a source of room identity or hit-testing. A text-free ghost-emblem coin replaces only the HUD icon; Flutter continues to own localized values and semantics.
 - Audio integration adopts only the seven paths needed by the current service contract. WAV playback remains optional and injectable, and no audio asset is referenced from deterministic simulation.
+
+## HK-028 privacy and diagnostics decisions
+
+Date: 2026-10-14
+
+- Analytics and external crash/error reporting are separate, explicit, persisted opt-ins. Both default to off; changing either setting does not affect local saves, simulation, audio, or offline play.
+- Google UMP is the platform consent source for ad eligibility. Consent information is refreshed at launch, a required form is shown before ad requests, and the rewarded adapter checks `canRequestAds` before initializing or loading Mobile Ads. A privacy-options entry is shown only when UMP reports that it is required.
+- Framework and uncaught asynchronous errors are routed through an injectable error-reporting boundary. No crash vendor is configured in this repository; production can inject one behind the boundary without importing it into simulation. Provider failures are swallowed by the consent-aware wrapper.
+- Consent state is save schema 20. Version-19 saves migrate with external error reporting disabled. The settings dialog keeps existing audio controls first and places privacy controls in a localized expandable section.
+- UMP, ads, and diagnostics are application/service concerns. `lib/simulation` remains free of Flutter, Flame, Google Mobile Ads, and provider SDK imports.

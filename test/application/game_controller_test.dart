@@ -3,6 +3,8 @@ import 'package:hantu_kontrakan/application/game_controller.dart';
 import 'package:hantu_kontrakan/application/simulation_runtime.dart';
 import 'package:hantu_kontrakan/services/analytics_service.dart';
 import 'package:hantu_kontrakan/services/audio_service.dart';
+import 'package:hantu_kontrakan/services/error_reporting_service.dart';
+import 'package:hantu_kontrakan/services/privacy_consent_service.dart';
 import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
@@ -69,6 +71,44 @@ void main() {
       expect(saves.storedState?.analyticsConsentGranted, isFalse);
     },
   );
+
+  test('error-reporting consent persists and configures reporter', () async {
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
+    final reporter = ConsentAwareErrorReportingService();
+    final controller = GameController(
+      saveService: saves,
+      errorReportingService: reporter,
+    );
+
+    await controller.initialize();
+    expect(reporter.enabled, isFalse);
+
+    expect(await controller.setErrorReportingConsent(true), isTrue);
+    expect(reporter.enabled, isTrue);
+    expect(saves.storedState?.errorReportingConsentGranted, isTrue);
+
+    expect(await controller.setErrorReportingConsent(false), isTrue);
+    expect(reporter.enabled, isFalse);
+  });
+
+  test('privacy service failure does not prevent offline play', () async {
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
+    final controller = GameController(
+      saveService: saves,
+      privacyConsentService: _ThrowingPrivacyConsentService(),
+    );
+
+    await controller.initialize();
+    await controller.collectAllRent(claimId: 'offline-claim');
+
+    expect(controller.isReady, isTrue);
+    expect(saves.storedState, isNotNull);
+    expect(await controller.isPrivacyOptionsRequired(), isFalse);
+  });
 
   test('tutorial gameplay emits only approved content identifiers', () async {
     final analytics = _RecordingAnalyticsService();
@@ -584,6 +624,20 @@ class _ThrowingRewardedAdService implements RewardedAdService {
   }) {
     throw StateError('ad SDK failed');
   }
+}
+
+class _ThrowingPrivacyConsentService implements PrivacyConsentService {
+  @override
+  Future<bool> canRequestAds() => throw StateError('offline');
+
+  @override
+  Future<void> initialize() => throw StateError('offline');
+
+  @override
+  Future<bool> isPrivacyOptionsRequired() => throw StateError('offline');
+
+  @override
+  Future<void> showPrivacyOptions() => throw StateError('offline');
 }
 
 class _RecordingAudioService implements AudioService {

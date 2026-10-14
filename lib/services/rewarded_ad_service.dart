@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import 'privacy_consent_service.dart';
+
 enum RewardedAdOutcome { earned, dismissed, unavailable, failed }
 
 abstract interface class RewardedAdService {
@@ -21,11 +23,15 @@ class UnavailableRewardedAdService implements RewardedAdService {
 }
 
 class GoogleTestRewardedAdService implements RewardedAdService {
+  GoogleTestRewardedAdService({required PrivacyConsentService privacyConsent})
+    : _privacyConsent = privacyConsent;
+
   static const String androidTestUnitId =
       'ca-app-pub-3940256099942544/5224354917';
   static const String iosTestUnitId = 'ca-app-pub-3940256099942544/1712485313';
 
   bool _initialized = false;
+  final PrivacyConsentService _privacyConsent;
 
   @override
   Future<RewardedAdOutcome> showRewardedAd({
@@ -39,6 +45,10 @@ class GoogleTestRewardedAdService implements RewardedAdService {
     if (adUnitId == null) return RewardedAdOutcome.unavailable;
 
     try {
+      await _privacyConsent.initialize();
+      if (!await _privacyConsent.canRequestAds()) {
+        return RewardedAdOutcome.unavailable;
+      }
       if (!_initialized) {
         await MobileAds.instance.initialize();
         _initialized = true;

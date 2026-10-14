@@ -2,10 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/app/app.dart';
 import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
+import 'package:hantu_kontrakan/services/privacy_consent_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 
 void main() {
+  testWidgets(
+    'privacy settings persist opt-ins and keep offline promise visible',
+    (tester) async {
+      final saves = MemorySaveService(
+        initialResult: SaveLoaded(GameState.seeded()),
+      );
+      await tester.pumpWidget(
+        HantuKontrakanApp(
+          saveService: saves,
+          privacyConsentService: _RequiredPrivacyConsentService(),
+          locale: const Locale('en'),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.tap(find.byKey(const Key('settings-button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Privacy'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('privacy-settings-section')));
+      await tester.pump();
+      expect(
+        find.textContaining('offline game remains playable'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('ad-privacy-options')), findsOneWidget);
+
+      tester
+          .widget<SwitchListTile>(find.byKey(const Key('analytics-consent')))
+          .onChanged!(true);
+      await tester.pump();
+      tester
+          .widget<SwitchListTile>(
+            find.byKey(const Key('error-reporting-consent')),
+          )
+          .onChanged!(true);
+      await tester.pump();
+
+      expect(saves.storedState?.analyticsConsentGranted, isTrue);
+      expect(saves.storedState?.errorReportingConsentGranted, isTrue);
+    },
+  );
+
   testWidgets('complaint resolution visibly updates and persists state', (
     tester,
   ) async {
@@ -248,4 +294,18 @@ class _EarnedRewardedAdService implements RewardedAdService {
     await onRewardEarned();
     return RewardedAdOutcome.earned;
   }
+}
+
+class _RequiredPrivacyConsentService implements PrivacyConsentService {
+  @override
+  Future<bool> canRequestAds() async => true;
+
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<bool> isPrivacyOptionsRequired() async => true;
+
+  @override
+  Future<void> showPrivacyOptions() async {}
 }

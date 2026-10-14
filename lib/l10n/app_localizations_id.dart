@@ -425,6 +425,26 @@ class AppLocalizationsId extends AppLocalizations {
   String get audioSettingsTitle => 'Pengaturan audio';
 
   @override
+  String get settingsTitle => 'Pengaturan';
+
+  @override
+  String get privacySettingsTitle => 'Privasi';
+
+  @override
+  String get privacyOfflineExplanation =>
+      'Analitik dan laporan kerusakan bersifat opsional. Game offline tetap dapat dimainkan saat dimatikan atau tidak tersedia.';
+
+  @override
+  String get analyticsConsentLabel => 'Bagikan analitik permainan anonim';
+
+  @override
+  String get errorReportingConsentLabel =>
+      'Bagikan laporan kerusakan dan kesalahan';
+
+  @override
+  String get adPrivacyOptionsLabel => 'Kelola pilihan privasi iklan';
+
+  @override
   String get musicMutedLabel => 'Bisukan musik';
 
   @override

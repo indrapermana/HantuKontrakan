@@ -28,6 +28,7 @@ void main() {
       mysticalCrystals: 4,
       languageCode: 'en',
       analyticsConsentGranted: true,
+      errorReportingConsentGranted: true,
       musicMuted: true,
       soundMuted: true,
       musicVolume: 0.2,
@@ -100,6 +101,7 @@ void main() {
     expect(loaded.mysticalCrystals, 4);
     expect(loaded.languageCode, 'en');
     expect(loaded.analyticsConsentGranted, isTrue);
+    expect(loaded.errorReportingConsentGranted, isTrue);
     expect(loaded.musicMuted, isTrue);
     expect(loaded.soundMuted, isTrue);
     expect(loaded.musicVolume, 0.2);
@@ -212,6 +214,19 @@ void main() {
     expect(migrated.completedRewardedRentClaimIds, isEmpty);
     expect(migrated.rewardedRentBonusDayKey, isNull);
     expect(migrated.rewardedRentBonusCount, 0);
+  });
+
+  test('version 19 save migrates with crash reporting disabled', () async {
+    final version19 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 19
+      ..remove('errorReportingConsentGranted');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version19),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+
+    expect((result as SaveLoaded).state.errorReportingConsentGranted, isFalse);
   });
 
   test('version 1 save migrates to current debug state defaults', () async {

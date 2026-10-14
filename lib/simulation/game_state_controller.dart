@@ -66,6 +66,8 @@ class GameStateController {
         _state,
         granted,
       ),
+      SetErrorReportingConsent(:final granted) =>
+        GameRules.setErrorReportingConsent(_state, granted),
       SetAudioPreferences(
         :final musicMuted,
         :final soundMuted,

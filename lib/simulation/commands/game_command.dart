@@ -118,6 +118,12 @@ final class SetAnalyticsConsent extends GameCommand {
   final bool granted;
 }
 
+final class SetErrorReportingConsent extends GameCommand {
+  const SetErrorReportingConsent({required this.granted});
+
+  final bool granted;
+}
+
 final class SetAudioPreferences extends GameCommand {
   const SetAudioPreferences({
     required this.musicMuted,

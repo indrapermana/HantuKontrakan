@@ -424,6 +424,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get audioSettingsTitle => 'Audio settings';
 
   @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get privacySettingsTitle => 'Privacy';
+
+  @override
+  String get privacyOfflineExplanation =>
+      'Analytics and crash reports are optional. The offline game remains playable when they are off or unavailable.';
+
+  @override
+  String get analyticsConsentLabel => 'Share anonymous gameplay analytics';
+
+  @override
+  String get errorReportingConsentLabel => 'Share crash and error reports';
+
+  @override
+  String get adPrivacyOptionsLabel => 'Manage ad privacy choices';
+
+  @override
   String get musicMutedLabel => 'Mute music';
 
   @override
