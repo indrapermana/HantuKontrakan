@@ -482,6 +482,22 @@ void main() {
     expect(saves.storedState?.pendingRentMicrocoins, greaterThan(0));
   });
 
+  test('offline earnings presentation delta is exposed exactly once', () async {
+    final clock = _MutableClock(DateTime.utc(2026, 10, 13, 8));
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
+    final controller = GameController(saveService: saves, clock: clock);
+    await controller.initialize();
+
+    await controller.pauseForOffline();
+    clock.value = clock.value.add(const Duration(hours: 1));
+    await controller.resumeFromOffline();
+
+    expect(controller.takePendingOfflineEarningsCoins(), greaterThan(0));
+    expect(controller.takePendingOfflineEarningsCoins(), 0);
+  });
+
   test('ability cooldown continues after controller reload', () async {
     final initial = GameState(
       schemaVersion: GameState.currentSchemaVersion,

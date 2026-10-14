@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../application/game_controller.dart';
 import '../../l10n/app_localizations.dart';
+import '../../widgets/game_panel.dart';
 
 class AudioSettingsDialog extends StatefulWidget {
   const AudioSettingsDialog({required this.controller, super.key});
@@ -49,9 +50,11 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final strings = AppLocalizations.of(context);
-    return AlertDialog(
-      title: Text(strings.settingsTitle),
-      content: SingleChildScrollView(
+    return GameDialog(
+      title: strings.settingsTitle,
+      icon: Icons.settings_rounded,
+      // ignore: sort_child_properties_last
+      child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -109,17 +112,17 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
                   key: const Key('privacy-policy'),
                   onPressed: () => showDialog<void>(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(strings.privacyPolicyTitle),
-                      content: SingleChildScrollView(
+                    builder: (dialogContext) => GameDialog(
+                      title: strings.privacyPolicyTitle,
+                      icon: Icons.privacy_tip_rounded,
+                      // ignore: sort_child_properties_last
+                      child: SingleChildScrollView(
                         child: Text(strings.privacyPolicyBody),
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(strings.closeLabel),
-                        ),
-                      ],
+                      primaryAction: GamePrimaryButton(
+                        label: strings.closeLabel,
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                      ),
                     ),
                   ),
                   child: Text(strings.privacyPolicyLabel),
@@ -153,12 +156,10 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: Text(strings.closeLabel),
-        ),
-      ],
+      primaryAction: GamePrimaryButton(
+        label: strings.closeLabel,
+        onPressed: () => Navigator.of(context).pop(),
+      ),
     );
   }
 }

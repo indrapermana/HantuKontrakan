@@ -9,6 +9,7 @@ import '../../simulation/models/ghost.dart';
 import '../../simulation/models/room.dart';
 import '../../simulation/systems/happiness_system.dart';
 import '../../simulation/systems/repair_system.dart';
+import '../../widgets/game_panel.dart';
 
 class RoomDetailsSheet extends StatelessWidget {
   const RoomDetailsSheet({
@@ -39,19 +40,15 @@ class RoomDetailsSheet extends StatelessWidget {
         ? null
         : HappinessSystem.breakdownFor(state, occupantId);
     final repairCost = RepairSystem.costFor(state, room.id);
-    return SafeArea(
+    return GameBottomSheetFrame(
+      title: strings.roomTitle(_roomNumber(room.id)),
+      icon: Icons.bedroom_parent_rounded,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              strings.roomTitle(_roomNumber(room.id)),
-              key: Key('selected-${room.id}'),
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 12),
+            SizedBox(key: Key('selected-${room.id}')),
             Text(
               ghost == null
                   ? strings.vacantTenant
@@ -252,9 +249,10 @@ class GhostProfileSheet extends StatelessWidget {
     final definition = GhostDefinitions.byKind(ghost.kind);
     final room = state.roomForGhost(ghost.id);
     final breakdown = HappinessSystem.breakdownFor(state, ghost.id);
-    return SafeArea(
+    return GameBottomSheetFrame(
+      title: strings.ghostProfileTitle(ghost.kind.displayName),
+      icon: _ghostIcon(ghost.kind),
       child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,11 +268,7 @@ class GhostProfileSheet extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        strings.ghostProfileTitle(ghost.kind.displayName),
-                        key: Key('ghost-profile-${ghost.id}'),
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
+                      SizedBox(key: Key('ghost-profile-${ghost.id}')),
                       Text(localizedArchetype(strings, ghost.kind)),
                     ],
                   ),

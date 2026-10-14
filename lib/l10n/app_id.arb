@@ -185,5 +185,8 @@
   "navigationGhosts": "Hantu",
   "navigationShop": "Toko",
   "moreActionsLabel": "Aksi lainnya",
-  "propertyActionsTitle": "Kamar dan peningkatan"
+  "propertyActionsTitle": "Kamar dan peningkatan",
+  "offlineReturnTitle": "Selamat datang kembali!",
+  "offlineReturnBody": "Para penyewa menghasilkan {coins} koin saat kamu pergi.",
+  "collectLabel": "Ambil"
 }

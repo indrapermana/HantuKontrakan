@@ -1009,6 +1009,24 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Kamar dan peningkatan'**
   String get propertyActionsTitle;
+
+  /// No description provided for @offlineReturnTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Selamat datang kembali!'**
+  String get offlineReturnTitle;
+
+  /// No description provided for @offlineReturnBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Para penyewa menghasilkan {coins} koin saat kamu pergi.'**
+  String offlineReturnBody(Object coins);
+
+  /// No description provided for @collectLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Ambil'**
+  String get collectLabel;
 }
 
 class _AppLocalizationsDelegate

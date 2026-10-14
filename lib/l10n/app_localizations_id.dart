@@ -545,4 +545,15 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get propertyActionsTitle => 'Kamar dan peningkatan';
+
+  @override
+  String get offlineReturnTitle => 'Selamat datang kembali!';
+
+  @override
+  String offlineReturnBody(Object coins) {
+    return 'Para penyewa menghasilkan $coins koin saat kamu pergi.';
+  }
+
+  @override
+  String get collectLabel => 'Ambil';
 }

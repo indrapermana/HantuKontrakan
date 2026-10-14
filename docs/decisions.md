@@ -353,3 +353,20 @@ Date: 2026-10-14
   state. Per-room balances, coin bubbles, and save migration remain HK-030-C.
 - Flutter-drawn surfaces and existing approved assets are used for this layout;
   no baked localized text or new production art dependency was introduced.
+
+### HK-030-B themed interaction decisions
+
+- All primary interaction surfaces use shared Flutter-owned game panel, choice,
+  and action primitives. Flame remains responsible only for world rendering and
+  world hit targets.
+- Primary async actions disable themselves while awaiting completion. This UI
+  guard complements, but does not replace, the deterministic exactly-once
+  protections in mission, incident, complaint, rent, and upgrade rules.
+- Offline earnings continue to be calculated and persisted by the existing
+  resume command. The controller exposes only the resulting positive coin delta
+  once for presentation, avoiding a save-schema or economy change in UX-R2.
+- Panels constrain their height around safe keyboard insets, keep content
+  scrollable, and use live Flutter localization. No localized copy is rendered
+  into raster assets.
+- Existing gameplay values and action availability are preserved. Per-room rent
+  ownership and collection remain explicitly deferred to HK-030-C.

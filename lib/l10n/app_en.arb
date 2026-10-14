@@ -151,5 +151,8 @@
   "navigationGhosts": "Ghosts",
   "navigationShop": "Shop",
   "moreActionsLabel": "More actions",
-  "propertyActionsTitle": "Rooms and improvements"
+  "propertyActionsTitle": "Rooms and improvements",
+  "offlineReturnTitle": "Welcome back!",
+  "offlineReturnBody": "Your tenants earned {coins} coins while you were away.",
+  "collectLabel": "Collect"
 }

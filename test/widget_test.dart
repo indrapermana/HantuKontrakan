@@ -5,6 +5,7 @@ import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
 import 'package:hantu_kontrakan/services/privacy_consent_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
+import 'package:hantu_kontrakan/widgets/game_panel.dart';
 
 void main() {
   testWidgets(
@@ -214,7 +215,7 @@ void main() {
     expect(saves.storedState?.playerExperience, 25);
     expect(
       tester
-          .widget<FilledButton>(
+          .widget<GamePrimaryButton>(
             find.byKey(const Key('claim-mission-place_pocong')),
           )
           .onPressed,

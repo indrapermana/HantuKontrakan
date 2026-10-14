@@ -543,4 +543,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get propertyActionsTitle => 'Rooms and improvements';
+
+  @override
+  String get offlineReturnTitle => 'Welcome back!';
+
+  @override
+  String offlineReturnBody(Object coins) {
+    return 'Your tenants earned $coins coins while you were away.';
+  }
+
+  @override
+  String get collectLabel => 'Collect';
 }

@@ -832,8 +832,8 @@ Roadmap preparation follow-up:
   full-screen shell, HUD, navigation, and action reachability; per-room economy,
   panel redesign, recurring goals, portfolio state, and new audio remain in
   their later tickets.
-- HK-030-A is complete and locally verified. HK-030-B is the next unfinished
-  ticket; no HK-030-B panel redesign or later economy work is included here.
+- HK-030-A is complete and locally verified. Its implementation did not include
+  the panel redesign or later economy work delivered by subsequent tickets.
 
 ### HK-030-A — Full-screen world shell
 
@@ -859,3 +859,29 @@ Status: locally verified on 2026-10-14.
   the wired device lacks a usable provisioning profile, while the already
   provisioned wireless device installed/launched the app but did not expose its
   Dart VM service. Automated acceptance and the Android artifact are unaffected.
+
+### HK-030-B — Themed interaction system
+
+Status: locally verified on 2026-10-14.
+
+- Added shared game-panel primitives for dialogs, bottom sheets, choice cards,
+  primary actions, and secondary actions using the established night, wood,
+  parchment, gold, and green visual language.
+- Migrated room, ghost, mission, incident, complaint, incident-result,
+  destination/swap, language, settings, privacy, action-center, and locked-room
+  flows. No primary feature flow retains `AlertDialog` or `SimpleDialog`.
+- Reworked mission presentation into readable stacked cards with an explicit
+  reward preview and guarded claim action. Existing mission ordering, rewards,
+  eligibility, and exactly-once domain behavior remain unchanged.
+- Added a one-time offline-return panel backed by the rent delta already
+  calculated by deterministic resume processing. The delta is presentation-only
+  transient controller state; no simulation rules or persisted schema changed.
+- Added panel regression coverage for compact portrait layout with visible
+  keyboard and 1.5x text scaling, duplicate primary-action taps, and exactly-once
+  offline-summary consumption. Existing English and Indonesian gameplay widget
+  tests continue to cover settings, missions, complaint, and incident flows.
+- Validation evidence: formatting completed; `flutter analyze` reported no
+  issues; all 183 `flutter test` tests passed; Android debug build succeeded;
+  `git diff --check` passed.
+- HK-030-C is the next unfinished ticket. This work does not add per-room rent,
+  coin bubbles, collect-one state, or any save migration reserved for HK-030-C.

@@ -52,6 +52,7 @@ class GameController extends ChangeNotifier {
   int _rentClaimSequence = 0;
   int _repairSequence = 0;
   int _rewardedRentSequence = 0;
+  int _pendingOfflineEarningsCoins = 0;
   Future<void> _lifecycleOperation = Future<void>.value();
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
@@ -83,6 +84,12 @@ class GameController extends ChangeNotifier {
   bool get canCollectRewardedRent =>
       RewardedRentSystem.canBegin(state, _localDayKey(_clock.now()));
 
+  int takePendingOfflineEarningsCoins() {
+    final coins = _pendingOfflineEarningsCoins;
+    _pendingOfflineEarningsCoins = 0;
+    return coins;
+  }
+
   Future<void> initialize() async {
     _loadResult = await _saveService.load();
     _domainController = GameStateController(switch (_loadResult) {
@@ -101,6 +108,9 @@ class GameController extends ChangeNotifier {
     final resumed = _domainController.dispatch(
       ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
     );
+    _pendingOfflineEarningsCoins =
+        (state.pendingRentMicrocoins - beforeResume.pendingRentMicrocoins) ~/
+        GameBalance.microcoinsPerCoin;
     if (resumed) await _saveService.save(state);
     _isReady = true;
     _syncErrorReportingConsent();
@@ -331,7 +341,15 @@ class GameController extends ChangeNotifier {
     if (!_isReady) return;
     final timestampMillis = _clock.now().millisecondsSinceEpoch;
     _lifecycleOperation = _lifecycleOperation.then((_) async {
+      final pendingBefore = state.pendingRentMicrocoins;
       await _dispatch(ResumeFromOffline(timestampMillis: timestampMillis));
+      final earnedCoins =
+          (state.pendingRentMicrocoins - pendingBefore) ~/
+          GameBalance.microcoinsPerCoin;
+      if (earnedCoins > 0) {
+        _pendingOfflineEarningsCoins = earnedCoins;
+        notifyListeners();
+      }
       await _runAudio(_audioService.resumeBackground);
     });
     await _lifecycleOperation;

@@ -11,6 +11,7 @@ import '../../simulation/content/incident_definitions.dart';
 import '../../simulation/content/progression_definitions.dart';
 import '../../simulation/models/incident_definition.dart';
 import '../../simulation/systems/game_rules.dart';
+import '../../widgets/game_panel.dart';
 import '../missions/mission_dialog.dart';
 import '../settings/audio_settings_dialog.dart';
 import '../tutorial/tutorial_panel.dart';
@@ -34,6 +35,15 @@ class HomeScreen extends StatelessWidget {
           );
         }
         final state = controller.state;
+        final offlineEarningsCoins = controller
+            .takePendingOfflineEarningsCoins();
+        if (offlineEarningsCoins > 0) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) {
+              _showOfflineReturn(context, offlineEarningsCoins);
+            }
+          });
+        }
         final activeIncident = state.activeIncidentId == null
             ? null
             : IncidentDefinitions.byId(state.activeIncidentId!);
@@ -173,32 +183,33 @@ class HomeScreen extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     await showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(strings.moreActionsLabel),
-        content: OutlinedButton.icon(
+      builder: (dialogContext) => GameDialog(
+        title: strings.moreActionsLabel,
+        icon: Icons.auto_awesome_motion_rounded,
+        // ignore: sort_child_properties_last
+        child: GameChoiceCard(
           key: const Key('collect-rent-rewarded'),
-          onPressed: controller.canCollectRewardedRent
-              ? () async {
-                  Navigator.pop(dialogContext);
-                  await _collectRewardedRent(context);
-                }
-              : null,
-          icon: const Icon(Icons.ondemand_video_rounded),
-          label: Text(
-            controller.rewardedRentBonusesRemaining == 0
-                ? strings.rewardedRentDailyLimit
-                : strings.rewardedRentButton(
-                    controller.pendingRentCoins,
-                    controller.rewardedRentBonusesRemaining,
-                  ),
+          title: controller.rewardedRentBonusesRemaining == 0
+              ? strings.rewardedRentDailyLimit
+              : strings.rewardedRentButton(
+                  controller.pendingRentCoins,
+                  controller.rewardedRentBonusesRemaining,
+                ),
+          subtitle: '',
+          enabled: controller.canCollectRewardedRent,
+          leading: const Icon(
+            Icons.ondemand_video_rounded,
+            color: gamePanelGold,
           ),
+          onPressed: () async {
+            Navigator.pop(dialogContext);
+            await _collectRewardedRent(context);
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(strings.closeLabel),
-          ),
-        ],
+        secondaryAction: GameSecondaryButton(
+          label: strings.closeLabel,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
       ),
     );
   }
@@ -208,18 +219,15 @@ class HomeScreen extends StatelessWidget {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => GameBottomSheetFrame(
+        title: strings.navigationGhosts,
+        icon: Icons.person_pin_circle_rounded,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                strings.navigationGhosts,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
               for (final ghost in controller.state.ghosts)
                 ListTile(
                   key: Key('ghost-roster-${ghost.id}'),
@@ -248,18 +256,15 @@ class HomeScreen extends StatelessWidget {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      builder: (sheetContext) => SafeArea(
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => GameBottomSheetFrame(
+        title: strings.propertyActionsTitle,
+        icon: Icons.home_work_rounded,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                strings.propertyActionsTitle,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 8),
               for (final room in controller.state.rooms)
                 ListTile(
                   key: Key('property-room-${room.id}'),
@@ -300,6 +305,38 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _showOfflineReturn(BuildContext context, int coins) async {
+    final strings = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => GameDialog(
+        key: const Key('offline-return-panel'),
+        title: strings.offlineReturnTitle,
+        icon: Icons.nights_stay_rounded,
+        // ignore: sort_child_properties_last
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.savings_rounded, size: 54, color: gamePanelGold),
+            const SizedBox(height: 12),
+            Text(
+              strings.offlineReturnBody(coins),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ],
+        ),
+        primaryAction: GamePrimaryButton(
+          key: const Key('offline-return-continue'),
+          label: strings.collectLabel,
+          icon: Icons.check_rounded,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
+      ),
+    );
+  }
+
   Future<void> _showRoomDetails(BuildContext context, String roomId) async {
     final strings = AppLocalizations.of(context);
     final room = controller.state.rooms
@@ -308,55 +345,55 @@ class HomeScreen extends StatelessWidget {
     if (room == null || !room.unlocked) {
       await showModalBottomSheet<void>(
         context: context,
-        showDragHandle: true,
-        builder: (context) => Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                strings.roomTitle(_roomNumber(roomId)),
-                key: Key('selected-$roomId'),
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                strings.roomLocked,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                room == null
-                    ? strings.roomUnlockLater
-                    : strings.roomUnlockRequirement(
-                        GameBalance.roomUnlockCosts[room.id]!,
-                        ProgressionDefinitions.requiredLevelForRoom(room.id),
-                      ),
-              ),
-              if (room != null) ...[
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    key: Key('unlock-${room.id}'),
-                    onPressed:
-                        controller.state.playerLevel >=
-                                ProgressionDefinitions.requiredLevelForRoom(
-                                  room.id,
-                                ) &&
-                            controller.state.walletCoins >=
-                                GameBalance.roomUnlockCosts[room.id]!
-                        ? () async {
-                            Navigator.pop(context);
-                            await controller.unlockRoom(room.id);
-                          }
-                        : null,
-                    child: Text(strings.unlockRoom),
-                  ),
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (sheetContext) => GameBottomSheetFrame(
+          title: strings.roomTitle(_roomNumber(roomId)),
+          icon: Icons.lock_rounded,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(key: Key('selected-$roomId')),
+                Text(
+                  strings.roomLocked,
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  room == null
+                      ? strings.roomUnlockLater
+                      : strings.roomUnlockRequirement(
+                          GameBalance.roomUnlockCosts[room.id]!,
+                          ProgressionDefinitions.requiredLevelForRoom(room.id),
+                        ),
+                ),
+                if (room != null) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GamePrimaryButton(
+                      key: Key('unlock-${room.id}'),
+                      onPressed:
+                          controller.state.playerLevel >=
+                                  ProgressionDefinitions.requiredLevelForRoom(
+                                    room.id,
+                                  ) &&
+                              controller.state.walletCoins >=
+                                  GameBalance.roomUnlockCosts[room.id]!
+                          ? () async {
+                              Navigator.pop(sheetContext);
+                              await controller.unlockRoom(room.id);
+                            }
+                          : null,
+                      label: strings.unlockRoom,
+                      icon: Icons.lock_open_rounded,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       );
@@ -367,7 +404,8 @@ class HomeScreen extends StatelessWidget {
         : controller.state.ghostById(room.occupantId!);
     await showModalBottomSheet<void>(
       context: context,
-      showDragHandle: true,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (sheetContext) => RoomDetailsSheet(
         state: controller.state,
         room: room,
@@ -403,20 +441,26 @@ class HomeScreen extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     final languageCode = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => SimpleDialog(
-        title: Text(strings.languageTitle),
-        children: [
-          SimpleDialogOption(
-            key: const Key('language-id'),
-            onPressed: () => Navigator.pop(dialogContext, 'id'),
-            child: Text(strings.languageIndonesian),
-          ),
-          SimpleDialogOption(
-            key: const Key('language-en'),
-            onPressed: () => Navigator.pop(dialogContext, 'en'),
-            child: Text(strings.languageEnglish),
-          ),
-        ],
+      builder: (dialogContext) => GameDialog(
+        title: strings.languageTitle,
+        icon: Icons.language_rounded,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GameChoiceCard(
+              key: const Key('language-id'),
+              onPressed: () => Navigator.pop(dialogContext, 'id'),
+              title: strings.languageIndonesian,
+              subtitle: '',
+            ),
+            GameChoiceCard(
+              key: const Key('language-en'),
+              onPressed: () => Navigator.pop(dialogContext, 'en'),
+              title: strings.languageEnglish,
+              subtitle: '',
+            ),
+          ],
+        ),
       ),
     );
     if (languageCode != null) {
@@ -432,7 +476,8 @@ class HomeScreen extends StatelessWidget {
     final room = controller.state.roomForGhost(ghostId);
     await showModalBottomSheet<void>(
       context: context,
-      showDragHandle: true,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (sheetContext) => GhostProfileSheet(
         state: controller.state,
         ghost: ghost,
@@ -459,20 +504,23 @@ class HomeScreen extends StatelessWidget {
 
     final targetRoomId = await showDialog<String>(
       context: context,
-      builder: (context) => SimpleDialog(
-        title: Text(strings.chooseDestination),
-        children: [
-          for (final room in destinations)
-            SimpleDialogOption(
-              key: Key('destination-${room.id}'),
-              onPressed: () => Navigator.pop(context, room.id),
-              child: Text(
-                room.occupantId == null
+      builder: (dialogContext) => GameDialog(
+        title: strings.chooseDestination,
+        icon: Icons.swap_horiz_rounded,
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (final room in destinations)
+              GameChoiceCard(
+                key: Key('destination-${room.id}'),
+                onPressed: () => Navigator.pop(dialogContext, room.id),
+                title: room.occupantId == null
                     ? strings.vacantRoom(_roomNumber(room.id))
                     : strings.occupiedRoom(_roomNumber(room.id)),
+                subtitle: '',
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
     if (targetRoomId == null || !context.mounted) return;
@@ -485,20 +533,21 @@ class HomeScreen extends StatelessWidget {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(strings.confirmSwapTitle),
-        content: Text(strings.confirmSwapBody(_roomNumber(targetRoomId))),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(strings.cancel),
-          ),
-          FilledButton(
-            key: const Key('confirm-swap'),
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(strings.confirmSwap),
-          ),
-        ],
+      builder: (dialogContext) => GameDialog(
+        title: strings.confirmSwapTitle,
+        icon: Icons.swap_horiz_rounded,
+        // ignore: sort_child_properties_last
+        child: Text(strings.confirmSwapBody(_roomNumber(targetRoomId))),
+        secondaryAction: GameSecondaryButton(
+          label: strings.cancel,
+          onPressed: () => Navigator.pop(dialogContext, false),
+        ),
+        primaryAction: GamePrimaryButton(
+          key: const Key('confirm-swap'),
+          onPressed: () => Navigator.pop(dialogContext, true),
+          label: strings.confirmSwap,
+          icon: Icons.swap_horiz_rounded,
+        ),
       ),
     );
     if (confirmed != true) return;
@@ -514,9 +563,11 @@ class HomeScreen extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     final choice = await showDialog<IncidentChoiceDefinition>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(_localized(context, incident.title!)),
-        content: SingleChildScrollView(
+      builder: (dialogContext) => GameDialog(
+        title: _localized(context, incident.title!),
+        icon: Icons.crisis_alert_rounded,
+        // ignore: sort_child_properties_last
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -524,36 +575,26 @@ class HomeScreen extends StatelessWidget {
               Text(_localized(context, incident.dialogue!)),
               const SizedBox(height: 16),
               for (final choice in incident.choices) ...[
-                OutlinedButton(
+                GameChoiceCard(
                   key: Key('incident-choice-${choice.id}'),
-                  onPressed:
+                  enabled:
                       controller.state.walletCoins + choice.effects.coinDelta >=
-                          0
-                      ? () => Navigator.pop(dialogContext, choice)
-                      : null,
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: Text(
-                        '${_localized(context, choice.label)}\n'
-                        '${strings.incidentConsequencePreview(_effectPreview(context, choice.effects))}'
-                        '${controller.state.walletCoins + choice.effects.coinDelta < 0 ? '\n${strings.incidentNotEnoughCoins}' : ''}',
-                      ),
-                    ),
-                  ),
+                      0,
+                  onPressed: () => Navigator.pop(dialogContext, choice),
+                  title: _localized(context, choice.label),
+                  subtitle:
+                      '${strings.incidentConsequencePreview(_effectPreview(context, choice.effects))}'
+                      '${controller.state.walletCoins + choice.effects.coinDelta < 0 ? '\n${strings.incidentNotEnoughCoins}' : ''}',
                 ),
                 const SizedBox(height: 6),
               ],
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(strings.cancel),
-          ),
-        ],
+        secondaryAction: GameSecondaryButton(
+          label: strings.cancel,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
       ),
     );
     if (choice == null || !context.mounted) return;
@@ -563,19 +604,19 @@ class HomeScreen extends StatelessWidget {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(strings.incidentResolvedTitle),
-        content: Text(
+      builder: (dialogContext) => GameDialog(
+        title: strings.incidentResolvedTitle,
+        icon: Icons.auto_awesome_rounded,
+        // ignore: sort_child_properties_last
+        child: Text(
           '${_localized(context, choice.response)}\n\n'
           '${strings.incidentConsequencePreview(_effectPreview(context, choice.effects))}',
         ),
-        actions: [
-          FilledButton(
-            key: const Key('incident-outcome-continue'),
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(strings.continueLabel),
-          ),
-        ],
+        primaryAction: GamePrimaryButton(
+          key: const Key('incident-outcome-continue'),
+          onPressed: () => Navigator.pop(dialogContext),
+          label: strings.continueLabel,
+        ),
       ),
     );
   }
@@ -616,30 +657,46 @@ class HomeScreen extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     final choice = await showDialog<ComplaintChoice>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(strings.complaintTitle),
-        content: Text(strings.complaintBody),
-        actions: [
-          _ChoiceButton(
-            key: const Key('choice-soundproof'),
-            title: strings.installSoundproofing,
-            effect: strings.soundproofingEffect,
-            onPressed: () =>
-                Navigator.pop(context, ComplaintChoice.installSoundproofing),
+      builder: (dialogContext) => GameDialog(
+        title: strings.complaintTitle,
+        icon: Icons.campaign_rounded,
+        // ignore: sort_child_properties_last
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(strings.complaintBody),
+              const SizedBox(height: 12),
+              _ChoiceButton(
+                key: const Key('choice-soundproof'),
+                title: strings.installSoundproofing,
+                effect: strings.soundproofingEffect,
+                onPressed: () => Navigator.pop(
+                  dialogContext,
+                  ComplaintChoice.installSoundproofing,
+                ),
+              ),
+              _ChoiceButton(
+                title: strings.askTuyulCalm,
+                effect: strings.askTuyulCalmEffect,
+                onPressed: () => Navigator.pop(
+                  dialogContext,
+                  ComplaintChoice.askTuyulToCalmDown,
+                ),
+              ),
+              _ChoiceButton(
+                title: strings.peaceOffering,
+                effect: strings.peaceOfferingEffect,
+                onPressed: () =>
+                    Navigator.pop(dialogContext, ComplaintChoice.peaceOffering),
+              ),
+            ],
           ),
-          _ChoiceButton(
-            title: strings.askTuyulCalm,
-            effect: strings.askTuyulCalmEffect,
-            onPressed: () =>
-                Navigator.pop(context, ComplaintChoice.askTuyulToCalmDown),
-          ),
-          _ChoiceButton(
-            title: strings.peaceOffering,
-            effect: strings.peaceOfferingEffect,
-            onPressed: () =>
-                Navigator.pop(context, ComplaintChoice.peaceOffering),
-          ),
-        ],
+        ),
+        secondaryAction: GameSecondaryButton(
+          label: strings.cancel,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
       ),
     );
     if (choice == null || !context.mounted) return;
@@ -670,14 +727,6 @@ class _ChoiceButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    width: double.infinity,
-    child: TextButton(
-      onPressed: onPressed,
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text('$title\n$effect'),
-      ),
-    ),
-  );
+  Widget build(BuildContext context) =>
+      GameChoiceCard(title: title, subtitle: effect, onPressed: onPressed);
 }
