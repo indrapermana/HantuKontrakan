@@ -60,6 +60,19 @@ class GameStateController {
         _state,
         granted,
       ),
+      SetAudioPreferences(
+        :final musicMuted,
+        :final soundMuted,
+        :final musicVolume,
+        :final soundVolume,
+      ) =>
+        GameRules.setAudioPreferences(
+          _state,
+          musicMuted: musicMuted,
+          soundMuted: soundMuted,
+          musicVolume: musicVolume,
+          soundVolume: soundVolume,
+        ),
       ResolveIncident(
         :final incidentId,
         :final choiceId,

@@ -244,3 +244,9 @@ Date: 2026-10-13
 Date: 2026-10-14
 
 - Analytics is denied by default and persisted locally as explicit consent. Application hooks may emit only exact allowlisted gameplay schemas through an injected adapter; no provider SDK is installed, adapter failures cannot affect saves/gameplay, and the privacy/settings UX remains HK-028 scope.
+
+## HK-026 audio decisions
+
+Date: 2026-10-14
+
+- Production audio uses an injected `audioplayers` adapter with original generated placeholder WAV tones. Persisted mute/volume rules stay pure Dart, playback failures stay cosmetic, and lifecycle playback is serialized with offline pause/resume operations.

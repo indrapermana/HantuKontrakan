@@ -78,6 +78,32 @@ void main() {
     expect(find.text('200 Koin Arwah'), findsOneWidget);
   });
 
+  testWidgets('audio settings are localized and persist mute controls', (
+    tester,
+  ) async {
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('id')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('settings-button')));
+    await tester.pump();
+    expect(find.text('Pengaturan audio'), findsOneWidget);
+    expect(find.text('Volume musik'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('music-muted')));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('sound-muted')));
+    await tester.pump();
+
+    expect(saves.storedState?.musicMuted, isTrue);
+    expect(saves.storedState?.soundMuted, isTrue);
+  });
+
   test('platform manifests declare portrait-only presentation', () {
     final androidManifest = File(
       'android/app/src/main/AndroidManifest.xml',

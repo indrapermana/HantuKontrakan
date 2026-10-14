@@ -27,6 +27,10 @@ void main() {
       mysticalCrystals: 4,
       languageCode: 'en',
       analyticsConsentGranted: true,
+      musicMuted: true,
+      soundMuted: true,
+      musicVolume: 0.2,
+      soundVolume: 0.6,
       reputation: 77,
       pendingRentMicrocoins: 12345678,
       rentAccrualRemainder: 37,
@@ -83,6 +87,10 @@ void main() {
     expect(loaded.mysticalCrystals, 4);
     expect(loaded.languageCode, 'en');
     expect(loaded.analyticsConsentGranted, isTrue);
+    expect(loaded.musicMuted, isTrue);
+    expect(loaded.soundMuted, isTrue);
+    expect(loaded.musicVolume, 0.2);
+    expect(loaded.soundVolume, 0.6);
     expect(loaded.reputation, 77);
     expect(loaded.schemaVersion, GameState.currentSchemaVersion);
     expect(loaded.chaos, 40);
@@ -142,6 +150,26 @@ void main() {
     final result = await SharedPreferencesSaveService().load();
 
     expect((result as SaveLoaded).state.analyticsConsentGranted, isFalse);
+  });
+
+  test('version 17 save migrates with audible default settings', () async {
+    final version17 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 17
+      ..remove('musicMuted')
+      ..remove('soundMuted')
+      ..remove('musicVolume')
+      ..remove('soundVolume');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version17),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.musicMuted, isFalse);
+    expect(migrated.soundMuted, isFalse);
+    expect(migrated.musicVolume, 0.35);
+    expect(migrated.soundVolume, 0.7);
   });
 
   test('version 1 save migrates to current debug state defaults', () async {

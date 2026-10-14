@@ -419,7 +419,7 @@ Verification:
 
 ## Scope intentionally deferred
 
-- HK-026 and all later tickets.
+- HK-027 and all later tickets.
 - Furniture purchasing/inventory, automatic damage generation, tenant departures, ads, IAP, analytics, cloud/network services, and final artwork.
 
 ## Verification evidence
@@ -582,3 +582,39 @@ Verification:
 - Tests prove default denial, explicit persisted opt-in, immediate revocation, exact event order through the tutorial/incident flow, stable payload fields, rejection of unapproved/complex fields, schema-16 migration to denied, schema-17 round trip, and failure isolation.
 - `rg 'package:(flutter|flame)' lib/simulation`: no matches; consent state and commands remain independent from Flutter and Flame.
 - The implementation-plan HK-025 checkbox is synchronized with this tracker as requested.
+
+### HK-026 — Music, sound effects, and persisted audio settings
+
+Status: implemented and verified on 2026-10-14.
+
+- Added an injectable audio service boundary with a production `audioplayers` adapter and a no-op test/default adapter.
+- Added an original generated placeholder ambient loop plus distinct generated cues for coin collection, upgrades, room unlocks, incidents, repairs, and ghost placement/moves. No third-party or system audio assets are redistributed.
+- Added localized Indonesian/English audio settings with independent music/effect mute controls and 0–100% volume sliders.
+- Persisted audio preferences under save schema version 18. Version-17 and older saves migrate to audible defaults: music 35%, effects 70%, neither muted.
+- Music starts during application audio initialization, pauses with the app lifecycle, and resumes through the same serialized lifecycle queue used by offline persistence.
+- Successful gameplay transitions route cosmetic cues only after state and save completion. Muted effects are suppressed, invalid/no-op commands produce no cue, and adapter failures cannot change deterministic game state.
+
+Implementation decisions and assumptions:
+
+- HK-026 uses small PCM WAV tones generated in code as explicit placeholder audio. Final composed music and mastered SFX remain an asset-production task; replacing the generated sources does not require changing gameplay rules or settings contracts.
+- Audio settings belong to pure-Dart saved state, while playback belongs to the injected application service. `lib/simulation` remains free of Flutter, Flame, and audio-plugin imports.
+- Music and effects use separate players so a short cue does not interrupt the looping background track. Effect playback uses low-latency mode.
+- Mute and volume are independent: muting retains the chosen volume for later unmute. Invalid, non-finite, or out-of-range volumes are rejected atomically.
+- Lifecycle audio operations share the existing serialized pause/resume queue. This prevents rapid lifecycle changes from reordering offline snapshots, a race caught and fixed by the focused tests.
+- Audio is cosmetic and best-effort. Plugin errors are isolated from saves and gameplay, and automated tests use the injected recording/no-op adapter rather than platform channels.
+
+Verification:
+
+- `flutter pub get` completed with `audioplayers 6.7.1`; no unrelated service SDK was added.
+- Localization generation and Dart formatting completed successfully.
+- `flutter analyze`: no issues found.
+- Focused audio, controller, lifecycle, persistence, localization, and settings widget suite: all 50 tests passed after the lifecycle ordering correction.
+- `flutter test`: all 154 tests passed.
+- `flutter build apk --debug`: succeeded at `build/app/outputs/flutter-apk/app-debug.apk`, validating Android plugin integration.
+- Save tests cover schema-18 round trip and schema-17 audible-default migration; controller tests cover initialization, settings updates, mute suppression, lifecycle pause/resume, effects, and reload restoration.
+- `rg 'package:(flutter|flame)' lib/simulation`: no matches; audio preferences and validation remain pure Dart.
+- The implementation-plan HK-026 checkbox is synchronized with this tracker as requested.
+
+Remaining validation:
+
+- No emulator or physical device was attached, so audible output, device volume interaction, and interruption behavior were validated through the adapter contract, lifecycle tests, and Android build rather than a manual listening session.

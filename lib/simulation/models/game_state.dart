@@ -15,6 +15,10 @@ class GameState {
     this.mysticalCrystals = 0,
     this.languageCode,
     this.analyticsConsentGranted = false,
+    this.musicMuted = false,
+    this.soundMuted = false,
+    this.musicVolume = 0.35,
+    this.soundVolume = 0.7,
     this.reputation = GameBalance.initialReputation,
     this.pendingRentMicrocoins = 0,
     this.rentAccrualRemainder = 0,
@@ -56,6 +60,10 @@ class GameState {
         playerLevel > ProgressionDefinitions.levels.length ||
         playerExperience < 0 ||
         mysticalCrystals < 0 ||
+        musicVolume < 0 ||
+        musicVolume > 1 ||
+        soundVolume < 0 ||
+        soundVolume > 1 ||
         (languageCode != null &&
             languageCode != 'id' &&
             languageCode != 'en') ||
@@ -80,7 +88,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 17;
+  static const int currentSchemaVersion = 18;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -91,6 +99,10 @@ class GameState {
   final int mysticalCrystals;
   final String? languageCode;
   final bool analyticsConsentGranted;
+  final bool musicMuted;
+  final bool soundMuted;
+  final double musicVolume;
+  final double soundVolume;
   final int reputation;
   final int pendingRentMicrocoins;
   final int rentAccrualRemainder;
@@ -222,6 +234,10 @@ class GameState {
     int? mysticalCrystals,
     Object? languageCode = _notProvided,
     bool? analyticsConsentGranted,
+    bool? musicMuted,
+    bool? soundMuted,
+    double? musicVolume,
+    double? soundVolume,
     int? reputation,
     int? pendingRentMicrocoins,
     int? rentAccrualRemainder,
@@ -257,6 +273,10 @@ class GameState {
         : languageCode as String?,
     analyticsConsentGranted:
         analyticsConsentGranted ?? this.analyticsConsentGranted,
+    musicMuted: musicMuted ?? this.musicMuted,
+    soundMuted: soundMuted ?? this.soundMuted,
+    musicVolume: musicVolume ?? this.musicVolume,
+    soundVolume: soundVolume ?? this.soundVolume,
     reputation: reputation ?? this.reputation,
     pendingRentMicrocoins: pendingRentMicrocoins ?? this.pendingRentMicrocoins,
     rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
@@ -305,6 +325,10 @@ class GameState {
     'mysticalCrystals': mysticalCrystals,
     'languageCode': languageCode,
     'analyticsConsentGranted': analyticsConsentGranted,
+    'musicMuted': musicMuted,
+    'soundMuted': soundMuted,
+    'musicVolume': musicVolume,
+    'soundVolume': soundVolume,
     'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'rentAccrualRemainder': rentAccrualRemainder,
@@ -353,7 +377,8 @@ class GameState {
       14 => GameState._fromVersion14Json(json),
       15 => GameState._fromVersion15Json(json),
       16 => GameState._fromVersion16Json(json),
-      currentSchemaVersion => GameState._fromVersion17Json(json),
+      17 => GameState._fromVersion17Json(json),
+      currentSchemaVersion => GameState._fromVersion18Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -565,6 +590,14 @@ class GameState {
   factory GameState._fromVersion17Json(Map<String, Object?> json) =>
       GameState._fromVersion16Json(json).copyWith(
         analyticsConsentGranted: json['analyticsConsentGranted']! as bool,
+      );
+
+  factory GameState._fromVersion18Json(Map<String, Object?> json) =>
+      GameState._fromVersion17Json(json).copyWith(
+        musicMuted: json['musicMuted']! as bool,
+        soundMuted: json['soundMuted']! as bool,
+        musicVolume: (json['musicVolume']! as num).toDouble(),
+        soundVolume: (json['soundVolume']! as num).toDouble(),
       );
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>

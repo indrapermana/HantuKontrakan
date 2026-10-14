@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hantu_kontrakan/application/game_controller.dart';
 import 'package:hantu_kontrakan/application/simulation_runtime.dart';
-import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/services/analytics_service.dart';
+import 'package:hantu_kontrakan/services/audio_service.dart';
+import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/models/ghost.dart';
 import 'package:hantu_kontrakan/simulation/models/room.dart';
@@ -131,6 +132,64 @@ void main() {
       expect(controller.state.walletCoins, 202);
       expect(saves.storedState?.walletCoins, 202);
       expect(saves.storedState?.completedRentClaimIds, {'safe-claim'});
+    },
+  );
+
+  test(
+    'audio settings, effects, lifecycle, and reload use the adapter',
+    () async {
+      final audio = _RecordingAudioService();
+      final saves = MemorySaveService(
+        initialResult: SaveLoaded(
+          GameState.seeded().copyWith(pendingRentMicrocoins: 2000000),
+        ),
+      );
+      final controller = GameController(
+        saveService: saves,
+        audioService: audio,
+      );
+
+      await controller.initialize();
+      expect(audio.initialized, hasLength(1));
+      expect(audio.initialized.single.musicVolume, 0.35);
+
+      expect(
+        await controller.setAudioPreferences(
+          musicMuted: true,
+          soundMuted: false,
+          musicVolume: 0.2,
+          soundVolume: 0.6,
+        ),
+        isTrue,
+      );
+      expect(audio.updated.single.musicMuted, isTrue);
+      expect(saves.storedState?.musicVolume, 0.2);
+
+      await controller.collectAllRent(claimId: 'audio-rent');
+      expect(audio.cues, [AudioCue.coin]);
+      await controller.pauseForOffline();
+      await controller.resumeFromOffline();
+      expect(audio.pauseCount, 1);
+      expect(audio.resumeCount, 1);
+
+      await controller.setAudioPreferences(
+        musicMuted: true,
+        soundMuted: true,
+        musicVolume: 0.2,
+        soundVolume: 0.6,
+      );
+      await controller.upgradeRoom('room_01', RoomAttribute.comfort);
+      expect(audio.cues, [AudioCue.coin]);
+
+      final reloadedAudio = _RecordingAudioService();
+      final reloaded = GameController(
+        saveService: saves,
+        audioService: reloadedAudio,
+      );
+      await reloaded.initialize();
+      expect(reloadedAudio.initialized.single.musicMuted, isTrue);
+      expect(reloadedAudio.initialized.single.soundMuted, isTrue);
+      expect(reloadedAudio.initialized.single.soundVolume, 0.6);
     },
   );
 
@@ -418,4 +477,34 @@ class _FailingAnalyticsService implements AnalyticsService {
   Future<void> record(GameplayAnalyticsEvent event) async {
     throw StateError('offline');
   }
+}
+
+class _RecordingAudioService implements AudioService {
+  final List<AudioPreferences> initialized = [];
+  final List<AudioPreferences> updated = [];
+  final List<AudioCue> cues = [];
+  int pauseCount = 0;
+  int resumeCount = 0;
+
+  @override
+  Future<void> initialize(AudioPreferences preferences) async {
+    initialized.add(preferences);
+  }
+
+  @override
+  Future<void> updatePreferences(AudioPreferences preferences) async {
+    updated.add(preferences);
+  }
+
+  @override
+  Future<void> pauseBackground() async => pauseCount++;
+
+  @override
+  Future<void> resumeBackground() async => resumeCount++;
+
+  @override
+  Future<void> play(AudioCue cue) async => cues.add(cue);
+
+  @override
+  Future<void> dispose() async {}
 }

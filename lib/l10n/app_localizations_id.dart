@@ -404,6 +404,24 @@ class AppLocalizationsId extends AppLocalizations {
   String get languageEnglish => 'Bahasa Inggris';
 
   @override
+  String get audioSettingsTitle => 'Pengaturan audio';
+
+  @override
+  String get musicMutedLabel => 'Bisukan musik';
+
+  @override
+  String get soundMutedLabel => 'Bisukan efek suara';
+
+  @override
+  String get musicVolumeLabel => 'Volume musik';
+
+  @override
+  String get soundVolumeLabel => 'Volume efek suara';
+
+  @override
+  String get closeLabel => 'Tutup';
+
+  @override
   String roomCanvasHappiness(int value) {
     return 'Bahagia $value';
   }

@@ -11,8 +11,9 @@ import '../../simulation/content/incident_definitions.dart';
 import '../../simulation/content/progression_definitions.dart';
 import '../../simulation/models/incident_definition.dart';
 import '../../simulation/systems/game_rules.dart';
-import '../tutorial/tutorial_panel.dart';
 import '../missions/mission_dialog.dart';
+import '../settings/audio_settings_dialog.dart';
+import '../tutorial/tutorial_panel.dart';
 import 'detail_sheets.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -41,6 +42,15 @@ class HomeScreen extends StatelessWidget {
             title: Text(strings.appTitleUppercase),
             centerTitle: true,
             actions: [
+              IconButton(
+                key: const Key('settings-button'),
+                tooltip: strings.audioSettingsTitle,
+                onPressed: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => AudioSettingsDialog(controller: controller),
+                ),
+                icon: const Icon(Icons.settings),
+              ),
               IconButton(
                 key: const Key('language-button'),
                 tooltip: strings.languageTitle,

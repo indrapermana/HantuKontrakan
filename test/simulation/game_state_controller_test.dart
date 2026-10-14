@@ -126,6 +126,37 @@ void main() {
     expect(controller.state.analyticsConsentGranted, isFalse);
   });
 
+  test('audio settings validate ranges and update atomically', () {
+    final controller = GameStateController(GameState.seeded());
+
+    expect(
+      controller.dispatch(
+        const SetAudioPreferences(
+          musicMuted: true,
+          soundMuted: false,
+          musicVolume: 0.2,
+          soundVolume: 0.8,
+        ),
+      ),
+      isTrue,
+    );
+    expect(controller.state.musicMuted, isTrue);
+    expect(controller.state.musicVolume, 0.2);
+    expect(
+      controller.dispatch(
+        const SetAudioPreferences(
+          musicMuted: false,
+          soundMuted: false,
+          musicVolume: -0.1,
+          soundVolume: 0.8,
+        ),
+      ),
+      isFalse,
+    );
+    expect(controller.state.musicMuted, isTrue);
+    expect(controller.state.musicVolume, 0.2);
+  });
+
   test('game state rejects invalid one-to-one occupancy', () {
     expect(
       () => GameState(

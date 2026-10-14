@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
-import '../services/save_service.dart';
 import '../services/analytics_service.dart';
+import '../services/audio_service.dart';
+import '../services/save_service.dart';
 import '../simulation/commands/game_command.dart';
 import '../simulation/constants/game_balance.dart';
 import '../simulation/game_state_controller.dart';
@@ -17,15 +20,18 @@ class GameController extends ChangeNotifier {
   GameController({
     required SaveService saveService,
     AnalyticsService analyticsService = const NoopAnalyticsService(),
+    AudioService audioService = const NoopAudioService(),
     GameClock clock = const SystemGameClock(),
     int randomSeed = GameBalance.defaultRandomSeed,
   }) : _saveService = saveService,
        _analyticsService = analyticsService,
+       _audioService = audioService,
        _clock = clock,
        _randomSource = SeededRandomSource(randomSeed);
 
   final SaveService _saveService;
   final AnalyticsService _analyticsService;
+  final AudioService _audioService;
   final GameClock _clock;
   final SeededRandomSource _randomSource;
   int _rentClaimSequence = 0;
@@ -71,6 +77,7 @@ class GameController extends ChangeNotifier {
     if (resumed) await _saveService.save(state);
     _isReady = true;
     notifyListeners();
+    await _runAudio(() => _audioService.initialize(_audioPreferences));
     if (resumed) {
       await _recordTransition(
         ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
@@ -101,6 +108,26 @@ class GameController extends ChangeNotifier {
 
   Future<bool> setAnalyticsConsent(bool granted) =>
       _dispatch(SetAnalyticsConsent(granted: granted));
+
+  Future<bool> setAudioPreferences({
+    required bool musicMuted,
+    required bool soundMuted,
+    required double musicVolume,
+    required double soundVolume,
+  }) async {
+    final changed = await _dispatch(
+      SetAudioPreferences(
+        musicMuted: musicMuted,
+        soundMuted: soundMuted,
+        musicVolume: musicVolume,
+        soundVolume: soundVolume,
+      ),
+    );
+    if (changed) {
+      await _runAudio(() => _audioService.updatePreferences(_audioPreferences));
+    }
+    return changed;
+  }
 
   Future<void> moveGhost(
     String ghostId,
@@ -186,6 +213,7 @@ class GameController extends ChangeNotifier {
     if (!_isReady) return;
     final timestampMillis = _clock.now().millisecondsSinceEpoch;
     _lifecycleOperation = _lifecycleOperation.then((_) async {
+      await _runAudio(_audioService.pauseBackground);
       await _dispatch(PauseForOffline(timestampMillis: timestampMillis));
     });
     await _lifecycleOperation;
@@ -196,6 +224,7 @@ class GameController extends ChangeNotifier {
     final timestampMillis = _clock.now().millisecondsSinceEpoch;
     _lifecycleOperation = _lifecycleOperation.then((_) async {
       await _dispatch(ResumeFromOffline(timestampMillis: timestampMillis));
+      await _runAudio(_audioService.resumeBackground);
     });
     await _lifecycleOperation;
   }
@@ -215,7 +244,47 @@ class GameController extends ChangeNotifier {
     notifyListeners();
     await _saveService.save(state);
     await _recordTransition(command, before, state);
+    await _playTransition(command, before, state);
     return true;
+  }
+
+  AudioPreferences get _audioPreferences => AudioPreferences(
+    musicMuted: state.musicMuted,
+    soundMuted: state.soundMuted,
+    musicVolume: state.musicVolume,
+    soundVolume: state.soundVolume,
+  );
+
+  Future<void> _playTransition(
+    GameCommand command,
+    GameState before,
+    GameState after,
+  ) async {
+    AudioCue? cue;
+    if (before.activeIncidentId == null && after.activeIncidentId != null) {
+      cue = AudioCue.incident;
+    } else {
+      cue = switch (command) {
+        CollectAllRent() => AudioCue.coin,
+        UpgradeRoom() => AudioCue.upgrade,
+        UnlockRoom() => AudioCue.unlock,
+        RepairRoom() => AudioCue.repair,
+        PlaceGhost() || MoveGhost() => AudioCue.ghost,
+        ResolveIncident() || ResolveComplaint() => AudioCue.incident,
+        _ => null,
+      };
+    }
+    if (cue != null && !state.soundMuted) {
+      await _runAudio(() => _audioService.play(cue!));
+    }
+  }
+
+  Future<void> _runAudio(Future<void> Function() operation) async {
+    try {
+      await operation();
+    } on Object {
+      // Audio is cosmetic and must never interrupt deterministic gameplay.
+    }
   }
 
   Future<void> _recordTransition(
@@ -314,6 +383,12 @@ class GameController extends ChangeNotifier {
     } on Object {
       // Analytics is best-effort and must never affect local gameplay.
     }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_runAudio(_audioService.dispose));
+    super.dispose();
   }
 }
 

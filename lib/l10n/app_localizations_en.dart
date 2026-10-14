@@ -403,6 +403,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get languageEnglish => 'English';
 
   @override
+  String get audioSettingsTitle => 'Audio settings';
+
+  @override
+  String get musicMutedLabel => 'Mute music';
+
+  @override
+  String get soundMutedLabel => 'Mute sound effects';
+
+  @override
+  String get musicVolumeLabel => 'Music volume';
+
+  @override
+  String get soundVolumeLabel => 'Sound effects volume';
+
+  @override
+  String get closeLabel => 'Close';
+
+  @override
   String roomCanvasHappiness(int value) {
     return 'Happy $value';
   }

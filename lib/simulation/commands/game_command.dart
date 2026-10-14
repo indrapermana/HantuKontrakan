@@ -96,6 +96,20 @@ final class SetAnalyticsConsent extends GameCommand {
   final bool granted;
 }
 
+final class SetAudioPreferences extends GameCommand {
+  const SetAudioPreferences({
+    required this.musicMuted,
+    required this.soundMuted,
+    required this.musicVolume,
+    required this.soundVolume,
+  });
+
+  final bool musicMuted;
+  final bool soundMuted;
+  final double musicVolume;
+  final double soundVolume;
+}
+
 final class ResolveIncident extends GameCommand {
   const ResolveIncident({
     required this.incidentId,

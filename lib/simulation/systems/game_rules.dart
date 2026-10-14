@@ -224,6 +224,35 @@ abstract final class GameRules {
     return state.copyWith(analyticsConsentGranted: granted);
   }
 
+  static GameState setAudioPreferences(
+    GameState state, {
+    required bool musicMuted,
+    required bool soundMuted,
+    required double musicVolume,
+    required double soundVolume,
+  }) {
+    if (!musicVolume.isFinite ||
+        !soundVolume.isFinite ||
+        musicVolume < 0 ||
+        musicVolume > 1 ||
+        soundVolume < 0 ||
+        soundVolume > 1) {
+      return state;
+    }
+    if (state.musicMuted == musicMuted &&
+        state.soundMuted == soundMuted &&
+        state.musicVolume == musicVolume &&
+        state.soundVolume == soundVolume) {
+      return state;
+    }
+    return state.copyWith(
+      musicMuted: musicMuted,
+      soundMuted: soundMuted,
+      musicVolume: musicVolume,
+      soundVolume: soundVolume,
+    );
+  }
+
   static GameState upgradeRoom(
     GameState state,
     String roomId,

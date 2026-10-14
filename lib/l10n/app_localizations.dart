@@ -746,6 +746,42 @@ abstract class AppLocalizations {
   /// **'Bahasa Inggris'**
   String get languageEnglish;
 
+  /// No description provided for @audioSettingsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Pengaturan audio'**
+  String get audioSettingsTitle;
+
+  /// No description provided for @musicMutedLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Bisukan musik'**
+  String get musicMutedLabel;
+
+  /// No description provided for @soundMutedLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Bisukan efek suara'**
+  String get soundMutedLabel;
+
+  /// No description provided for @musicVolumeLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Volume musik'**
+  String get musicVolumeLabel;
+
+  /// No description provided for @soundVolumeLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Volume efek suara'**
+  String get soundVolumeLabel;
+
+  /// No description provided for @closeLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Tutup'**
+  String get closeLabel;
+
   /// No description provided for @roomCanvasHappiness.
   ///
   /// In id, this message translates to:
