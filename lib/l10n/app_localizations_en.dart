@@ -528,4 +528,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get furnitureShinyTrinket => 'Shiny trinket';
+
+  @override
+  String get navigationHome => 'Kontrakan';
+
+  @override
+  String get navigationGhosts => 'Ghosts';
+
+  @override
+  String get navigationShop => 'Shop';
+
+  @override
+  String get moreActionsLabel => 'More actions';
+
+  @override
+  String get propertyActionsTitle => 'Rooms and improvements';
 }

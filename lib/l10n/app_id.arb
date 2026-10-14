@@ -180,5 +180,10 @@
   "furnitureCurtain": "Tirai",
   "furnitureRug": "Karpet",
   "furnitureWallCharm": "Jimat dinding",
-  "furnitureShinyTrinket": "Pernak-pernik berkilau"
+  "furnitureShinyTrinket": "Pernak-pernik berkilau",
+  "navigationHome": "Kontrakan",
+  "navigationGhosts": "Hantu",
+  "navigationShop": "Toko",
+  "moreActionsLabel": "Aksi lainnya",
+  "propertyActionsTitle": "Kamar dan peningkatan"
 }

@@ -28,6 +28,16 @@ void main() {
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(find.byKey(const Key('settings-button')), findsOneWidget);
+      expect(find.byType(AppBar), findsNothing);
+      expect(find.byKey(const Key('home-navigation')), findsOneWidget);
+      expect(find.byKey(const Key('missions-button')), findsOneWidget);
+      expect(find.byKey(const Key('ghosts-navigation')), findsOneWidget);
+      expect(find.byKey(const Key('shop-navigation')), findsOneWidget);
+      final gameSize = tester.getSize(
+        find.byKey(const Key('full-screen-game')),
+      );
+      expect(gameSize.width, size.width);
+      expect(gameSize.height, size.height);
       expect(tester.takeException(), isNull, reason: 'home at $size');
 
       await tester.tap(find.byKey(const Key('settings-button')));
@@ -37,6 +47,19 @@ void main() {
 
       await tester.tap(find.text('Close'));
       await tester.pump();
+
+      await tester.tap(find.byKey(const Key('ghosts-navigation')));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byKey(const Key('ghost-roster-pocong_01')), findsOneWidget);
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      await tester.tap(find.byKey(const Key('shop-navigation')));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byKey(const Key('property-room-room_01')), findsOneWidget);
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull, reason: 'navigation at $size');
     }
   });
 

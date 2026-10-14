@@ -530,4 +530,19 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get furnitureShinyTrinket => 'Pernak-pernik berkilau';
+
+  @override
+  String get navigationHome => 'Kontrakan';
+
+  @override
+  String get navigationGhosts => 'Hantu';
+
+  @override
+  String get navigationShop => 'Toko';
+
+  @override
+  String get moreActionsLabel => 'Aksi lainnya';
+
+  @override
+  String get propertyActionsTitle => 'Kamar dan peningkatan';
 }

@@ -132,6 +132,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
+    await tester.tap(find.byKey(const Key('action-center-button')));
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('Watch test ad · 2 + 2 coins (3/3 left)'), findsOneWidget);
     await tester.tap(find.byKey(const Key('collect-rent-rewarded')));
     await tester.pump(const Duration(milliseconds: 100));

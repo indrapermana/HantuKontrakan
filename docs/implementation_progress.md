@@ -832,5 +832,30 @@ Roadmap preparation follow-up:
   full-screen shell, HUD, navigation, and action reachability; per-room economy,
   panel redesign, recurring goals, portfolio state, and new audio remain in
   their later tickets.
-- HK-030-A implementation has not started. The working tree contains only the
-  approved review, roadmap documentation, and concept image from this review.
+- HK-030-A is complete and locally verified. HK-030-B is the next unfinished
+  ticket; no HK-030-B panel redesign or later economy work is included here.
+
+### HK-030-A — Full-screen world shell
+
+Status: locally verified on 2026-10-14.
+
+- Replaced the application-style home scaffold with an edge-to-edge Flame world,
+  a compact themed HUD, four-destination bottom navigation, safe-area overlays,
+  and in-world collection, complaint, and incident controls.
+- Kept settings, language, missions, ghost profiles, room improvements, normal
+  collection, and rewarded collection reachable. Rewarded collection moved to
+  a secondary action panel without changing eligibility or claim behavior.
+- Added localized English and Indonesian navigation/action labels and responsive
+  widget coverage at 360x640 and 430x932. The tests assert that the game surface
+  fills both viewports, no `AppBar` remains, and all four navigation routes work
+  without overflow.
+- Preserved the pure-Dart simulation, balance, persistence schema, ad adapter,
+  and audio lifecycle. No `lib/simulation` files changed for this ticket.
+- Validation evidence: `dart format lib test` completed with no pending format
+  changes; `flutter analyze` reported no issues; all 180 `flutter test` tests
+  passed; `flutter build apk --debug` produced
+  `build/app/outputs/flutter-apk/app-debug.apk`; `git diff --check` passed.
+- A fresh physical iOS screenshot could not be captured in this environment:
+  the wired device lacks a usable provisioning profile, while the already
+  provisioned wireless device installed/launched the app but did not expose its
+  Dart VM service. Automated acceptance and the Android artifact are unaffected.

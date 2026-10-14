@@ -32,6 +32,9 @@ class HantuGame extends FlameGame {
   final String lockedLabel;
 
   @override
+  ui.Color backgroundColor() => const ui.Color(0xFF111631);
+
+  @override
   Future<void> onLoad() async {
     await super.onLoad();
     _frameCutawayWorld();

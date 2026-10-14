@@ -146,5 +146,10 @@
   "furnitureCurtain": "Curtain",
   "furnitureRug": "Rug",
   "furnitureWallCharm": "Wall charm",
-  "furnitureShinyTrinket": "Shiny trinket"
+  "furnitureShinyTrinket": "Shiny trinket",
+  "navigationHome": "Kontrakan",
+  "navigationGhosts": "Ghosts",
+  "navigationShop": "Shop",
+  "moreActionsLabel": "More actions",
+  "propertyActionsTitle": "Rooms and improvements"
 }

@@ -979,6 +979,36 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Pernak-pernik berkilau'**
   String get furnitureShinyTrinket;
+
+  /// No description provided for @navigationHome.
+  ///
+  /// In id, this message translates to:
+  /// **'Kontrakan'**
+  String get navigationHome;
+
+  /// No description provided for @navigationGhosts.
+  ///
+  /// In id, this message translates to:
+  /// **'Hantu'**
+  String get navigationGhosts;
+
+  /// No description provided for @navigationShop.
+  ///
+  /// In id, this message translates to:
+  /// **'Toko'**
+  String get navigationShop;
+
+  /// No description provided for @moreActionsLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Aksi lainnya'**
+  String get moreActionsLabel;
+
+  /// No description provided for @propertyActionsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamar dan peningkatan'**
+  String get propertyActionsTitle;
 }
 
 class _AppLocalizationsDelegate

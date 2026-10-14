@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../../application/game_controller.dart';
 import '../../features/debug/debug_hud.dart';
 import '../../game/hantu_game.dart';
-import '../../game/assets/game_assets.dart';
 import '../../l10n/app_localizations.dart';
 import '../../simulation/constants/game_balance.dart';
 import '../../simulation/content/incident_definitions.dart';
@@ -16,6 +15,7 @@ import '../missions/mission_dialog.dart';
 import '../settings/audio_settings_dialog.dart';
 import '../tutorial/tutorial_panel.dart';
 import 'detail_sheets.dart';
+import 'home_game_shell.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({required this.controller, super.key});
@@ -38,198 +38,245 @@ class HomeScreen extends StatelessWidget {
             ? null
             : IncidentDefinitions.byId(state.activeIncidentId!);
         final pocongHappiness = controller.happinessFor('pocong_01');
+        final currentLevel = ProgressionDefinitions.byLevel(state.playerLevel);
+        final nextLevel =
+            state.playerLevel >= ProgressionDefinitions.levels.length
+            ? null
+            : ProgressionDefinitions.byLevel(state.playerLevel + 1);
+        final levelProgress = nextLevel == null
+            ? 1.0
+            : (state.playerExperience - currentLevel.requiredExperience) /
+                  (nextLevel.requiredExperience -
+                      currentLevel.requiredExperience);
         return Scaffold(
-          appBar: AppBar(
-            title: Text(strings.appTitleUppercase),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                key: const Key('settings-button'),
-                tooltip: strings.settingsTitle,
-                onPressed: () => showDialog<void>(
-                  context: context,
-                  builder: (_) => AudioSettingsDialog(controller: controller),
-                ),
-                icon: Image.asset(
-                  GameAssets.settingsIcon,
-                  width: 30,
-                  height: 30,
-                ),
-              ),
-              IconButton(
-                key: const Key('language-button'),
-                tooltip: strings.languageTitle,
-                onPressed: () => _showLanguagePicker(context),
-                icon: const Icon(Icons.language),
-              ),
-              IconButton(
-                key: const Key('missions-button'),
-                tooltip: strings.missionsTitle,
-                onPressed: () => showDialog<void>(
-                  context: context,
-                  builder: (_) => MissionDialog(controller: controller),
-                ),
-                icon: const Icon(Icons.assignment_turned_in),
-              ),
-            ],
-          ),
-          body: SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
-                  child: Wrap(
-                    spacing: 10,
-                    runSpacing: 4,
-                    alignment: WrapAlignment.spaceBetween,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Image.asset(
-                            GameAssets.spiritCoin,
-                            width: 28,
-                            height: 28,
-                            semanticLabel: strings.spiritCoins(
-                              state.walletCoins,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            strings.spiritCoins(state.walletCoins),
-                            key: const Key('wallet-coins'),
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                      Text(
-                        strings.mysticalCrystals(state.mysticalCrystals),
-                        key: const Key('mystical-crystals'),
-                      ),
-                      Text(
-                        strings.ghostHappinessSummary(
-                          'Pocong',
-                          pocongHappiness,
-                        ),
-                      ),
-                    ],
+          backgroundColor: const Color(0xFF111631),
+          resizeToAvoidBottomInset: false,
+          body: Stack(
+            fit: StackFit.expand,
+            children: [
+              SizedBox.expand(
+                key: const Key('full-screen-game'),
+                child: GameWidget(
+                  key: ValueKey(controller.revision),
+                  loadingBuilder: (context) => const ColoredBox(
+                    key: Key('game-loading'),
+                    color: Color(0xFF111631),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  game: HantuGame(
+                    state: state,
+                    onRoomTap: (roomId) => _showRoomDetails(context, roomId),
+                    onGhostTap: (ghostId) =>
+                        _showGhostProfile(context, ghostId),
+                    roomLabelFor: (roomId) =>
+                        strings.roomTitle(_roomNumber(roomId)),
+                    happinessLabelFor: strings.roomCanvasHappiness,
+                    lockedLabel: strings.roomCanvasLocked,
                   ),
                 ),
-                if (kDebugMode) DebugHud(controller: controller),
-                TutorialPanel(
-                  step: state.tutorialStep,
-                  onContinue: controller.continueTutorial,
-                  onPlacePocong: () =>
-                      controller.placeGhost('pocong_01', 'room_01'),
-                  onPlaceKuntilanak: () =>
-                      controller.placeGhost('kuntilanak_01', 'room_02'),
+              ),
+              SafeArea(
+                bottom: false,
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: HomeGameHud(
+                    levelLabel: 'Lv. ${state.playerLevel}',
+                    experienceProgress: levelProgress,
+                    coinLabel: strings.spiritCoins(state.walletCoins),
+                    crystalLabel: strings.mysticalCrystals(
+                      state.mysticalCrystals,
+                    ),
+                    happinessLabel: strings.ghostHappinessSummary(
+                      'Pocong',
+                      pocongHappiness,
+                    ),
+                    settingsTooltip: strings.settingsTitle,
+                    languageTooltip: strings.languageTitle,
+                    onSettings: () => showDialog<void>(
+                      context: context,
+                      builder: (_) =>
+                          AudioSettingsDialog(controller: controller),
+                    ),
+                    onLanguage: () => _showLanguagePicker(context),
+                  ),
                 ),
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: GameWidget(
-                      key: ValueKey(controller.revision),
-                      loadingBuilder: (context) => const ColoredBox(
-                        key: Key('game-loading'),
-                        color: Colors.black,
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                      game: HantuGame(
-                        state: state,
-                        onRoomTap: (roomId) =>
-                            _showRoomDetails(context, roomId),
-                        onGhostTap: (ghostId) =>
-                            _showGhostProfile(context, ghostId),
-                        roomLabelFor: (roomId) =>
-                            strings.roomTitle(_roomNumber(roomId)),
-                        happinessLabelFor: strings.roomCanvasHappiness,
-                        lockedLabel: strings.roomCanvasLocked,
-                      ),
+              ),
+              if (kDebugMode)
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 92),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: DebugHud(controller: controller),
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          key: const Key('collect-rent'),
-                          onPressed: controller.pendingRentCoins > 0
-                              ? () => controller.collectAllRent()
-                              : null,
-                          icon: const Icon(Icons.savings),
-                          label: Text(
-                            strings.collectAllRent(controller.pendingRentCoins),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          key: const Key('collect-rent-rewarded'),
-                          onPressed: controller.canCollectRewardedRent
-                              ? () => _collectRewardedRent(context)
-                              : null,
-                          icon: const Icon(Icons.ondemand_video),
-                          label: Text(
-                            controller.rewardedRentBonusesRemaining == 0
-                                ? strings.rewardedRentDailyLimit
-                                : strings.rewardedRentButton(
-                                    controller.pendingRentCoins,
-                                    controller.rewardedRentBonusesRemaining,
-                                  ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (activeIncident != null) ...[
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton.icon(
-                            key: const Key('incident-button'),
-                            onPressed: () =>
-                                _showIncident(context, activeIncident),
-                            icon: const Icon(Icons.crisis_alert),
-                            label: Text(
-                              strings.activeIncident(
-                                _localized(context, activeIncident.title!),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          key: const Key('complaint-button'),
-                          onPressed: controller.hasPendingComplaint
-                              ? () => _showComplaint(context)
-                              : null,
-                          icon: Icon(
-                            controller.hasPendingComplaint
-                                ? Icons.campaign
-                                : Icons.check_circle,
-                          ),
-                          label: Text(
-                            controller.hasPendingComplaint
-                                ? strings.pendingComplaint
-                                : strings.resolvedComplaint,
-                          ),
-                        ),
-                      ),
-                    ],
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsets.only(top: kDebugMode ? 142 : 94),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: TutorialPanel(
+                      step: state.tutorialStep,
+                      onContinue: controller.continueTutorial,
+                      onPlacePocong: () =>
+                          controller.placeGhost('pocong_01', 'room_01'),
+                      onPlaceKuntilanak: () =>
+                          controller.placeGhost('kuntilanak_01', 'room_02'),
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+              WorldActionOverlay(
+                collectLabel: strings.collectAllRent(
+                  controller.pendingRentCoins,
+                ),
+                canCollect: controller.pendingRentCoins > 0,
+                onCollect: controller.collectAllRent,
+                complaintLabel: controller.hasPendingComplaint
+                    ? strings.pendingComplaint
+                    : strings.resolvedComplaint,
+                hasComplaint: controller.hasPendingComplaint,
+                onComplaint: () => _showComplaint(context),
+                incidentLabel: activeIncident == null
+                    ? null
+                    : strings.activeIncident(
+                        _localized(context, activeIncident.title!),
+                      ),
+                onIncident: activeIncident == null
+                    ? null
+                    : () => _showIncident(context, activeIncident),
+                moreTooltip: strings.moreActionsLabel,
+                onMore: () => _showActionCenter(context),
+              ),
+              HomeBottomNavigation(
+                homeLabel: strings.navigationHome,
+                missionsLabel: strings.missionsTitle,
+                ghostsLabel: strings.navigationGhosts,
+                shopLabel: strings.navigationShop,
+                onMissions: () => showDialog<void>(
+                  context: context,
+                  builder: (_) => MissionDialog(controller: controller),
+                ),
+                onGhosts: () => _showGhostRoster(context),
+                onShop: () => _showPropertyActions(context),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+
+  Future<void> _showActionCenter(BuildContext context) async {
+    final strings = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(strings.moreActionsLabel),
+        content: OutlinedButton.icon(
+          key: const Key('collect-rent-rewarded'),
+          onPressed: controller.canCollectRewardedRent
+              ? () async {
+                  Navigator.pop(dialogContext);
+                  await _collectRewardedRent(context);
+                }
+              : null,
+          icon: const Icon(Icons.ondemand_video_rounded),
+          label: Text(
+            controller.rewardedRentBonusesRemaining == 0
+                ? strings.rewardedRentDailyLimit
+                : strings.rewardedRentButton(
+                    controller.pendingRentCoins,
+                    controller.rewardedRentBonusesRemaining,
+                  ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(strings.closeLabel),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showGhostRoster(BuildContext context) async {
+    final strings = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                strings.navigationGhosts,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              for (final ghost in controller.state.ghosts)
+                ListTile(
+                  key: Key('ghost-roster-${ghost.id}'),
+                  leading: const Icon(Icons.person_pin_circle_rounded),
+                  title: Text(ghost.kind.displayName),
+                  subtitle: Text(
+                    strings.ghostHappinessSummary(
+                      ghost.kind.displayName,
+                      controller.happinessFor(ghost.id),
+                    ),
+                  ),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    await _showGhostProfile(context, ghost.id);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showPropertyActions(BuildContext context) async {
+    final strings = AppLocalizations.of(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                strings.propertyActionsTitle,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              for (final room in controller.state.rooms)
+                ListTile(
+                  key: Key('property-room-${room.id}'),
+                  leading: Icon(
+                    room.unlocked ? Icons.bedroom_parent : Icons.lock_rounded,
+                  ),
+                  title: Text(strings.roomTitle(_roomNumber(room.id))),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () async {
+                    Navigator.pop(sheetContext);
+                    await _showRoomDetails(context, room.id);
+                  },
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

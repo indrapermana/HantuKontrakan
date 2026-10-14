@@ -336,3 +336,20 @@ Date: 2026-10-14
 - The redesign is tracked as HK-030-A through HK-030-F before final HK-030
   acceptance. HK-030-A is deliberately presentation-only so the full-screen
   foundation can be reviewed before economy and save-schema expansion.
+
+### HK-030-A full-screen shell decisions
+
+- Flame continues to own the cutaway world and its room/ghost interactions;
+  Flutter owns safe-area HUD, navigation, semantics, and temporary panels.
+- The game surface fills the home viewport. A compact overlaid HUD and bottom
+  navigation replace the former app bar and vertically stacked control area.
+- Existing dialogs and sheets remain temporary routes in HK-030-A. Their themed
+  replacement is intentionally deferred to HK-030-B so presentation-shell work
+  does not silently expand into interaction redesign.
+- Rewarded collection is reachable from the secondary action panel, but its
+  adapter, availability rules, normal-rent fallback, and exactly-once claim
+  semantics are unchanged.
+- Prototype world markers derive only from existing incident and complaint
+  state. Per-room balances, coin bubbles, and save migration remain HK-030-C.
+- Flutter-drawn surfaces and existing approved assets are used for this layout;
+  no baked localized text or new production art dependency was introduced.
