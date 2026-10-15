@@ -616,4 +616,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String dailyScheduleLabel(String dayKey) {
     return 'Schedule: $dayKey';
   }
+
+  @override
+  String roomTier(int tier) {
+    return 'ROOM TIER $tier';
+  }
+
+  @override
+  String get propertyPortfolioTitle => 'PROPERTY PORTFOLIO';
+
+  @override
+  String get propertyFirstName => 'First Kontrakan';
+
+  @override
+  String get propertySecondName => 'Night Market Lodge';
+
+  @override
+  String get propertyActive => 'Active property';
+
+  @override
+  String get propertyVisit => 'Visit';
+
+  @override
+  String get propertyLocked =>
+      'Fill all four rooms in the First Kontrakan to expand.';
+
+  @override
+  String get propertyUnlock => 'Open expansion';
+
+  @override
+  String get propertyReady => 'Expansion ready — no purchase required.';
+
+  @override
+  String get ownedFurnitureTitle => 'OWNED FURNITURE';
+
+  @override
+  String get crystalFurnitureTitle => 'MYSTICAL WORKSHOP';
+
+  @override
+  String buyForCrystals(int cost) {
+    return 'Get for $cost crystals';
+  }
+
+  @override
+  String get furnitureMoonMirror => 'Moon mirror';
+
+  @override
+  String get furnitureSpiritRadio => 'Spirit radio';
+
+  @override
+  String get ghostStoryReady => 'Story ready';
+
+  @override
+  String get ghostStoryComplete => 'Story remembered';
+
+  @override
+  String get ghostStoryLocked => 'House this ghost to unlock their story';
+
+  @override
+  String get rememberStory => 'Remember story';
+
+  @override
+  String ghostCollectionProgress(int complete, int total) {
+    return 'Stories $complete/$total';
+  }
 }

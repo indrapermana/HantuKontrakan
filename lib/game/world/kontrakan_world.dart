@@ -37,9 +37,19 @@ class KontrakanWorld extends PositionComponent {
     addAll(createRoomComponents());
   }
 
-  List<RoomComponent> createRoomComponents() => [
-    for (final layout in _roomLayouts) _createRoom(layout),
-  ];
+  List<RoomComponent> createRoomComponents() {
+    final rooms = state.rooms.toList(growable: false)
+      ..sort((left, right) {
+        final row = left.row.compareTo(right.row);
+        return row != 0 ? row : left.column.compareTo(right.column);
+      });
+    return [
+      for (final room in rooms)
+        _createRoom(
+          _RoomLayout(id: room.id, column: room.column, row: room.row),
+        ),
+    ];
+  }
 
   RoomComponent _createRoom(_RoomLayout layout) {
     final room = _findRoom(layout.id);
@@ -68,17 +78,9 @@ class KontrakanWorld extends PositionComponent {
     for (final room in state.rooms) {
       if (room.id == roomId) return room;
     }
-    final layout = _roomLayouts.firstWhere((room) => room.id == roomId);
-    return RoomState(id: roomId, column: layout.column, row: layout.row);
+    return RoomState(id: roomId, column: 0, row: 0);
   }
 }
-
-const _roomLayouts = [
-  _RoomLayout(id: 'room_03', column: 0, row: 0),
-  _RoomLayout(id: 'room_04', column: 1, row: 0),
-  _RoomLayout(id: 'room_01', column: 0, row: 1),
-  _RoomLayout(id: 'room_02', column: 1, row: 1),
-];
 
 class _RoomLayout {
   const _RoomLayout({

@@ -419,3 +419,28 @@ Date: 2026-10-14
   foreground ticks. The Flutter lifecycle owns the timer trigger; all economy,
   incident, ability, and daily-progress rules remain in pure Dart, and ticks
   stop while the application is backgrounded.
+
+### HK-030-E portfolio decisions
+
+- Schema v23 stores stable property IDs and a room list per property. The
+  existing `rooms` rule surface remains the selected property's compatibility
+  view, so pure-Dart rules stay independent from Flame and older systems do not
+  gain presentation dependencies.
+- `kontrakan_pertama` is migrated from every v22 save. Filling its four rooms
+  unlocks `kontrakan_pasar` for free; this progression gate never spends coins,
+  crystals, money, or an advertisement view.
+- Room IDs are globally unique across the portfolio. Rent balances and
+  fractional remainders therefore remain deterministic, and every owned
+  property continues earning even while another property is selected.
+- Switching changes only the selected room view. Prior room occupants,
+  upgrades, furniture, rent, and repair state stay in the portfolio and can be
+  revisited without a prestige reset.
+- Existing furniture becomes starter-owned during migration. Two optional
+  mystical workshop items provide explicit crystal sinks; unowned furniture
+  cannot be equipped, and no required progression consumes crystals.
+- Room tier is derived from upgrades and equipped furniture rather than stored
+  as a second source of truth. Ghost stories are free collection milestones
+  unlocked by housing a ghost and are persisted exactly once.
+- Flutter owns the localized portfolio, workshop, tier, and story presentation.
+  Flame renders whichever deterministic room set is active and does not own
+  unlock, purchase, income, or persistence logic.

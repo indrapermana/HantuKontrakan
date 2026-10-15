@@ -49,6 +49,25 @@ final class EquipFurniture extends GameCommand {
   final FurnitureSlot slot;
 }
 
+final class PurchaseFurniture extends GameCommand {
+  const PurchaseFurniture({required this.furnitureId});
+  final String furnitureId;
+}
+
+final class UnlockSecondProperty extends GameCommand {
+  const UnlockSecondProperty();
+}
+
+final class SwitchProperty extends GameCommand {
+  const SwitchProperty({required this.propertyId});
+  final String propertyId;
+}
+
+final class CompleteGhostStory extends GameCommand {
+  const CompleteGhostStory({required this.ghostId});
+  final String ghostId;
+}
+
 final class ResolveComplaint extends GameCommand {
   const ResolveComplaint({required this.choice, required this.resolutionId});
 

@@ -618,4 +618,68 @@ class AppLocalizationsId extends AppLocalizations {
   String dailyScheduleLabel(String dayKey) {
     return 'Jadwal: $dayKey';
   }
+
+  @override
+  String roomTier(int tier) {
+    return 'TINGKAT KAMAR $tier';
+  }
+
+  @override
+  String get propertyPortfolioTitle => 'PORTOFOLIO PROPERTI';
+
+  @override
+  String get propertyFirstName => 'Kontrakan Pertama';
+
+  @override
+  String get propertySecondName => 'Pondokan Pasar Malam';
+
+  @override
+  String get propertyActive => 'Properti aktif';
+
+  @override
+  String get propertyVisit => 'Kunjungi';
+
+  @override
+  String get propertyLocked =>
+      'Isi keempat kamar di Kontrakan Pertama untuk berekspansi.';
+
+  @override
+  String get propertyUnlock => 'Buka ekspansi';
+
+  @override
+  String get propertyReady => 'Ekspansi siap — tanpa pembelian.';
+
+  @override
+  String get ownedFurnitureTitle => 'FURNITUR MILIKMU';
+
+  @override
+  String get crystalFurnitureTitle => 'BENGKEL MISTIS';
+
+  @override
+  String buyForCrystals(int cost) {
+    return 'Ambil dengan $cost kristal';
+  }
+
+  @override
+  String get furnitureMoonMirror => 'Cermin bulan';
+
+  @override
+  String get furnitureSpiritRadio => 'Radio arwah';
+
+  @override
+  String get ghostStoryReady => 'Kisah siap';
+
+  @override
+  String get ghostStoryComplete => 'Kisah dikenang';
+
+  @override
+  String get ghostStoryLocked => 'Tempatkan hantu ini untuk membuka kisahnya';
+
+  @override
+  String get rememberStory => 'Kenang kisah';
+
+  @override
+  String ghostCollectionProgress(int complete, int total) {
+    return 'Kisah $complete/$total';
+  }
 }

@@ -9,6 +9,7 @@ import '../../simulation/models/ghost.dart';
 import '../../simulation/models/room.dart';
 import '../../simulation/systems/happiness_system.dart';
 import '../../simulation/systems/repair_system.dart';
+import '../../simulation/systems/room_tier_system.dart';
 import '../../widgets/game_panel.dart';
 
 class RoomDetailsSheet extends StatelessWidget {
@@ -55,6 +56,12 @@ class RoomDetailsSheet extends StatelessWidget {
                   : strings.tenantLabel(ghost.kind.displayName),
               key: const Key('room-tenant'),
               style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              strings.roomTier(RoomTierSystem.tierFor(room)),
+              key: const Key('room-tier'),
+              style: Theme.of(context).textTheme.titleSmall,
             ),
             if (ghost != null && breakdown != null) ...[
               const SizedBox(height: 8),
@@ -110,7 +117,12 @@ class RoomDetailsSheet extends StatelessWidget {
               style: Theme.of(context).textTheme.titleSmall,
             ),
             for (final slot in FurnitureSlot.values)
-              _FurnitureRow(room: room, slot: slot, onEquip: onEquipFurniture),
+              _FurnitureRow(
+                room: room,
+                slot: slot,
+                ownedFurnitureIds: state.ownedFurnitureIds,
+                onEquip: onEquipFurniture,
+              ),
             if (ghost != null && breakdown != null) ...[
               const SizedBox(height: 16),
               SizedBox(
@@ -184,11 +196,13 @@ class _FurnitureRow extends StatelessWidget {
   const _FurnitureRow({
     required this.room,
     required this.slot,
+    required this.ownedFurnitureIds,
     required this.onEquip,
   });
 
   final RoomState room;
   final FurnitureSlot slot;
+  final Set<String> ownedFurnitureIds;
   final void Function(FurnitureSlot slot, String furnitureId) onEquip;
 
   @override
@@ -196,7 +210,9 @@ class _FurnitureRow extends StatelessWidget {
     final strings = AppLocalizations.of(context);
     final current = room.furnitureIn(slot);
     final choices = FurnitureDefinitions.all.values
-        .where((item) => item.slot == slot)
+        .where(
+          (item) => item.slot == slot && ownedFurnitureIds.contains(item.id),
+        )
         .toList(growable: false);
     return Row(
       children: [
@@ -425,5 +441,7 @@ String localizedFurniture(AppLocalizations strings, String id) => switch (id) {
   'rug' => strings.furnitureRug,
   'wall_charm' => strings.furnitureWallCharm,
   'shiny_trinket' => strings.furnitureShinyTrinket,
+  'moon_mirror' => strings.furnitureMoonMirror,
+  'spirit_radio' => strings.furnitureSpiritRadio,
   _ => throw ArgumentError.value(id, 'id', 'Missing localization'),
 };

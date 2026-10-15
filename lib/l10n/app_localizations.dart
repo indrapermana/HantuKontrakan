@@ -1123,6 +1123,120 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Jadwal: {dayKey}'**
   String dailyScheduleLabel(String dayKey);
+
+  /// No description provided for @roomTier.
+  ///
+  /// In id, this message translates to:
+  /// **'TINGKAT KAMAR {tier}'**
+  String roomTier(int tier);
+
+  /// No description provided for @propertyPortfolioTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'PORTOFOLIO PROPERTI'**
+  String get propertyPortfolioTitle;
+
+  /// No description provided for @propertyFirstName.
+  ///
+  /// In id, this message translates to:
+  /// **'Kontrakan Pertama'**
+  String get propertyFirstName;
+
+  /// No description provided for @propertySecondName.
+  ///
+  /// In id, this message translates to:
+  /// **'Pondokan Pasar Malam'**
+  String get propertySecondName;
+
+  /// No description provided for @propertyActive.
+  ///
+  /// In id, this message translates to:
+  /// **'Properti aktif'**
+  String get propertyActive;
+
+  /// No description provided for @propertyVisit.
+  ///
+  /// In id, this message translates to:
+  /// **'Kunjungi'**
+  String get propertyVisit;
+
+  /// No description provided for @propertyLocked.
+  ///
+  /// In id, this message translates to:
+  /// **'Isi keempat kamar di Kontrakan Pertama untuk berekspansi.'**
+  String get propertyLocked;
+
+  /// No description provided for @propertyUnlock.
+  ///
+  /// In id, this message translates to:
+  /// **'Buka ekspansi'**
+  String get propertyUnlock;
+
+  /// No description provided for @propertyReady.
+  ///
+  /// In id, this message translates to:
+  /// **'Ekspansi siap — tanpa pembelian.'**
+  String get propertyReady;
+
+  /// No description provided for @ownedFurnitureTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'FURNITUR MILIKMU'**
+  String get ownedFurnitureTitle;
+
+  /// No description provided for @crystalFurnitureTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'BENGKEL MISTIS'**
+  String get crystalFurnitureTitle;
+
+  /// No description provided for @buyForCrystals.
+  ///
+  /// In id, this message translates to:
+  /// **'Ambil dengan {cost} kristal'**
+  String buyForCrystals(int cost);
+
+  /// No description provided for @furnitureMoonMirror.
+  ///
+  /// In id, this message translates to:
+  /// **'Cermin bulan'**
+  String get furnitureMoonMirror;
+
+  /// No description provided for @furnitureSpiritRadio.
+  ///
+  /// In id, this message translates to:
+  /// **'Radio arwah'**
+  String get furnitureSpiritRadio;
+
+  /// No description provided for @ghostStoryReady.
+  ///
+  /// In id, this message translates to:
+  /// **'Kisah siap'**
+  String get ghostStoryReady;
+
+  /// No description provided for @ghostStoryComplete.
+  ///
+  /// In id, this message translates to:
+  /// **'Kisah dikenang'**
+  String get ghostStoryComplete;
+
+  /// No description provided for @ghostStoryLocked.
+  ///
+  /// In id, this message translates to:
+  /// **'Tempatkan hantu ini untuk membuka kisahnya'**
+  String get ghostStoryLocked;
+
+  /// No description provided for @rememberStory.
+  ///
+  /// In id, this message translates to:
+  /// **'Kenang kisah'**
+  String get rememberStory;
+
+  /// No description provided for @ghostCollectionProgress.
+  ///
+  /// In id, this message translates to:
+  /// **'Kisah {complete}/{total}'**
+  String ghostCollectionProgress(int complete, int total);
 }
 
 class _AppLocalizationsDelegate

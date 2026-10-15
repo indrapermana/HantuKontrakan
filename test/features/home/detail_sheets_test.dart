@@ -28,6 +28,7 @@ void main() {
     );
 
     expect(find.text('KAMAR 01'), findsOneWidget);
+    expect(find.text('TINGKAT KAMAR 1'), findsOneWidget);
     expect(find.text('Penghuni: Pocong'), findsOneWidget);
     expect(find.text('Kebahagiaan: 70 (Nyaman)'), findsOneWidget);
     expect(find.text('Dasar: 50'), findsOneWidget);

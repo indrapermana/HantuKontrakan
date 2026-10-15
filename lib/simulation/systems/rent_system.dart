@@ -25,30 +25,43 @@ abstract final class RentSystem {
     return multipliedRate + abilityBonus;
   }
 
-  static int totalRentPerMinuteMicrocoins(GameState state) => state.rooms
-      .where((room) => room.unlocked && room.occupantId != null)
-      .fold(
+  static int totalRentPerMinuteMicrocoins(GameState state) =>
+      _propertyStates(state).fold(
         0,
-        (total, room) =>
-            total + rentPerMinuteMicrocoinsFor(state, room.occupantId!),
+        (total, propertyState) =>
+            total +
+            propertyState.rooms
+                .where((room) => room.unlocked && room.occupantId != null)
+                .fold(
+                  0,
+                  (propertyTotal, room) =>
+                      propertyTotal +
+                      rentPerMinuteMicrocoinsFor(
+                        propertyState,
+                        room.occupantId!,
+                      ),
+                ),
       );
 
   static GameState accrue(GameState state, int elapsedSeconds) {
     if (elapsedSeconds <= 0) return state;
     final pending = Map<String, int>.of(state.pendingRentMicrocoinsByRoom);
     final remainders = Map<String, int>.of(state.rentAccrualRemainderByRoom);
-    final eligibleRooms =
-        state.rooms
-            .where((room) => room.unlocked && room.occupantId != null)
-            .toList(growable: false)
-          ..sort((left, right) => left.id.compareTo(right.id));
-    for (final room in eligibleRooms) {
-      final numerator =
-          (remainders[room.id] ?? 0) +
-          rentPerMinuteMicrocoinsFor(state, room.occupantId!) * elapsedSeconds;
-      pending[room.id] =
-          (pending[room.id] ?? 0) + numerator ~/ GameBalance.secondsPerMinute;
-      remainders[room.id] = numerator % GameBalance.secondsPerMinute;
+    for (final propertyState in _propertyStates(state)) {
+      final eligibleRooms =
+          propertyState.rooms
+              .where((room) => room.unlocked && room.occupantId != null)
+              .toList(growable: false)
+            ..sort((left, right) => left.id.compareTo(right.id));
+      for (final room in eligibleRooms) {
+        final numerator =
+            (remainders[room.id] ?? 0) +
+            rentPerMinuteMicrocoinsFor(propertyState, room.occupantId!) *
+                elapsedSeconds;
+        pending[room.id] =
+            (pending[room.id] ?? 0) + numerator ~/ GameBalance.secondsPerMinute;
+        remainders[room.id] = numerator % GameBalance.secondsPerMinute;
+      }
     }
     return state.copyWith(
       activeSimulationSeconds: state.activeSimulationSeconds + elapsedSeconds,
@@ -67,14 +80,23 @@ abstract final class RentSystem {
     final result = Map<String, int>.of(state.pendingRentMicrocoinsByRoom);
     if (addedMicrocoins <= 0) return result;
     final rates = <String, int>{
-      for (final room in state.rooms)
-        if (room.unlocked && room.occupantId != null)
-          room.id: rentPerMinuteMicrocoinsFor(state, room.occupantId!),
+      for (final propertyState in _propertyStates(state))
+        for (final room in propertyState.rooms)
+          if (room.unlocked && room.occupantId != null)
+            room.id: rentPerMinuteMicrocoinsFor(
+              propertyState,
+              room.occupantId!,
+            ),
     };
     final roomIds = rates.keys.toList()..sort();
     final totalRate = rates.values.fold<int>(0, (total, rate) => total + rate);
     if (roomIds.isEmpty || totalRate <= 0) {
-      final fallback = state.rooms.map((room) => room.id).toList()..sort();
+      final fallback =
+          state.propertyRoomsById.values
+              .expand((rooms) => rooms)
+              .map((room) => room.id)
+              .toList()
+            ..sort();
       if (fallback.isNotEmpty) {
         result[fallback.first] =
             (result[fallback.first] ?? 0) + addedMicrocoins;
@@ -107,5 +129,14 @@ abstract final class RentSystem {
     if (chaos >= 70) return 125;
     if (chaos >= 30) return 115;
     return 100;
+  }
+
+  static Iterable<GameState> _propertyStates(GameState state) sync* {
+    final propertyIds = state.propertyRoomsById.keys.toList()..sort();
+    for (final propertyId in propertyIds) {
+      yield propertyId == state.activePropertyId
+          ? state
+          : state.copyWith(activePropertyId: propertyId);
+    }
   }
 }

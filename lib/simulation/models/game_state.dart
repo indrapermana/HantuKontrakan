@@ -50,6 +50,23 @@ class GameState {
     Map<String, int> dailyGoalProgress = const {},
     Set<String> completedDailyGoalIds = const {},
     this.dailyChestClaimed = false,
+    this.activePropertyId = 'kontrakan_pertama',
+    Map<String, List<RoomState>>? propertyRoomsById,
+    Set<String> ownedFurnitureIds = const {
+      'bed',
+      'reinforced_shelf',
+      'fan',
+      'dresser',
+      'door',
+      'lamp',
+      'plant',
+      'lantern',
+      'curtain',
+      'rug',
+      'wall_charm',
+      'shiny_trinket',
+    },
+    Set<String> completedGhostStoryIds = const {},
     this.tutorialStep = TutorialStep.completed,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
@@ -86,6 +103,14 @@ class GameState {
        completedMissionIds = Set.unmodifiable(completedMissionIds),
        dailyGoalProgress = Map.unmodifiable(dailyGoalProgress),
        completedDailyGoalIds = Set.unmodifiable(completedDailyGoalIds),
+       propertyRoomsById = Map.unmodifiable({
+         ...?propertyRoomsById?.map(
+           (id, value) => MapEntry(id, List<RoomState>.unmodifiable(value)),
+         ),
+         activePropertyId: List<RoomState>.unmodifiable(rooms),
+       }),
+       ownedFurnitureIds = Set.unmodifiable(ownedFurnitureIds),
+       completedGhostStoryIds = Set.unmodifiable(completedGhostStoryIds),
        ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
@@ -141,9 +166,11 @@ class GameState {
         (dailyGoalDayKey != null &&
             !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(dailyGoalDayKey!)) ||
         (dailyTenantRoomId != null &&
-            !rooms.any(
-              (room) => room.id == dailyTenantRoomId && room.unlocked,
-            )) ||
+            !this.propertyRoomsById.values
+                .expand((rooms) => rooms)
+                .any(
+                  (room) => room.id == dailyTenantRoomId && room.unlocked,
+                )) ||
         unscriptedIncidentSpawnTimes.any(
           (timestamp) => timestamp < 0 || timestamp > activeSimulationSeconds,
         ) ||
@@ -153,10 +180,13 @@ class GameState {
                     activeSimulationSeconds))) {
       throw ArgumentError('Game state values are out of range.');
     }
+    if (!this.propertyRoomsById.containsKey(activePropertyId)) {
+      throw ArgumentError('The active property must exist in the portfolio.');
+    }
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 22;
+  static const int currentSchemaVersion = 23;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -199,6 +229,10 @@ class GameState {
   final Map<String, int> dailyGoalProgress;
   final Set<String> completedDailyGoalIds;
   final bool dailyChestClaimed;
+  final String activePropertyId;
+  final Map<String, List<RoomState>> propertyRoomsById;
+  final Set<String> ownedFurnitureIds;
+  final Set<String> completedGhostStoryIds;
   final TutorialStep tutorialStep;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
@@ -260,8 +294,10 @@ class GameState {
   RoomState roomById(String id) => rooms.firstWhere((room) => room.id == id);
 
   RoomState? roomForGhost(String ghostId) {
-    for (final room in rooms) {
-      if (room.occupantId == ghostId) return room;
+    for (final propertyRooms in propertyRoomsById.values) {
+      for (final room in propertyRooms) {
+        if (room.occupantId == ghostId) return room;
+      }
     }
     return null;
   }
@@ -278,13 +314,14 @@ class GameState {
       throw ArgumentError.value(ghosts, 'ghosts', 'Ghost IDs must be unique.');
     }
 
-    final roomIds = rooms.map((room) => room.id).toSet();
-    if (roomIds.length != rooms.length) {
+    final allRooms = propertyRoomsById.values.expand((rooms) => rooms).toList();
+    final roomIds = allRooms.map((room) => room.id).toSet();
+    if (roomIds.length != allRooms.length) {
       throw ArgumentError.value(rooms, 'rooms', 'Room IDs must be unique.');
     }
 
     final occupants = <String>{};
-    for (final room in rooms) {
+    for (final room in allRooms) {
       final occupantId = room.occupantId;
       if (occupantId == null) continue;
       if (!room.unlocked) {
@@ -352,102 +389,130 @@ class GameState {
     Map<String, int>? dailyGoalProgress,
     Set<String>? completedDailyGoalIds,
     bool? dailyChestClaimed,
+    String? activePropertyId,
+    Map<String, List<RoomState>>? propertyRoomsById,
+    Set<String>? ownedFurnitureIds,
+    Set<String>? completedGhostStoryIds,
     TutorialStep? tutorialStep,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
     bool? complaintResolved,
     String? resolutionId,
-  }) => GameState(
-    schemaVersion: schemaVersion,
-    walletCoins: walletCoins ?? this.walletCoins,
-    chaos: chaos ?? this.chaos,
-    activeSimulationSeconds:
-        activeSimulationSeconds ?? this.activeSimulationSeconds,
-    playerLevel: playerLevel ?? this.playerLevel,
-    playerExperience: playerExperience ?? this.playerExperience,
-    mysticalCrystals: mysticalCrystals ?? this.mysticalCrystals,
-    languageCode: identical(languageCode, _notProvided)
-        ? this.languageCode
-        : languageCode as String?,
-    analyticsConsentGranted:
-        analyticsConsentGranted ?? this.analyticsConsentGranted,
-    errorReportingConsentGranted:
-        errorReportingConsentGranted ?? this.errorReportingConsentGranted,
-    musicMuted: musicMuted ?? this.musicMuted,
-    soundMuted: soundMuted ?? this.soundMuted,
-    musicVolume: musicVolume ?? this.musicVolume,
-    soundVolume: soundVolume ?? this.soundVolume,
-    reputation: reputation ?? this.reputation,
-    pendingRentMicrocoins:
-        pendingRentMicrocoins ??
-        (pendingRentMicrocoinsByRoom == null
-            ? this.pendingRentMicrocoins
-            : pendingRentMicrocoinsByRoom.values.fold<int>(
-                0,
-                (total, value) => total + value,
-              )),
-    pendingRentMicrocoinsByRoom:
-        pendingRentMicrocoinsByRoom ??
-        (pendingRentMicrocoins == null
-            ? this.pendingRentMicrocoinsByRoom
-            : null),
-    rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
-    rentAccrualRemainderByRoom:
-        rentAccrualRemainderByRoom ??
-        (rentAccrualRemainder == null ? this.rentAccrualRemainderByRoom : null),
-    completedRentClaimIds: completedRentClaimIds ?? this.completedRentClaimIds,
-    pendingRewardedRentClaim: identical(pendingRewardedRentClaim, _notProvided)
-        ? this.pendingRewardedRentClaim
-        : pendingRewardedRentClaim as RewardedRentClaim?,
-    completedRewardedRentClaimIds:
-        completedRewardedRentClaimIds ?? this.completedRewardedRentClaimIds,
-    rewardedRentBonusDayKey: identical(rewardedRentBonusDayKey, _notProvided)
-        ? this.rewardedRentBonusDayKey
-        : rewardedRentBonusDayKey as String?,
-    rewardedRentBonusCount:
-        rewardedRentBonusCount ?? this.rewardedRentBonusCount,
-    abilityCooldownSeconds:
-        abilityCooldownSeconds ?? this.abilityCooldownSeconds,
-    offlineRateSnapshotMicrocoinsPerMinute:
-        identical(offlineRateSnapshotMicrocoinsPerMinute, _notProvided)
-        ? this.offlineRateSnapshotMicrocoinsPerMinute
-        : offlineRateSnapshotMicrocoinsPerMinute as int?,
-    lastOfflineAccrualTimestampMillis:
-        identical(lastOfflineAccrualTimestampMillis, _notProvided)
-        ? this.lastOfflineAccrualTimestampMillis
-        : lastOfflineAccrualTimestampMillis as int?,
-    unscriptedIncidentsEnabled:
-        unscriptedIncidentsEnabled ?? this.unscriptedIncidentsEnabled,
-    activeIncidentId: identical(activeIncidentId, _notProvided)
-        ? this.activeIncidentId
-        : activeIncidentId as String?,
-    lastIncidentResolvedAtActiveSecond:
-        identical(lastIncidentResolvedAtActiveSecond, _notProvided)
-        ? this.lastIncidentResolvedAtActiveSecond
-        : lastIncidentResolvedAtActiveSecond as int?,
-    unscriptedIncidentSpawnTimes:
-        unscriptedIncidentSpawnTimes ?? this.unscriptedIncidentSpawnTimes,
-    recentIncidentIds: recentIncidentIds ?? this.recentIncidentIds,
-    completedIncidentResolutionIds:
-        completedIncidentResolutionIds ?? this.completedIncidentResolutionIds,
-    incidentRandomState: incidentRandomState ?? this.incidentRandomState,
-    completedRepairIds: completedRepairIds ?? this.completedRepairIds,
-    completedMissionIds: completedMissionIds ?? this.completedMissionIds,
-    dailyGoalDayKey: identical(dailyGoalDayKey, _notProvided)
-        ? this.dailyGoalDayKey
-        : dailyGoalDayKey as String?,
-    dailyTenantRoomId: identical(dailyTenantRoomId, _notProvided)
-        ? this.dailyTenantRoomId
-        : dailyTenantRoomId as String?,
-    dailyGoalProgress: dailyGoalProgress ?? this.dailyGoalProgress,
-    completedDailyGoalIds: completedDailyGoalIds ?? this.completedDailyGoalIds,
-    dailyChestClaimed: dailyChestClaimed ?? this.dailyChestClaimed,
-    tutorialStep: tutorialStep ?? this.tutorialStep,
-    ghosts: ghosts ?? this.ghosts,
-    rooms: rooms ?? this.rooms,
-    complaintResolved: complaintResolved ?? this.complaintResolved,
-    resolutionId: resolutionId ?? this.resolutionId,
-  );
+  }) {
+    final nextPropertyId = activePropertyId ?? this.activePropertyId;
+    final nextPortfolio = <String, List<RoomState>>{
+      ...(propertyRoomsById ?? this.propertyRoomsById),
+    };
+    if (rooms != null && activePropertyId == null) {
+      nextPortfolio[this.activePropertyId] = rooms;
+    }
+    final nextRooms =
+        rooms ??
+        (activePropertyId == null
+            ? this.rooms
+            : nextPortfolio[nextPropertyId] ?? this.rooms);
+    return GameState(
+      schemaVersion: schemaVersion,
+      walletCoins: walletCoins ?? this.walletCoins,
+      chaos: chaos ?? this.chaos,
+      activeSimulationSeconds:
+          activeSimulationSeconds ?? this.activeSimulationSeconds,
+      playerLevel: playerLevel ?? this.playerLevel,
+      playerExperience: playerExperience ?? this.playerExperience,
+      mysticalCrystals: mysticalCrystals ?? this.mysticalCrystals,
+      languageCode: identical(languageCode, _notProvided)
+          ? this.languageCode
+          : languageCode as String?,
+      analyticsConsentGranted:
+          analyticsConsentGranted ?? this.analyticsConsentGranted,
+      errorReportingConsentGranted:
+          errorReportingConsentGranted ?? this.errorReportingConsentGranted,
+      musicMuted: musicMuted ?? this.musicMuted,
+      soundMuted: soundMuted ?? this.soundMuted,
+      musicVolume: musicVolume ?? this.musicVolume,
+      soundVolume: soundVolume ?? this.soundVolume,
+      reputation: reputation ?? this.reputation,
+      pendingRentMicrocoins:
+          pendingRentMicrocoins ??
+          (pendingRentMicrocoinsByRoom == null
+              ? this.pendingRentMicrocoins
+              : pendingRentMicrocoinsByRoom.values.fold<int>(
+                  0,
+                  (total, value) => total + value,
+                )),
+      pendingRentMicrocoinsByRoom:
+          pendingRentMicrocoinsByRoom ??
+          (pendingRentMicrocoins == null
+              ? this.pendingRentMicrocoinsByRoom
+              : null),
+      rentAccrualRemainder: rentAccrualRemainder ?? this.rentAccrualRemainder,
+      rentAccrualRemainderByRoom:
+          rentAccrualRemainderByRoom ??
+          (rentAccrualRemainder == null
+              ? this.rentAccrualRemainderByRoom
+              : null),
+      completedRentClaimIds:
+          completedRentClaimIds ?? this.completedRentClaimIds,
+      pendingRewardedRentClaim:
+          identical(pendingRewardedRentClaim, _notProvided)
+          ? this.pendingRewardedRentClaim
+          : pendingRewardedRentClaim as RewardedRentClaim?,
+      completedRewardedRentClaimIds:
+          completedRewardedRentClaimIds ?? this.completedRewardedRentClaimIds,
+      rewardedRentBonusDayKey: identical(rewardedRentBonusDayKey, _notProvided)
+          ? this.rewardedRentBonusDayKey
+          : rewardedRentBonusDayKey as String?,
+      rewardedRentBonusCount:
+          rewardedRentBonusCount ?? this.rewardedRentBonusCount,
+      abilityCooldownSeconds:
+          abilityCooldownSeconds ?? this.abilityCooldownSeconds,
+      offlineRateSnapshotMicrocoinsPerMinute:
+          identical(offlineRateSnapshotMicrocoinsPerMinute, _notProvided)
+          ? this.offlineRateSnapshotMicrocoinsPerMinute
+          : offlineRateSnapshotMicrocoinsPerMinute as int?,
+      lastOfflineAccrualTimestampMillis:
+          identical(lastOfflineAccrualTimestampMillis, _notProvided)
+          ? this.lastOfflineAccrualTimestampMillis
+          : lastOfflineAccrualTimestampMillis as int?,
+      unscriptedIncidentsEnabled:
+          unscriptedIncidentsEnabled ?? this.unscriptedIncidentsEnabled,
+      activeIncidentId: identical(activeIncidentId, _notProvided)
+          ? this.activeIncidentId
+          : activeIncidentId as String?,
+      lastIncidentResolvedAtActiveSecond:
+          identical(lastIncidentResolvedAtActiveSecond, _notProvided)
+          ? this.lastIncidentResolvedAtActiveSecond
+          : lastIncidentResolvedAtActiveSecond as int?,
+      unscriptedIncidentSpawnTimes:
+          unscriptedIncidentSpawnTimes ?? this.unscriptedIncidentSpawnTimes,
+      recentIncidentIds: recentIncidentIds ?? this.recentIncidentIds,
+      completedIncidentResolutionIds:
+          completedIncidentResolutionIds ?? this.completedIncidentResolutionIds,
+      incidentRandomState: incidentRandomState ?? this.incidentRandomState,
+      completedRepairIds: completedRepairIds ?? this.completedRepairIds,
+      completedMissionIds: completedMissionIds ?? this.completedMissionIds,
+      dailyGoalDayKey: identical(dailyGoalDayKey, _notProvided)
+          ? this.dailyGoalDayKey
+          : dailyGoalDayKey as String?,
+      dailyTenantRoomId: identical(dailyTenantRoomId, _notProvided)
+          ? this.dailyTenantRoomId
+          : dailyTenantRoomId as String?,
+      dailyGoalProgress: dailyGoalProgress ?? this.dailyGoalProgress,
+      completedDailyGoalIds:
+          completedDailyGoalIds ?? this.completedDailyGoalIds,
+      dailyChestClaimed: dailyChestClaimed ?? this.dailyChestClaimed,
+      activePropertyId: nextPropertyId,
+      propertyRoomsById: nextPortfolio,
+      ownedFurnitureIds: ownedFurnitureIds ?? this.ownedFurnitureIds,
+      completedGhostStoryIds:
+          completedGhostStoryIds ?? this.completedGhostStoryIds,
+      tutorialStep: tutorialStep ?? this.tutorialStep,
+      ghosts: ghosts ?? this.ghosts,
+      rooms: nextRooms,
+      complaintResolved: complaintResolved ?? this.complaintResolved,
+      resolutionId: resolutionId ?? this.resolutionId,
+    );
+  }
 
   Map<String, Object?> toJson() => {
     'schemaVersion': schemaVersion,
@@ -496,6 +561,15 @@ class GameState {
     'dailyGoalProgress': dailyGoalProgress,
     'completedDailyGoalIds': completedDailyGoalIds.toList(growable: false),
     'dailyChestClaimed': dailyChestClaimed,
+    'activePropertyId': activePropertyId,
+    'propertyRoomsById': propertyRoomsById.map(
+      (id, rooms) => MapEntry(
+        id,
+        rooms.map((room) => room.toJson()).toList(growable: false),
+      ),
+    ),
+    'ownedFurnitureIds': ownedFurnitureIds.toList(growable: false),
+    'completedGhostStoryIds': completedGhostStoryIds.toList(growable: false),
     'tutorialStep': tutorialStep.name,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
@@ -530,7 +604,8 @@ class GameState {
       19 => GameState._fromVersion19Json(json),
       20 => GameState._fromVersion20Json(json),
       21 => GameState._fromVersion21Json(json),
-      currentSchemaVersion => GameState._fromVersion22Json(json),
+      22 => GameState._fromVersion22Json(json),
+      currentSchemaVersion => GameState._fromVersion23Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -796,6 +871,36 @@ class GameState {
             .toSet(),
         dailyChestClaimed: json['dailyChestClaimed']! as bool,
       );
+
+  factory GameState._fromVersion23Json(Map<String, Object?> json) {
+    final activePropertyId = json['activePropertyId']! as String;
+    final portfolio = (json['propertyRoomsById']! as Map<String, Object?>).map(
+      (id, value) => MapEntry(
+        id,
+        (value! as List<Object?>)
+            .map((item) => RoomState.fromJson(item! as Map<String, Object?>))
+            .toList(growable: false),
+      ),
+    );
+    final firstPropertyRooms = portfolio['kontrakan_pertama']!;
+    final baseJson = <String, Object?>{
+      ...json,
+      'rooms': firstPropertyRooms
+          .map((room) => room.toJson())
+          .toList(growable: false),
+    };
+    return GameState._fromVersion22Json(baseJson).copyWith(
+      activePropertyId: activePropertyId,
+      propertyRoomsById: portfolio,
+      rooms: portfolio[activePropertyId],
+      ownedFurnitureIds: (json['ownedFurnitureIds']! as List<Object?>)
+          .cast<String>()
+          .toSet(),
+      completedGhostStoryIds: (json['completedGhostStoryIds']! as List<Object?>)
+          .cast<String>()
+          .toSet(),
+    );
+  }
 
   static Map<String, int> _normalizeRoomRent(
     int total,

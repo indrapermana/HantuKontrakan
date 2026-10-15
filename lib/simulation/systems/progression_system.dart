@@ -21,7 +21,18 @@ abstract final class ProgressionSystem {
     if (experience == state.playerExperience && level == state.playerLevel) {
       return state;
     }
-    return state.copyWith(playerExperience: experience, playerLevel: level);
+    final ghosts = [...state.ghosts];
+    if (level >= GhostDefinitions.byKind(GhostKind.genderuwo).unlockLevel &&
+        !ghosts.any((ghost) => ghost.kind == GhostKind.genderuwo)) {
+      ghosts.add(
+        const GhostState(id: 'genderuwo_01', kind: GhostKind.genderuwo),
+      );
+    }
+    return state.copyWith(
+      playerExperience: experience,
+      playerLevel: level,
+      ghosts: ghosts,
+    );
   }
 
   static bool isGhostUnlocked(GameState state, GhostKind kind) =>

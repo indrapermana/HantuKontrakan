@@ -9,8 +9,10 @@ import '../../l10n/app_localizations.dart';
 import '../../simulation/constants/game_balance.dart';
 import '../../simulation/content/incident_definitions.dart';
 import '../../simulation/content/progression_definitions.dart';
+import '../../simulation/content/property_definitions.dart';
 import '../../simulation/models/incident_definition.dart';
 import '../../simulation/systems/game_rules.dart';
+import '../../simulation/systems/portfolio_system.dart';
 import '../../widgets/game_panel.dart';
 import '../missions/mission_dialog.dart';
 import '../settings/audio_settings_dialog.dart';
@@ -241,11 +243,24 @@ class HomeScreen extends StatelessWidget {
                   leading: const Icon(Icons.person_pin_circle_rounded),
                   title: Text(ghost.kind.displayName),
                   subtitle: Text(
-                    strings.ghostHappinessSummary(
-                      ghost.kind.displayName,
-                      controller.happinessFor(ghost.id),
-                    ),
+                    '${strings.ghostHappinessSummary(ghost.kind.displayName, controller.happinessFor(ghost.id))}\n'
+                    '${_ghostStoryStatus(strings, ghost.id)}',
                   ),
+                  isThreeLine: true,
+                  trailing:
+                      controller.state.completedGhostStoryIds.contains(ghost.id)
+                      ? const Icon(Icons.auto_stories_rounded)
+                      : IconButton(
+                          key: Key('ghost-story-${ghost.id}'),
+                          tooltip: strings.rememberStory,
+                          onPressed:
+                              controller.state.roomForGhost(ghost.id) == null
+                              ? null
+                              : () async {
+                                  await controller.completeGhostStory(ghost.id);
+                                },
+                          icon: const Icon(Icons.menu_book_rounded),
+                        ),
                   onTap: () async {
                     Navigator.pop(sheetContext);
                     await _showGhostProfile(context, ghost.id);
@@ -265,13 +280,93 @@ class HomeScreen extends StatelessWidget {
       showDragHandle: true,
       backgroundColor: Colors.transparent,
       builder: (sheetContext) => GameBottomSheetFrame(
-        title: strings.propertyActionsTitle,
+        title: strings.propertyPortfolioTitle,
         icon: Icons.home_work_rounded,
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text(
+                _propertyName(strings, controller.state.activePropertyId),
+                key: const Key('active-property-name'),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(
+                strings.ghostCollectionProgress(
+                  controller.state.completedGhostStoryIds.length,
+                  controller.state.ghosts.length,
+                ),
+              ),
+              const SizedBox(height: 12),
+              for (final propertyId in controller.state.propertyRoomsById.keys)
+                ListTile(
+                  key: Key('portfolio-property-$propertyId'),
+                  leading: const Icon(Icons.apartment_rounded),
+                  title: Text(_propertyName(strings, propertyId)),
+                  subtitle: Text(
+                    '${controller.state.propertyRoomsById[propertyId]!.where((room) => room.occupantId != null).length}/'
+                    '${controller.state.propertyRoomsById[propertyId]!.length}',
+                  ),
+                  trailing: propertyId == controller.state.activePropertyId
+                      ? Text(strings.propertyActive)
+                      : TextButton(
+                          onPressed: () async {
+                            Navigator.pop(sheetContext);
+                            await controller.switchProperty(propertyId);
+                          },
+                          child: Text(strings.propertyVisit),
+                        ),
+                ),
+              if (!controller.state.propertyRoomsById.containsKey(
+                PropertyDefinitions.secondPropertyId,
+              ))
+                GameChoiceCard(
+                  key: const Key('unlock-second-property'),
+                  title: strings.propertySecondName,
+                  subtitle:
+                      PortfolioSystem.canUnlockSecondProperty(controller.state)
+                      ? strings.propertyReady
+                      : strings.propertyLocked,
+                  leading: const Icon(Icons.add_business_rounded),
+                  enabled: PortfolioSystem.canUnlockSecondProperty(
+                    controller.state,
+                  ),
+                  onPressed: () async {
+                    await controller.unlockSecondProperty();
+                    if (sheetContext.mounted) Navigator.pop(sheetContext);
+                  },
+                ),
+              const SizedBox(height: 12),
+              Text(
+                strings.ownedFurnitureTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              Text('${controller.state.ownedFurnitureIds.length}'),
+              const SizedBox(height: 12),
+              Text(
+                strings.crystalFurnitureTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              for (final entry
+                  in PortfolioSystem.premiumFurnitureCrystalCosts.entries)
+                ListTile(
+                  key: Key('premium-furniture-${entry.key}'),
+                  leading: const Icon(Icons.diamond_rounded),
+                  title: Text(localizedFurniture(strings, entry.key)),
+                  subtitle: Text(strings.buyForCrystals(entry.value)),
+                  trailing:
+                      controller.state.ownedFurnitureIds.contains(entry.key)
+                      ? const Icon(Icons.check_circle_rounded)
+                      : FilledButton(
+                          onPressed:
+                              controller.state.mysticalCrystals >= entry.value
+                              ? () => controller.purchaseFurniture(entry.key)
+                              : null,
+                          child: Text('${entry.value}'),
+                        ),
+                ),
+              const Divider(),
               for (final room in controller.state.rooms)
                 ListTile(
                   key: Key('property-room-${room.id}'),
@@ -290,6 +385,15 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _ghostStoryStatus(AppLocalizations strings, String ghostId) {
+    if (controller.state.completedGhostStoryIds.contains(ghostId)) {
+      return strings.ghostStoryComplete;
+    }
+    return controller.state.roomForGhost(ghostId) == null
+        ? strings.ghostStoryLocked
+        : strings.ghostStoryReady;
   }
 
   Future<void> _collectRewardedRent(BuildContext context) async {
@@ -795,6 +899,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+
+String _propertyName(AppLocalizations strings, String propertyId) =>
+    switch (propertyId) {
+      PropertyDefinitions.firstPropertyId => strings.propertyFirstName,
+      PropertyDefinitions.secondPropertyId => strings.propertySecondName,
+      _ => propertyId,
+    };
 
 class _ChoiceButton extends StatelessWidget {
   const _ChoiceButton({

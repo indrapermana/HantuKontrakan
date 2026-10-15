@@ -5,6 +5,8 @@ import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
 import 'package:hantu_kontrakan/services/privacy_consent_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
+import 'package:hantu_kontrakan/simulation/models/ghost.dart';
+import 'package:hantu_kontrakan/simulation/models/room.dart';
 import 'package:hantu_kontrakan/widgets/game_panel.dart';
 
 void main() {
@@ -335,6 +337,64 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump(const Duration(milliseconds: 100));
     expect(saves.storedState?.pendingRentMicrocoins, pendingAfterResume);
+  });
+
+  testWidgets('portfolio unlocks and revisits a second playable property', (
+    tester,
+  ) async {
+    final state = GameState(
+      schemaVersion: GameState.currentSchemaVersion,
+      walletCoins: 200,
+      playerLevel: 5,
+      playerExperience: 700,
+      ghosts: const [
+        GhostState(id: 'pocong_01', kind: GhostKind.pocong),
+        GhostState(id: 'kuntilanak_01', kind: GhostKind.kuntilanak),
+        GhostState(id: 'tuyul_01', kind: GhostKind.tuyul),
+        GhostState(id: 'genderuwo_01', kind: GhostKind.genderuwo),
+      ],
+      rooms: [
+        RoomState(id: 'room_01', column: 0, row: 1, occupantId: 'pocong_01'),
+        RoomState(
+          id: 'room_02',
+          column: 1,
+          row: 1,
+          occupantId: 'kuntilanak_01',
+        ),
+        RoomState(id: 'room_03', column: 0, occupantId: 'tuyul_01'),
+        RoomState(id: 'room_04', column: 1, occupantId: 'genderuwo_01'),
+      ],
+      complaintResolved: true,
+    );
+    final saves = MemorySaveService(initialResult: SaveLoaded(state));
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('en')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('shop-navigation')));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(
+      find.text('Expansion ready — no purchase required.'),
+      findsOneWidget,
+    );
+    tester
+        .widget<GameChoiceCard>(find.byKey(const Key('unlock-second-property')))
+        .onPressed();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(saves.storedState?.propertyRoomsById, hasLength(2));
+    expect(saves.storedState?.walletCoins, 200);
+
+    await tester.tap(find.byKey(const Key('shop-navigation')));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Night Market Lodge'), findsOneWidget);
+    tester
+        .widget<TextButton>(find.widgetWithText(TextButton, 'Visit'))
+        .onPressed!();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(saves.storedState?.activePropertyId, 'kontrakan_pasar');
+    expect(saves.storedState?.rooms.first.id, 'pasar_room_01');
   });
 
   testWidgets('incident previews effects, commits once, and shows outcome', (

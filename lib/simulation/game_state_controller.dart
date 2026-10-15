@@ -2,6 +2,7 @@ import 'commands/game_command.dart';
 import 'models/game_state.dart';
 import 'systems/game_rules.dart';
 import 'systems/daily_goal_system.dart';
+import 'systems/portfolio_system.dart';
 
 class GameStateController {
   GameStateController(GameState initialState) : _state = initialState;
@@ -34,6 +35,17 @@ class GameStateController {
       ),
       EquipFurniture(:final roomId, :final furnitureId, :final slot) =>
         GameRules.equipFurniture(_state, roomId, furnitureId, slot),
+      PurchaseFurniture(:final furnitureId) =>
+        PortfolioSystem.purchaseFurniture(_state, furnitureId),
+      UnlockSecondProperty() => PortfolioSystem.unlockSecondProperty(_state),
+      SwitchProperty(:final propertyId) => PortfolioSystem.switchProperty(
+        _state,
+        propertyId,
+      ),
+      CompleteGhostStory(:final ghostId) => PortfolioSystem.completeGhostStory(
+        _state,
+        ghostId,
+      ),
       ResolveComplaint(:final choice, :final resolutionId) =>
         GameRules.resolveComplaint(_state, choice, resolutionId),
       AdvanceSimulation(:final seconds) => GameRules.advanceSimulation(

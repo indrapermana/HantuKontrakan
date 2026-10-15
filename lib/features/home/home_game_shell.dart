@@ -245,6 +245,10 @@ class RoomRentBubbleOverlay extends StatelessWidget {
     'room_04': Alignment(0.48, -0.55),
     'room_01': Alignment(-0.48, 0.20),
     'room_02': Alignment(0.48, 0.20),
+    'pasar_room_03': Alignment(-0.48, -0.55),
+    'pasar_room_04': Alignment(0.48, -0.55),
+    'pasar_room_01': Alignment(-0.48, 0.20),
+    'pasar_room_02': Alignment(0.48, 0.20),
   };
 
   @override

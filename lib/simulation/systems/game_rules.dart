@@ -355,6 +355,7 @@ abstract final class GameRules {
         !room.unlocked ||
         furniture == null ||
         furniture.slot != slot ||
+        !state.ownedFurnitureIds.contains(furnitureId) ||
         room.furnitureIn(slot) == furnitureId) {
       return state;
     }

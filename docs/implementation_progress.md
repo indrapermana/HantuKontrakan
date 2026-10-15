@@ -959,3 +959,36 @@ Status: locally verified on 2026-10-15.
   harness issue, the retry could not rediscover the Dart VM service over Wi-Fi.
 - HK-030-E is the next unfinished ticket. This ticket adds no owned furniture,
   second property, portfolio economy, crystal sinks, or audio redesign.
+
+### HK-030-E — Visible progression and property portfolio
+
+Status: locally verified on 2026-10-15.
+
+- Added schema-v23 persistence for the active property, stable per-property
+  room sets, owned furniture, and completed ghost stories. Version-22 saves
+  migrate into `kontrakan_pertama` with all existing furniture treated as
+  starter-owned, preserving the prior room and economy state.
+- Completing all four initial rooms now enables a free expansion into
+  `kontrakan_pasar`, a second four-room playable cutaway. Unlocking also adds a
+  new Pocong tenant, while level 5 now deterministically adds the Genderuwo
+  needed to complete the initial property.
+- Property switching persists the room state of both locations. All owned
+  properties accrue rent in stable property/room order, while the selected
+  property alone is rendered and directly managed. Globally unique room IDs
+  keep balances, remainders, claims, and reloads unambiguous.
+- Added derived room tiers, a filtered owned-furniture picker, and two optional
+  crystal workshop items. Required progression remains free and works with
+  zero crystals, ads, IAP, or network access.
+- Expanded the ghost roster with saved, exactly-once story milestones that
+  become available after the ghost is housed. The localized portfolio shows
+  story completion, property occupancy, active/visit state, expansion status,
+  owned inventory, and crystal prices.
+- Added pure-Dart coverage for free expansion, cross-property earning,
+  revisiting, schema migration, ownership enforcement, crystal spending, story
+  persistence, and room tiers, plus widget coverage for the complete expansion
+  and property-switch route and Flame coverage for dynamic room IDs.
+- Validation evidence: formatting completed; `flutter analyze` reported no
+  issues; all Flutter tests passed; Android debug build succeeded; and
+  `git diff --check` passed.
+- HK-030-F is the next unfinished ticket. HK-030-E does not replace music,
+  ambience, effects, haptics, or reduced-motion behavior.

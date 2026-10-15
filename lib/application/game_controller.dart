@@ -266,6 +266,18 @@ class GameController extends ChangeNotifier {
     );
   }
 
+  Future<bool> purchaseFurniture(String furnitureId) =>
+      _dispatch(PurchaseFurniture(furnitureId: furnitureId));
+
+  Future<bool> unlockSecondProperty() =>
+      _dispatch(const UnlockSecondProperty());
+
+  Future<bool> switchProperty(String propertyId) =>
+      _dispatch(SwitchProperty(propertyId: propertyId));
+
+  Future<bool> completeGhostStory(String ghostId) =>
+      _dispatch(CompleteGhostStory(ghostId: ghostId));
+
   Future<void> resolveComplaint(ComplaintChoice choice) async {
     await _dispatch(
       ResolveComplaint(

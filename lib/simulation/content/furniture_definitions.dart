@@ -63,6 +63,18 @@ abstract final class FurnitureDefinitions {
       slot: FurnitureSlot.decoration,
       tags: ['shiny'],
     ),
+    'moon_mirror': FurnitureDefinition(
+      id: 'moon_mirror',
+      slot: FurnitureSlot.decoration,
+      tags: ['mystical', 'shiny'],
+      crystalCost: 3,
+    ),
+    'spirit_radio': FurnitureDefinition(
+      id: 'spirit_radio',
+      slot: FurnitureSlot.primary,
+      tags: ['decorated', 'quiet'],
+      crystalCost: 5,
+    ),
   };
 
   static FurnitureDefinition? byId(String id) => all[id];

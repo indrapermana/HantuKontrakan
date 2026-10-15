@@ -119,19 +119,19 @@ void main() {
     expect(room.furnitureTags, {'shiny', 'plant'});
   });
 
-  test('all twelve furniture definitions are available across two slots', () {
-    expect(FurnitureDefinitions.all, hasLength(12));
+  test('all furniture definitions are available across two slots', () {
+    expect(FurnitureDefinitions.all, hasLength(14));
     expect(
       FurnitureDefinitions.all.values.where(
         (item) => item.slot == FurnitureSlot.primary,
       ),
-      hasLength(6),
+      hasLength(7),
     );
     expect(
       FurnitureDefinitions.all.values.where(
         (item) => item.slot == FurnitureSlot.decoration,
       ),
-      hasLength(6),
+      hasLength(7),
     );
     expect(GameBalance.maximumRoomUpgradeLevel, 2);
     expect(GameBalance.roomUpgradeCosts, {0: 100, 1: 200});

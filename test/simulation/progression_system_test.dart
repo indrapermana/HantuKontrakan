@@ -54,6 +54,7 @@ void main() {
 
     expect(single.playerExperience, 800);
     expect(single.playerLevel, 5);
+    expect(single.ghosts.any((ghost) => ghost.id == 'genderuwo_01'), isTrue);
     expect(chunked.playerExperience, single.playerExperience);
     expect(chunked.playerLevel, single.playerLevel);
     expect(restored.playerExperience, 800);
