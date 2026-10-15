@@ -20,6 +20,9 @@ class HomeGameHud extends StatelessWidget {
     required this.happinessLabel,
     required this.settingsTooltip,
     required this.languageTooltip,
+    required this.onLevel,
+    required this.onCoins,
+    required this.onCrystals,
     required this.onSettings,
     required this.onLanguage,
     super.key,
@@ -34,6 +37,9 @@ class HomeGameHud extends StatelessWidget {
   final String happinessLabel;
   final String settingsTooltip;
   final String languageTooltip;
+  final VoidCallback onLevel;
+  final VoidCallback onCoins;
+  final VoidCallback onCrystals;
   final VoidCallback onSettings;
   final VoidCallback onLanguage;
 
@@ -53,7 +59,11 @@ class HomeGameHud extends StatelessWidget {
         children: [
           Row(
             children: [
-              _LevelBadge(label: levelLabel, progress: experienceProgress),
+              _LevelBadge(
+                label: levelLabel,
+                progress: experienceProgress,
+                onPressed: onLevel,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: _ResourceChip(
@@ -61,6 +71,7 @@ class HomeGameHud extends StatelessWidget {
                   imageAsset: GameAssets.spiritCoin,
                   label: coinLabel,
                   semanticsLabel: coinSemanticsLabel,
+                  onPressed: onCoins,
                 ),
               ),
               const SizedBox(width: 6),
@@ -71,6 +82,7 @@ class HomeGameHud extends StatelessWidget {
                   iconColor: const Color(0xFFB96CFF),
                   label: crystalLabel,
                   semanticsLabel: crystalSemanticsLabel,
+                  onPressed: onCrystals,
                 ),
               ),
               const SizedBox(width: 4),
@@ -130,8 +142,6 @@ class WorldActionOverlay extends StatelessWidget {
     required this.complaintLabel,
     required this.hasComplaint,
     required this.onComplaint,
-    required this.moreTooltip,
-    required this.onMore,
     this.incidentLabel,
     this.onIncident,
     super.key,
@@ -143,8 +153,6 @@ class WorldActionOverlay extends StatelessWidget {
   final String complaintLabel;
   final bool hasComplaint;
   final VoidCallback onComplaint;
-  final String moreTooltip;
-  final VoidCallback onMore;
   final String? incidentLabel;
   final VoidCallback? onIncident;
 
@@ -214,16 +222,6 @@ class WorldActionOverlay extends StatelessWidget {
             onPressed: onIncident!,
           ),
         ),
-      Positioned(
-        right: 12,
-        bottom: 148,
-        child: _HudIconButton(
-          key: const Key('action-center-button'),
-          tooltip: moreTooltip,
-          onPressed: onMore,
-          icon: const Icon(Icons.auto_awesome_motion_rounded),
-        ),
-      ),
     ],
   );
 }
@@ -313,6 +311,7 @@ class HomeBottomNavigation extends StatelessWidget {
     required this.onMissions,
     required this.onGhosts,
     required this.onShop,
+    required this.showMissionsBadge,
     super.key,
   });
 
@@ -323,6 +322,7 @@ class HomeBottomNavigation extends StatelessWidget {
   final VoidCallback onMissions;
   final VoidCallback onGhosts;
   final VoidCallback onShop;
+  final bool showMissionsBadge;
 
   @override
   Widget build(BuildContext context) => Align(
@@ -359,7 +359,7 @@ class HomeBottomNavigation extends StatelessWidget {
                   key: const Key('missions-button'),
                   icon: Icons.assignment_turned_in_rounded,
                   label: missionsLabel,
-                  showBadge: true,
+                  showBadge: showMissionsBadge,
                   onPressed: onMissions,
                 ),
               ),
@@ -388,43 +388,57 @@ class HomeBottomNavigation extends StatelessWidget {
 }
 
 class _LevelBadge extends StatelessWidget {
-  const _LevelBadge({required this.label, required this.progress});
+  const _LevelBadge({
+    required this.label,
+    required this.progress,
+    required this.onPressed,
+  });
 
   final String label;
   final double progress;
+  final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: 62,
-    padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
-    decoration: BoxDecoration(
-      color: _wood,
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: label,
+    child: InkWell(
+      key: const Key('player-level'),
+      onTap: onPressed,
       borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: _woodLight, width: 2),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          style: const TextStyle(
-            color: _parchment,
-            fontWeight: FontWeight.w800,
-            fontSize: 12,
-          ),
+      child: Container(
+        width: 62,
+        padding: const EdgeInsets.fromLTRB(8, 6, 8, 6),
+        decoration: BoxDecoration(
+          color: _wood,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _woodLight, width: 2),
         ),
-        const SizedBox(height: 3),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(4),
-          child: LinearProgressIndicator(
-            value: progress.clamp(0, 1),
-            minHeight: 5,
-            color: const Color(0xFF42D879),
-            backgroundColor: Colors.black38,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              maxLines: 1,
+              style: const TextStyle(
+                color: _parchment,
+                fontWeight: FontWeight.w800,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 3),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress.clamp(0, 1),
+                minHeight: 5,
+                color: const Color(0xFF42D879),
+                backgroundColor: Colors.black38,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     ),
   );
 }
@@ -433,6 +447,7 @@ class _ResourceChip extends StatelessWidget {
   const _ResourceChip({
     required this.label,
     required this.semanticsLabel,
+    required this.onPressed,
     this.imageAsset,
     this.icon,
     this.iconColor,
@@ -441,6 +456,7 @@ class _ResourceChip extends StatelessWidget {
 
   final String label;
   final String semanticsLabel;
+  final VoidCallback onPressed;
   final String? imageAsset;
   final IconData? icon;
   final Color? iconColor;
@@ -448,35 +464,40 @@ class _ResourceChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     label: semanticsLabel,
+    button: true,
     excludeSemantics: true,
-    child: Container(
-      constraints: const BoxConstraints(minHeight: 42),
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-      decoration: BoxDecoration(
-        color: _wood,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _woodLight, width: 2),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (imageAsset != null)
-            Image.asset(imageAsset!, width: 24, height: 24)
-          else
-            Icon(icon, size: 22, color: iconColor ?? _gold),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
+    child: InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 42),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+        decoration: BoxDecoration(
+          color: _wood,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: _woodLight, width: 2),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (imageAsset != null)
+              Image.asset(imageAsset!, width: 24, height: 24)
+            else
+              Icon(icon, size: 22, color: iconColor ?? _gold),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
@@ -598,6 +619,7 @@ class _NavigationItem extends StatelessWidget {
                 top: 7,
                 right: 15,
                 child: DecoratedBox(
+                  key: Key('mission-notification-badge'),
                   decoration: BoxDecoration(
                     color: Color(0xFFE84D4D),
                     shape: BoxShape.circle,

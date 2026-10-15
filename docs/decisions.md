@@ -477,3 +477,22 @@ Date: 2026-10-14
 - Automated duration, format, no-clipping, lifecycle, migration, and physical
   iPhone checks are evidence of technical behavior, not a substitute for a
   human 20-minute listening and loudness/taste sign-off.
+
+### HK-030-G1 interaction-correction decisions
+
+- Tenant assignment is a missing presentation path, not a new simulation rule.
+  Both room-first and ghost-first pickers derive eligibility by evaluating the
+  existing pure-Dart `GameRules.placeGhost` transition and commit through the
+  controller, preserving validation, saving, and progress behavior.
+- A mission notification means that the player can claim something now. Open,
+  incomplete, or already-claimed content does not display attention state.
+- The overlapping secondary world button is removed rather than repositioned.
+  Its rewarded-rent action remains in the existing post-collection offer, so
+  ordinary rent stays ungated and the primary world CTA has one clear meaning.
+- HUD resources are tappable explanations and routes, not storefront promises.
+  Coin text exposes the derived rent rate; level text summarizes existing
+  mission/unlock data; crystal text names only implemented rewards and the
+  existing workshop. No IAP, ad currency, or speculative source was added.
+- This correction milestone does not alter save schema, balance, deterministic
+  rules, or Flame ownership. Portrait composition and status art belong to
+  G2; navigation/profile redesign to G3; commercial audio replacement to G4.

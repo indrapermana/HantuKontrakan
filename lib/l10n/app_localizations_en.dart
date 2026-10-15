@@ -693,4 +693,73 @@ class AppLocalizationsEn extends AppLocalizations {
   String ghostCollectionProgress(int complete, int total) {
     return 'Stories $complete/$total';
   }
+
+  @override
+  String get assignTenant => 'Add tenant';
+
+  @override
+  String get assignRoom => 'Assign room';
+
+  @override
+  String chooseTenantForRoom(String number) {
+    return 'CHOOSE TENANT · ROOM $number';
+  }
+
+  @override
+  String get chooseRoomForTenant => 'CHOOSE A VACANT ROOM';
+
+  @override
+  String get noAvailableTenants =>
+      'No unlocked unassigned tenant is available yet.';
+
+  @override
+  String get noAvailableRooms => 'No vacant unlocked room is available yet.';
+
+  @override
+  String levelProgressTitle(int level) {
+    return 'LEVEL $level PROGRESS';
+  }
+
+  @override
+  String levelExperienceProgress(int current, int target) {
+    return '$current / $target XP';
+  }
+
+  @override
+  String get maximumLevelReached => 'Maximum level reached';
+
+  @override
+  String nextLevelUnlocks(int level, String unlocks) {
+    return 'Level $level unlocks: $unlocks';
+  }
+
+  @override
+  String nextLevelMoreRewards(int level) {
+    return 'Reach level $level for more progression rewards.';
+  }
+
+  @override
+  String get levelChecklistTitle => 'NEXT USEFUL ACTIONS';
+
+  @override
+  String get viewTasks => 'View tasks';
+
+  @override
+  String get coinInfoTitle => 'SPIRIT COINS';
+
+  @override
+  String coinInfoBody(int coins, String rate) {
+    return 'You have $coins coins. Occupied rooms currently earn about $rate coins per minute. Collect rent, then spend coins on rooms and upgrades.';
+  }
+
+  @override
+  String get crystalInfoTitle => 'MYSTICAL CRYSTALS';
+
+  @override
+  String crystalInfoBody(int count) {
+    return 'You have $count crystals. Earn more from selected chapter missions and daily rewards, then spend them on optional workshop furniture. No purchase is required.';
+  }
+
+  @override
+  String get openWorkshop => 'Open workshop';
 }

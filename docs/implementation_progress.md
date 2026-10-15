@@ -1034,3 +1034,32 @@ subjective 20-minute audio acceptance remains pending.
 - Final ticket acceptance therefore requires a human 20-minute listen on a
   target phone, checking repetition, music/effect balance, speaker distortion,
   incident tension, mute/volume controls, and personal horror-comedy fit.
+
+### HK-030-G1 — Interaction correctness
+
+Status: locally verified on 2026-10-15.
+
+- Added two-way tenant assignment: a vacant unlocked room can choose an
+  eligible unassigned ghost, and an unassigned ghost profile can choose an
+  eligible vacant unlocked room. Eligibility is checked through the existing
+  pure-Dart placement rule and successful placement uses the saved controller
+  command.
+- Mission navigation now displays its attention badge only when a chapter
+  reward, daily reward, or daily chest is actually claimable. Merely having
+  unfinished tasks no longer produces a permanent red notification.
+- Removed the floating secondary world action that overlapped Collect All.
+  Normal collection remains immediate and the optional rewarded bonus remains
+  available only after base rent has been collected and persisted.
+- Made level, coin, and crystal HUD chips interactive. Localized panels now
+  show level progress and immediate objectives, the current rent rate, and the
+  actual crystal uses/sources already supported by the game. The crystal panel
+  does not imply an unavailable purchase flow.
+- Added English and Indonesian strings plus widget coverage for vacant-room
+  assignment, Room 3 assignment persistence, claimable-only mission attention,
+  the removed overlap control, and all three HUD explanations.
+- Verification passed: formatting, `flutter analyze`, the focused room/detail,
+  home widget, and localization tests, all 210 Flutter tests, an Android debug
+  APK build, and `git diff --check`.
+- HK-030-G2 is next. Portrait world composition, room/lock visual redesign,
+  profile simplification, navigation onboarding, and commercial audio remain
+  deliberately outside G1.

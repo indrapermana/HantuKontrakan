@@ -8,11 +8,16 @@ import '../../game/hantu_game.dart';
 import '../../l10n/app_localizations.dart';
 import '../../simulation/constants/game_balance.dart';
 import '../../simulation/content/incident_definitions.dart';
+import '../../simulation/content/mission_definitions.dart';
 import '../../simulation/content/progression_definitions.dart';
 import '../../simulation/content/property_definitions.dart';
 import '../../simulation/models/incident_definition.dart';
+import '../../simulation/models/mission_definition.dart';
+import '../../simulation/systems/daily_goal_system.dart';
 import '../../simulation/systems/game_rules.dart';
+import '../../simulation/systems/mission_system.dart';
 import '../../simulation/systems/portfolio_system.dart';
+import '../../simulation/systems/rent_system.dart';
 import '../../widgets/game_panel.dart';
 import '../missions/mission_dialog.dart';
 import '../settings/audio_settings_dialog.dart';
@@ -60,6 +65,14 @@ class HomeScreen extends StatelessWidget {
             : (state.playerExperience - currentLevel.requiredExperience) /
                   (nextLevel.requiredExperience -
                       currentLevel.requiredExperience);
+        final hasMissionReward =
+            MissionDefinitions.all.any(
+              (mission) => MissionSystem.isClaimable(state, mission),
+            ) ||
+            controller.dailyGoals.any(
+              (goal) => DailyGoalSystem.isClaimable(state, goal),
+            ) ||
+            DailyGoalSystem.isChestClaimable(state);
         return Scaffold(
           backgroundColor: const Color(0xFF111631),
           resizeToAvoidBottomInset: false,
@@ -112,6 +125,9 @@ class HomeScreen extends StatelessWidget {
                     ),
                     settingsTooltip: strings.settingsTitle,
                     languageTooltip: strings.languageTitle,
+                    onLevel: () => _showLevelProgress(context),
+                    onCoins: () => _showCoinInfo(context),
+                    onCrystals: () => _showCrystalInfo(context),
                     onSettings: () => showDialog<void>(
                       context: context,
                       builder: (_) =>
@@ -173,14 +189,13 @@ class HomeScreen extends StatelessWidget {
                 onIncident: activeIncident == null
                     ? null
                     : () => _showIncident(context, activeIncident),
-                moreTooltip: strings.moreActionsLabel,
-                onMore: () => _showActionCenter(context),
               ),
               HomeBottomNavigation(
                 homeLabel: strings.navigationHome,
                 missionsLabel: strings.missionsTitle,
                 ghostsLabel: strings.navigationGhosts,
                 shopLabel: strings.navigationShop,
+                showMissionsBadge: hasMissionReward,
                 onMissions: () => showDialog<void>(
                   context: context,
                   builder: (_) => MissionDialog(controller: controller),
@@ -195,36 +210,166 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _showActionCenter(BuildContext context) async {
+  Future<void> _showLevelProgress(BuildContext context) async {
     final strings = AppLocalizations.of(context);
+    final state = controller.state;
+    final nextLevel = state.playerLevel < ProgressionDefinitions.levels.length
+        ? ProgressionDefinitions.byLevel(state.playerLevel + 1)
+        : null;
+    final remainingMissions = MissionDefinitions.all
+        .where((mission) => !state.completedMissionIds.contains(mission.id))
+        .take(3)
+        .toList(growable: false);
+    final unlocks = <String>[
+      if (nextLevel != null)
+        for (final roomId in nextLevel.unlockedRoomIds)
+          strings.roomTitle(_roomNumber(roomId)),
+      if (nextLevel != null)
+        for (final kind in nextLevel.unlockedGhostKinds) kind.displayName,
+    ];
     await showDialog<void>(
       context: context,
       builder: (dialogContext) => GameDialog(
-        title: strings.moreActionsLabel,
-        icon: Icons.auto_awesome_motion_rounded,
+        key: const Key('level-progress-panel'),
+        title: strings.levelProgressTitle(state.playerLevel),
+        icon: Icons.star_rounded,
         // ignore: sort_child_properties_last
-        child: GameChoiceCard(
-          key: const Key('collect-rent-rewarded'),
-          title: controller.rewardedRentBonusesRemaining == 0
-              ? strings.rewardedRentDailyLimit
-              : strings.rewardedRentButton(
-                  controller.pendingRewardOfferCoins,
-                  controller.rewardedRentBonusesRemaining,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              nextLevel == null
+                  ? strings.maximumLevelReached
+                  : strings.levelExperienceProgress(
+                      state.playerExperience,
+                      nextLevel.requiredExperience,
+                    ),
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: nextLevel == null
+                  ? 1
+                  : (state.playerExperience / nextLevel.requiredExperience)
+                        .clamp(0, 1),
+              minHeight: 9,
+              borderRadius: BorderRadius.circular(5),
+              color: gamePanelGold,
+            ),
+            if (nextLevel != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                unlocks.isEmpty
+                    ? strings.nextLevelMoreRewards(nextLevel.level)
+                    : strings.nextLevelUnlocks(
+                        nextLevel.level,
+                        unlocks.join(' · '),
+                      ),
+              ),
+            ],
+            if (remainingMissions.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              Text(
+                strings.levelChecklistTitle,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              for (final mission in remainingMissions)
+                ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    MissionSystem.isComplete(state, mission)
+                        ? Icons.card_giftcard_rounded
+                        : Icons.radio_button_unchecked_rounded,
+                    color: gamePanelGold,
+                  ),
+                  title: Text(_localizedMission(context, mission.title)),
+                  subtitle: Text(
+                    _localizedMission(context, mission.description),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-          subtitle: '',
-          enabled: controller.canCollectRewardedRent,
-          leading: const Icon(
-            Icons.ondemand_video_rounded,
-            color: gamePanelGold,
-          ),
+            ],
+          ],
+        ),
+        primaryAction: GamePrimaryButton(
+          label: strings.viewTasks,
+          icon: Icons.assignment_turned_in_rounded,
           onPressed: () async {
             Navigator.pop(dialogContext);
-            await _collectRewardedRent(context);
+            await showDialog<void>(
+              context: context,
+              builder: (_) => MissionDialog(controller: controller),
+            );
           },
         ),
         secondaryAction: GameSecondaryButton(
           label: strings.closeLabel,
           onPressed: () => Navigator.pop(dialogContext),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCoinInfo(BuildContext context) async {
+    final strings = AppLocalizations.of(context);
+    final microcoins = RentSystem.totalRentPerMinuteMicrocoins(
+      controller.state,
+    );
+    final rate = microcoins / GameBalance.microcoinsPerCoin;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => GameDialog(
+        key: const Key('coin-info-panel'),
+        title: strings.coinInfoTitle,
+        icon: Icons.savings_rounded,
+        // ignore: sort_child_properties_last
+        child: Text(
+          strings.coinInfoBody(
+            controller.state.walletCoins,
+            rate.toStringAsFixed(1),
+          ),
+          textAlign: TextAlign.center,
+        ),
+        primaryAction: GamePrimaryButton(
+          label: strings.closeLabel,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showCrystalInfo(BuildContext context) async {
+    final strings = AppLocalizations.of(context);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => GameDialog(
+        key: const Key('crystal-info-panel'),
+        title: strings.crystalInfoTitle,
+        icon: Icons.diamond_rounded,
+        // ignore: sort_child_properties_last
+        child: Text(
+          strings.crystalInfoBody(controller.state.mysticalCrystals),
+          textAlign: TextAlign.center,
+        ),
+        primaryAction: GamePrimaryButton(
+          label: strings.openWorkshop,
+          icon: Icons.storefront_rounded,
+          onPressed: () async {
+            Navigator.pop(dialogContext);
+            await _showPropertyActions(context);
+          },
+        ),
+        secondaryAction: GameSecondaryButton(
+          label: strings.viewTasks,
+          onPressed: () async {
+            Navigator.pop(dialogContext);
+            await showDialog<void>(
+              context: context,
+              builder: (_) => MissionDialog(controller: controller),
+            );
+          },
         ),
       ),
     );
@@ -602,6 +747,12 @@ class HomeScreen extends StatelessWidget {
       builder: (sheetContext) => RoomDetailsSheet(
         state: controller.state,
         room: room,
+        onAssignGhost: ghost == null
+            ? () async {
+                Navigator.pop(sheetContext);
+                await _chooseTenantForRoom(context, room.id);
+              }
+            : null,
         onViewGhost: ghost == null
             ? () {}
             : () async {
@@ -674,12 +825,115 @@ class HomeScreen extends StatelessWidget {
       builder: (sheetContext) => GhostProfileSheet(
         state: controller.state,
         ghost: ghost,
+        onAssignGhost: room == null
+            ? () async {
+                Navigator.pop(sheetContext);
+                await _chooseRoomForTenant(context, ghost.id);
+              }
+            : null,
         onMoveGhost: room == null
             ? () {}
             : () async {
                 Navigator.pop(sheetContext);
                 await _chooseDestination(context, ghost.id, room.id);
               },
+      ),
+    );
+  }
+
+  Future<void> _chooseTenantForRoom(BuildContext context, String roomId) async {
+    final strings = AppLocalizations.of(context);
+    final candidates = controller.state.ghosts
+        .where((ghost) {
+          if (controller.state.roomForGhost(ghost.id) != null) return false;
+          return !identical(
+            GameRules.placeGhost(controller.state, ghost.id, roomId),
+            controller.state,
+          );
+        })
+        .toList(growable: false);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => GameDialog(
+        key: const Key('choose-tenant-panel'),
+        title: strings.chooseTenantForRoom(_roomNumber(roomId)),
+        icon: Icons.person_add_alt_1_rounded,
+        // ignore: sort_child_properties_last
+        child: candidates.isEmpty
+            ? Text(strings.noAvailableTenants)
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final ghost in candidates)
+                    GameChoiceCard(
+                      key: Key('assign-${ghost.id}-$roomId'),
+                      title: ghost.kind.displayName,
+                      subtitle: localizedArchetype(strings, ghost.kind),
+                      leading: const Icon(
+                        Icons.person_pin_circle_rounded,
+                        color: gamePanelGold,
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(dialogContext);
+                        await controller.placeGhost(ghost.id, roomId);
+                      },
+                    ),
+                ],
+              ),
+        secondaryAction: GameSecondaryButton(
+          label: strings.cancel,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _chooseRoomForTenant(
+    BuildContext context,
+    String ghostId,
+  ) async {
+    final strings = AppLocalizations.of(context);
+    final rooms = controller.state.rooms
+        .where((room) {
+          if (!room.unlocked || room.occupantId != null) return false;
+          return !identical(
+            GameRules.placeGhost(controller.state, ghostId, room.id),
+            controller.state,
+          );
+        })
+        .toList(growable: false);
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => GameDialog(
+        key: const Key('choose-room-panel'),
+        title: strings.chooseRoomForTenant,
+        icon: Icons.add_home_rounded,
+        // ignore: sort_child_properties_last
+        child: rooms.isEmpty
+            ? Text(strings.noAvailableRooms)
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (final room in rooms)
+                    GameChoiceCard(
+                      key: Key('assign-$ghostId-${room.id}'),
+                      title: strings.roomTitle(_roomNumber(room.id)),
+                      subtitle: strings.vacantTenant,
+                      leading: const Icon(
+                        Icons.bedroom_parent_rounded,
+                        color: gamePanelGold,
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(dialogContext);
+                        await controller.placeGhost(ghostId, room.id);
+                      },
+                    ),
+                ],
+              ),
+        secondaryAction: GameSecondaryButton(
+          label: strings.cancel,
+          onPressed: () => Navigator.pop(dialogContext),
+        ),
       ),
     );
   }
@@ -913,6 +1167,9 @@ String _propertyName(AppLocalizations strings, String propertyId) =>
       PropertyDefinitions.secondPropertyId => strings.propertySecondName,
       _ => propertyId,
     };
+
+String _localizedMission(BuildContext context, LocalizedMissionText text) =>
+    Localizations.localeOf(context).languageCode == 'id' ? text.id : text.en;
 
 class _ChoiceButton extends StatelessWidget {
   const _ChoiceButton({

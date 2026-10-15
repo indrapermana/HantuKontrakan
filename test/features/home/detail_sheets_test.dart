@@ -45,10 +45,11 @@ void main() {
     expect(moveRequested, isTrue);
   });
 
-  testWidgets('vacant room sheet hides unavailable tenant actions', (
+  testWidgets('vacant room sheet offers tenant assignment when available', (
     tester,
   ) async {
     final state = _detailState();
+    var assignmentRequested = false;
 
     await tester.pumpWidget(
       _LocalizedHarness(
@@ -59,6 +60,7 @@ void main() {
           onMoveGhost: () {},
           onUpgrade: (_) {},
           onEquipFurniture: (_, _) {},
+          onAssignGhost: () => assignmentRequested = true,
         ),
       ),
     );
@@ -66,6 +68,9 @@ void main() {
     expect(find.text('Penghuni: Kosong'), findsOneWidget);
     expect(find.byKey(const Key('view-ghost-profile')), findsNothing);
     expect(find.byKey(const Key('move-tenant')), findsNothing);
+    expect(find.byKey(const Key('assign-tenant')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('assign-tenant')));
+    expect(assignmentRequested, isTrue);
   });
 
   testWidgets('room upgrade and furniture controls expose valid actions', (

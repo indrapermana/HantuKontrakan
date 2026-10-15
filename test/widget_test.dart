@@ -4,9 +4,11 @@ import 'package:hantu_kontrakan/app/app.dart';
 import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
 import 'package:hantu_kontrakan/services/privacy_consent_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
+import 'package:hantu_kontrakan/simulation/content/mission_definitions.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/models/ghost.dart';
 import 'package:hantu_kontrakan/simulation/models/room.dart';
+import 'package:hantu_kontrakan/simulation/models/tutorial_step.dart';
 import 'package:hantu_kontrakan/widgets/game_panel.dart';
 
 void main() {
@@ -311,6 +313,95 @@ void main() {
     expect(find.text('CHAPTER 1 · FIRST KONTRAKAN'), findsOneWidget);
     expect(saves.storedState?.dailyGoalDayKey, isNotNull);
   });
+
+  testWidgets('unassigned tenant can be placed into unlocked Room 3', (
+    tester,
+  ) async {
+    final seed = GameState.newGame();
+    final state = seed.copyWith(
+      playerLevel: 3,
+      playerExperience: 250,
+      tutorialStep: TutorialStep.completed,
+      rooms: [
+        RoomState(id: 'room_01', column: 0, row: 1, occupantId: 'pocong_01'),
+        RoomState(
+          id: 'room_02',
+          column: 1,
+          row: 1,
+          occupantId: 'kuntilanak_01',
+        ),
+        RoomState(id: 'room_03', column: 0, row: 0),
+        RoomState(id: 'room_04', column: 1, row: 0, unlocked: false),
+      ],
+    );
+    final saves = MemorySaveService(initialResult: SaveLoaded(state));
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('en')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('ghosts-navigation')));
+    await tester.pump(const Duration(milliseconds: 300));
+    final tuyulTile = tester.widget<ListTile>(
+      find.byKey(const Key('ghost-roster-tuyul_01')),
+    );
+    tuyulTile.onTap!();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const Key('profile-assign-tenant')), findsOneWidget);
+
+    tester
+        .widget<ButtonStyleButton>(
+          find.byKey(const Key('profile-assign-tenant')),
+        )
+        .onPressed!();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const Key('assign-tuyul_01-room_03')), findsOneWidget);
+    tester
+        .widget<GameChoiceCard>(
+          find.byKey(const Key('assign-tuyul_01-room_03')),
+        )
+        .onPressed();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(saves.storedState?.roomById('room_03').occupantId, 'tuyul_01');
+  });
+
+  testWidgets(
+    'HUD resources explain progression and mission badge is truthful',
+    (tester) async {
+      final state = GameState.seeded().copyWith(
+        completedMissionIds: MissionDefinitions.all
+            .map((mission) => mission.id)
+            .toSet(),
+      );
+      final saves = MemorySaveService(initialResult: SaveLoaded(state));
+      await tester.pumpWidget(
+        HantuKontrakanApp(saveService: saves, locale: const Locale('en')),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.byKey(const Key('mission-notification-badge')), findsNothing);
+      expect(find.byKey(const Key('action-center-button')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('player-level')));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(const Key('level-progress-panel')), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('wallet-coins')));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(const Key('coin-info-panel')), findsOneWidget);
+      await tester.tap(find.text('Close'));
+      await tester.pump();
+
+      await tester.tap(find.byKey(const Key('mystical-crystals')));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.byKey(const Key('crystal-info-panel')), findsOneWidget);
+    },
+  );
 
   testWidgets('app lifecycle persists and consumes one offline snapshot', (
     tester,

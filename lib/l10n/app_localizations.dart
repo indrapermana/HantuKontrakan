@@ -1261,6 +1261,114 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Kisah {complete}/{total}'**
   String ghostCollectionProgress(int complete, int total);
+
+  /// No description provided for @assignTenant.
+  ///
+  /// In id, this message translates to:
+  /// **'Tambah penghuni'**
+  String get assignTenant;
+
+  /// No description provided for @assignRoom.
+  ///
+  /// In id, this message translates to:
+  /// **'Pilih kamar'**
+  String get assignRoom;
+
+  /// No description provided for @chooseTenantForRoom.
+  ///
+  /// In id, this message translates to:
+  /// **'PILIH PENGHUNI · KAMAR {number}'**
+  String chooseTenantForRoom(String number);
+
+  /// No description provided for @chooseRoomForTenant.
+  ///
+  /// In id, this message translates to:
+  /// **'PILIH KAMAR KOSONG'**
+  String get chooseRoomForTenant;
+
+  /// No description provided for @noAvailableTenants.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ada penghuni terbuka yang dapat ditempatkan.'**
+  String get noAvailableTenants;
+
+  /// No description provided for @noAvailableRooms.
+  ///
+  /// In id, this message translates to:
+  /// **'Belum ada kamar kosong yang sudah terbuka.'**
+  String get noAvailableRooms;
+
+  /// No description provided for @levelProgressTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'PROGRES LEVEL {level}'**
+  String levelProgressTitle(int level);
+
+  /// No description provided for @levelExperienceProgress.
+  ///
+  /// In id, this message translates to:
+  /// **'{current} / {target} XP'**
+  String levelExperienceProgress(int current, int target);
+
+  /// No description provided for @maximumLevelReached.
+  ///
+  /// In id, this message translates to:
+  /// **'Level maksimum tercapai'**
+  String get maximumLevelReached;
+
+  /// No description provided for @nextLevelUnlocks.
+  ///
+  /// In id, this message translates to:
+  /// **'Level {level} membuka: {unlocks}'**
+  String nextLevelUnlocks(int level, String unlocks);
+
+  /// No description provided for @nextLevelMoreRewards.
+  ///
+  /// In id, this message translates to:
+  /// **'Capai level {level} untuk hadiah progres berikutnya.'**
+  String nextLevelMoreRewards(int level);
+
+  /// No description provided for @levelChecklistTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'AKSI BERIKUTNYA'**
+  String get levelChecklistTitle;
+
+  /// No description provided for @viewTasks.
+  ///
+  /// In id, this message translates to:
+  /// **'Lihat tugas'**
+  String get viewTasks;
+
+  /// No description provided for @coinInfoTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'KOIN ARWAH'**
+  String get coinInfoTitle;
+
+  /// No description provided for @coinInfoBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamu memiliki {coins} koin. Kamar berpenghuni saat ini menghasilkan sekitar {rate} koin per menit. Ambil sewa, lalu gunakan koin untuk kamar dan peningkatan.'**
+  String coinInfoBody(int coins, String rate);
+
+  /// No description provided for @crystalInfoTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'KRISTAL MISTIS'**
+  String get crystalInfoTitle;
+
+  /// No description provided for @crystalInfoBody.
+  ///
+  /// In id, this message translates to:
+  /// **'Kamu memiliki {count} kristal. Dapatkan dari misi bab tertentu dan hadiah harian, lalu gunakan untuk furnitur bengkel opsional. Tidak ada pembelian wajib.'**
+  String crystalInfoBody(int count);
+
+  /// No description provided for @openWorkshop.
+  ///
+  /// In id, this message translates to:
+  /// **'Buka bengkel'**
+  String get openWorkshop;
 }
 
 class _AppLocalizationsDelegate

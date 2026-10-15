@@ -695,4 +695,73 @@ class AppLocalizationsId extends AppLocalizations {
   String ghostCollectionProgress(int complete, int total) {
     return 'Kisah $complete/$total';
   }
+
+  @override
+  String get assignTenant => 'Tambah penghuni';
+
+  @override
+  String get assignRoom => 'Pilih kamar';
+
+  @override
+  String chooseTenantForRoom(String number) {
+    return 'PILIH PENGHUNI · KAMAR $number';
+  }
+
+  @override
+  String get chooseRoomForTenant => 'PILIH KAMAR KOSONG';
+
+  @override
+  String get noAvailableTenants =>
+      'Belum ada penghuni terbuka yang dapat ditempatkan.';
+
+  @override
+  String get noAvailableRooms => 'Belum ada kamar kosong yang sudah terbuka.';
+
+  @override
+  String levelProgressTitle(int level) {
+    return 'PROGRES LEVEL $level';
+  }
+
+  @override
+  String levelExperienceProgress(int current, int target) {
+    return '$current / $target XP';
+  }
+
+  @override
+  String get maximumLevelReached => 'Level maksimum tercapai';
+
+  @override
+  String nextLevelUnlocks(int level, String unlocks) {
+    return 'Level $level membuka: $unlocks';
+  }
+
+  @override
+  String nextLevelMoreRewards(int level) {
+    return 'Capai level $level untuk hadiah progres berikutnya.';
+  }
+
+  @override
+  String get levelChecklistTitle => 'AKSI BERIKUTNYA';
+
+  @override
+  String get viewTasks => 'Lihat tugas';
+
+  @override
+  String get coinInfoTitle => 'KOIN ARWAH';
+
+  @override
+  String coinInfoBody(int coins, String rate) {
+    return 'Kamu memiliki $coins koin. Kamar berpenghuni saat ini menghasilkan sekitar $rate koin per menit. Ambil sewa, lalu gunakan koin untuk kamar dan peningkatan.';
+  }
+
+  @override
+  String get crystalInfoTitle => 'KRISTAL MISTIS';
+
+  @override
+  String crystalInfoBody(int count) {
+    return 'Kamu memiliki $count kristal. Dapatkan dari misi bab tertentu dan hadiah harian, lalu gunakan untuk furnitur bengkel opsional. Tidak ada pembelian wajib.';
+  }
+
+  @override
+  String get openWorkshop => 'Buka bengkel';
 }

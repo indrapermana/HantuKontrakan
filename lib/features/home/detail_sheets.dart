@@ -20,6 +20,7 @@ class RoomDetailsSheet extends StatelessWidget {
     required this.onMoveGhost,
     required this.onUpgrade,
     required this.onEquipFurniture,
+    this.onAssignGhost,
     this.onRepair,
     super.key,
   });
@@ -30,6 +31,7 @@ class RoomDetailsSheet extends StatelessWidget {
   final VoidCallback onMoveGhost;
   final ValueChanged<RoomAttribute> onUpgrade;
   final void Function(FurnitureSlot slot, String furnitureId) onEquipFurniture;
+  final VoidCallback? onAssignGhost;
   final VoidCallback? onRepair;
 
   @override
@@ -58,6 +60,18 @@ class RoomDetailsSheet extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 6),
+            if (ghost == null && onAssignGhost != null) ...[
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const Key('assign-tenant'),
+                  onPressed: onAssignGhost,
+                  icon: const Icon(Icons.person_add_alt_1_rounded),
+                  label: Text(strings.assignTenant),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
             Text(
               strings.roomTier(RoomTierSystem.tierFor(room)),
               key: const Key('room-tier'),
@@ -252,12 +266,14 @@ class GhostProfileSheet extends StatelessWidget {
     required this.state,
     required this.ghost,
     required this.onMoveGhost,
+    this.onAssignGhost,
     super.key,
   });
 
   final GameState state;
   final GhostState ghost;
   final VoidCallback onMoveGhost;
+  final VoidCallback? onAssignGhost;
 
   @override
   Widget build(BuildContext context) {
@@ -332,6 +348,17 @@ class GhostProfileSheet extends StatelessWidget {
                   onPressed: onMoveGhost,
                   icon: const Icon(Icons.swap_horiz),
                   label: Text(strings.moveTenant),
+                ),
+              ),
+            ] else if (onAssignGhost != null) ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  key: const Key('profile-assign-tenant'),
+                  onPressed: onAssignGhost,
+                  icon: const Icon(Icons.add_home_rounded),
+                  label: Text(strings.assignRoom),
                 ),
               ),
             ],
