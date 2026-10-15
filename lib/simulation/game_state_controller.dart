@@ -1,6 +1,7 @@
 import 'commands/game_command.dart';
 import 'models/game_state.dart';
 import 'systems/game_rules.dart';
+import 'systems/daily_goal_system.dart';
 
 class GameStateController {
   GameStateController(GameState initialState) : _state = initialState;
@@ -12,7 +13,7 @@ class GameStateController {
   int get revision => _revision;
 
   bool dispatch(GameCommand command) {
-    final nextState = switch (command) {
+    final resolvedState = switch (command) {
       PlaceGhost(:final ghostId, :final roomId) => GameRules.placeGhost(
         _state,
         ghostId,
@@ -69,6 +70,12 @@ class GameStateController {
         _state,
         missionId,
       ),
+      EnsureDailyGoals(:final dayKey) => GameRules.ensureDailyGoals(
+        _state,
+        dayKey,
+      ),
+      ClaimDailyGoal(:final goalId) => GameRules.claimDailyGoal(_state, goalId),
+      ClaimDailyChest() => GameRules.claimDailyChest(_state),
       SetLanguageCode(:final languageCode) => GameRules.setLanguageCode(
         _state,
         languageCode,
@@ -115,6 +122,7 @@ class GameStateController {
       SetGhostSpecialAction(:final ghostId, :final active) =>
         GameRules.setGhostSpecialAction(_state, ghostId, active),
     };
+    final nextState = DailyGoalSystem.record(_state, resolvedState, command);
     if (identical(nextState, _state)) return false;
 
     _state = nextState;

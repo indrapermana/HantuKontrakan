@@ -135,6 +135,27 @@ void main() {
     );
   });
 
+  testWidgets('foreground session ticker advances and pauses simulation', (
+    tester,
+  ) async {
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
+    await tester.pumpWidget(HantuKontrakanApp(saveService: saves));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pump();
+    expect(saves.storedState?.activeSimulationSeconds, 10);
+    expect(saves.storedState?.dailyGoalProgress['daily_active_management'], 10);
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(seconds: 10));
+    expect(saves.storedState?.activeSimulationSeconds, 10);
+  });
+
   testWidgets('debug HUD exposes state and supports tick and reset', (
     tester,
   ) async {

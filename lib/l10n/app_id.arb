@@ -193,5 +193,18 @@
   "roomRentBubbleLabel": "Ambil {coins} koin dari kamar {number}",
   "rentCollectedTitle": "Uang sewa diterima!",
   "allRentCollected": "Kamu menerima {coins} koin dari semua kamar yang siap.",
-  "roomRentCollected": "Kamar {number} membayar {coins} koin."
+  "roomRentCollected": "Kamar {number} membayar {coins} koin.",
+  "chapterOneTitle": "BAB 1 · KONTRAKAN PERTAMA",
+  "dailyGoalsTitle": "TUGAS HARI INI",
+  "dailyGoalsSubtitle": "Tiga alasan baru untuk mengecek para penghuni setiap hari.",
+  "dailyGoalProgress": "{current} / {target}",
+  "@dailyGoalProgress": {"placeholders": {"current": {"type": "int"}, "target": {"type": "int"}}},
+  "dailyTenantRequest": "Permintaan penghuni",
+  "dailyChestTitle": "Peti hadiah harian",
+  "dailyChestDescription": "Klaim hadiah dari ketiga tugas harian untuk membuka peti ini.",
+  "dailyChestClaim": "Buka peti",
+  "dailyChestLocked": "Selesaikan semua tugas",
+  "dailyChestClaimed": "Sudah dibuka hari ini",
+  "dailyScheduleLabel": "Jadwal: {dayKey}",
+  "@dailyScheduleLabel": {"placeholders": {"dayKey": {"type": "String"}}}
 }

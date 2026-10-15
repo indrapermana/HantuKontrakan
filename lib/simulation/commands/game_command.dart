@@ -115,6 +115,22 @@ final class ClaimMissionReward extends GameCommand {
   final String missionId;
 }
 
+final class EnsureDailyGoals extends GameCommand {
+  const EnsureDailyGoals({required this.dayKey});
+
+  final String dayKey;
+}
+
+final class ClaimDailyGoal extends GameCommand {
+  const ClaimDailyGoal({required this.goalId});
+
+  final String goalId;
+}
+
+final class ClaimDailyChest extends GameCommand {
+  const ClaimDailyChest();
+}
+
 final class SetLanguageCode extends GameCommand {
   const SetLanguageCode({required this.languageCode});
 

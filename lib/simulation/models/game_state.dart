@@ -45,6 +45,11 @@ class GameState {
     this.incidentRandomState = GameBalance.defaultRandomSeed,
     Set<String> completedRepairIds = const {},
     Set<String> completedMissionIds = const {},
+    this.dailyGoalDayKey,
+    this.dailyTenantRoomId,
+    Map<String, int> dailyGoalProgress = const {},
+    Set<String> completedDailyGoalIds = const {},
+    this.dailyChestClaimed = false,
     this.tutorialStep = TutorialStep.completed,
     required List<GhostState> ghosts,
     required List<RoomState> rooms,
@@ -79,6 +84,8 @@ class GameState {
        ),
        completedRepairIds = Set.unmodifiable(completedRepairIds),
        completedMissionIds = Set.unmodifiable(completedMissionIds),
+       dailyGoalProgress = Map.unmodifiable(dailyGoalProgress),
+       completedDailyGoalIds = Set.unmodifiable(completedDailyGoalIds),
        ghosts = List.unmodifiable(ghosts),
        rooms = List.unmodifiable(rooms) {
     if (pendingRentMicrocoins < 0 ||
@@ -123,6 +130,20 @@ class GameState {
             offlineRateSnapshotMicrocoinsPerMinute! < 0) ||
         incidentRandomState < 0 ||
         incidentRandomState > 0xffffffff ||
+        !_validDailyGoalState(
+          dailyGoalDayKey,
+          dailyTenantRoomId,
+          dailyGoalProgress,
+          completedDailyGoalIds,
+          dailyChestClaimed,
+        ) ||
+        ((dailyGoalDayKey == null) != (dailyTenantRoomId == null)) ||
+        (dailyGoalDayKey != null &&
+            !RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(dailyGoalDayKey!)) ||
+        (dailyTenantRoomId != null &&
+            !rooms.any(
+              (room) => room.id == dailyTenantRoomId && room.unlocked,
+            )) ||
         unscriptedIncidentSpawnTimes.any(
           (timestamp) => timestamp < 0 || timestamp > activeSimulationSeconds,
         ) ||
@@ -135,7 +156,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 21;
+  static const int currentSchemaVersion = 22;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -173,6 +194,11 @@ class GameState {
   final int incidentRandomState;
   final Set<String> completedRepairIds;
   final Set<String> completedMissionIds;
+  final String? dailyGoalDayKey;
+  final String? dailyTenantRoomId;
+  final Map<String, int> dailyGoalProgress;
+  final Set<String> completedDailyGoalIds;
+  final bool dailyChestClaimed;
   final TutorialStep tutorialStep;
   final List<GhostState> ghosts;
   final List<RoomState> rooms;
@@ -321,6 +347,11 @@ class GameState {
     int? incidentRandomState,
     Set<String>? completedRepairIds,
     Set<String>? completedMissionIds,
+    Object? dailyGoalDayKey = _notProvided,
+    Object? dailyTenantRoomId = _notProvided,
+    Map<String, int>? dailyGoalProgress,
+    Set<String>? completedDailyGoalIds,
+    bool? dailyChestClaimed,
     TutorialStep? tutorialStep,
     List<GhostState>? ghosts,
     List<RoomState>? rooms,
@@ -402,6 +433,15 @@ class GameState {
     incidentRandomState: incidentRandomState ?? this.incidentRandomState,
     completedRepairIds: completedRepairIds ?? this.completedRepairIds,
     completedMissionIds: completedMissionIds ?? this.completedMissionIds,
+    dailyGoalDayKey: identical(dailyGoalDayKey, _notProvided)
+        ? this.dailyGoalDayKey
+        : dailyGoalDayKey as String?,
+    dailyTenantRoomId: identical(dailyTenantRoomId, _notProvided)
+        ? this.dailyTenantRoomId
+        : dailyTenantRoomId as String?,
+    dailyGoalProgress: dailyGoalProgress ?? this.dailyGoalProgress,
+    completedDailyGoalIds: completedDailyGoalIds ?? this.completedDailyGoalIds,
+    dailyChestClaimed: dailyChestClaimed ?? this.dailyChestClaimed,
     tutorialStep: tutorialStep ?? this.tutorialStep,
     ghosts: ghosts ?? this.ghosts,
     rooms: rooms ?? this.rooms,
@@ -451,6 +491,11 @@ class GameState {
     'incidentRandomState': incidentRandomState,
     'completedRepairIds': completedRepairIds.toList(growable: false),
     'completedMissionIds': completedMissionIds.toList(growable: false),
+    'dailyGoalDayKey': dailyGoalDayKey,
+    'dailyTenantRoomId': dailyTenantRoomId,
+    'dailyGoalProgress': dailyGoalProgress,
+    'completedDailyGoalIds': completedDailyGoalIds.toList(growable: false),
+    'dailyChestClaimed': dailyChestClaimed,
     'tutorialStep': tutorialStep.name,
     'ghosts': ghosts.map((ghost) => ghost.toJson()).toList(),
     'rooms': rooms.map((room) => room.toJson()).toList(),
@@ -484,7 +529,8 @@ class GameState {
       18 => GameState._fromVersion18Json(json),
       19 => GameState._fromVersion19Json(json),
       20 => GameState._fromVersion20Json(json),
-      currentSchemaVersion => GameState._fromVersion21Json(json),
+      21 => GameState._fromVersion21Json(json),
+      currentSchemaVersion => GameState._fromVersion22Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -739,6 +785,18 @@ class GameState {
             ),
       );
 
+  factory GameState._fromVersion22Json(Map<String, Object?> json) =>
+      GameState._fromVersion21Json(json).copyWith(
+        dailyGoalDayKey: json['dailyGoalDayKey'] as String?,
+        dailyTenantRoomId: json['dailyTenantRoomId'] as String?,
+        dailyGoalProgress: (json['dailyGoalProgress']! as Map<String, Object?>)
+            .map((goalId, value) => MapEntry(goalId, value! as int)),
+        completedDailyGoalIds: (json['completedDailyGoalIds']! as List<Object?>)
+            .cast<String>()
+            .toSet(),
+        dailyChestClaimed: json['dailyChestClaimed']! as bool,
+      );
+
   static Map<String, int> _normalizeRoomRent(
     int total,
     Map<String, int>? byRoom,
@@ -753,6 +811,33 @@ class GameState {
           ..sort((left, right) => left.id.compareTo(right.id));
     final roomId = eligible.isEmpty ? rooms.first.id : eligible.first.id;
     return {roomId: total};
+  }
+
+  static bool _validDailyGoalState(
+    String? dayKey,
+    String? tenantRoomId,
+    Map<String, int> progress,
+    Set<String> completed,
+    bool chestClaimed,
+  ) {
+    const targets = <String, int>{
+      'daily_collect_rent': 2,
+      'daily_active_management': 180,
+      'daily_tenant_request': 1,
+    };
+    if (dayKey == null || tenantRoomId == null) {
+      return progress.isEmpty && completed.isEmpty && !chestClaimed;
+    }
+    if (progress.entries.any(
+          (entry) =>
+              !targets.containsKey(entry.key) ||
+              entry.value < 0 ||
+              entry.value > targets[entry.key]!,
+        ) ||
+        completed.any((goalId) => !targets.containsKey(goalId))) {
+      return false;
+    }
+    return !chestClaimed || completed.containsAll(targets.keys);
   }
 
   static List<GhostState> _ghostsFromJson(Map<String, Object?> json) =>

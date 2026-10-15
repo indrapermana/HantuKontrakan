@@ -11,6 +11,7 @@ import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/models/ghost.dart';
 import 'package:hantu_kontrakan/simulation/models/room.dart';
 import 'package:hantu_kontrakan/simulation/systems/game_rules.dart';
+import 'package:hantu_kontrakan/simulation/systems/daily_goal_system.dart';
 
 void main() {
   test(
@@ -577,6 +578,36 @@ void main() {
       expect(reloaded.state.completedRepairIds, {'stable-repair'});
     },
   );
+
+  test('daily schedule refreshes by local day and survives reload', () async {
+    final clock = _MutableClock(DateTime(2026, 10, 15, 9));
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
+    final first = GameController(saveService: saves, clock: clock);
+    await first.initialize();
+    await first.advanceSimulation(180);
+
+    expect(first.state.dailyGoalDayKey, '2026-10-15');
+    expect(first.dailyGoals, hasLength(3));
+    expect(
+      first.state.dailyGoalProgress[DailyGoalSystem.activeManagementId],
+      180,
+    );
+
+    final sameDay = GameController(saveService: saves, clock: clock);
+    await sameDay.initialize();
+    expect(sameDay.state.dailyGoalProgress, first.state.dailyGoalProgress);
+    expect(await sameDay.refreshDailyGoals(), isFalse);
+
+    clock.value = DateTime(2026, 10, 16, 8);
+    final nextDay = GameController(saveService: saves, clock: clock);
+    await nextDay.initialize();
+    expect(nextDay.state.dailyGoalDayKey, '2026-10-16');
+    expect(nextDay.state.dailyGoalProgress, isEmpty);
+    expect(nextDay.state.completedDailyGoalIds, isEmpty);
+    expect(nextDay.state.dailyChestClaimed, isFalse);
+  });
 }
 
 class _FixedClock implements GameClock {

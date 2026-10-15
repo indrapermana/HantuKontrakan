@@ -393,3 +393,29 @@ Date: 2026-10-14
   second source of truth to the save.
 - Compact numeric HUD text is paired with full localized semantic labels. This
   prevents narrow-device truncation without reducing screen-reader context.
+
+### HK-030-D repeatable-goal decisions
+
+- The original mission chain is preserved as Chapter 1. Daily content is a
+  separate repeatable layer, so refreshes never erase authored progression or
+  require replaying an already valid room layout.
+- A daily schedule is keyed by the device-local calendar day. Reopening on the
+  same day is an identity-preserving no-op; a new valid day resets only daily
+  progress, claims, and chest state.
+- Every schedule contains exactly three core actions: two rent collections,
+  three foreground management minutes, and one collection from a selected
+  unlocked tenant room. None depends on ads, purchases, locked content, or
+  destructive tenant movement.
+- Tenant-room selection is deterministic and rotates across occupied unlocked
+  rooms using the numeric day key. An unlocked-room fallback keeps onboarding
+  schedules valid before the first tenant is placed.
+- Progress is recorded in the pure-Dart command pipeline only after a domain
+  transition succeeds. Offline accrual does not count as foreground activity,
+  and replayed claim IDs cannot advance daily progress.
+- Daily task and chest rewards are bounded coins and experience. The chest is
+  claimable only after all three task rewards are claimed and is persisted as
+  exactly once per schedule.
+- Normal gameplay advances the existing deterministic simulation in ten-second
+  foreground ticks. The Flutter lifecycle owns the timer trigger; all economy,
+  incident, ability, and daily-progress rules remain in pure Dart, and ticks
+  stop while the application is backgrounded.

@@ -4,6 +4,7 @@ import '../models/game_state.dart';
 import '../models/room.dart';
 import 'ability_system.dart';
 import 'chaos_reputation_system.dart';
+import 'daily_goal_system.dart';
 import 'event_modifier_system.dart';
 import 'incident_system.dart';
 import 'mission_system.dart';
@@ -17,6 +18,15 @@ import 'tutorial_system.dart';
 enum ComplaintChoice { installSoundproofing, askTuyulToCalmDown, peaceOffering }
 
 abstract final class GameRules {
+  static GameState ensureDailyGoals(GameState state, String dayKey) =>
+      DailyGoalSystem.ensureForDay(state, dayKey);
+
+  static GameState claimDailyGoal(GameState state, String goalId) =>
+      DailyGoalSystem.claimGoal(state, goalId);
+
+  static GameState claimDailyChest(GameState state) =>
+      DailyGoalSystem.claimChest(state);
+
   static GameState setGhostSpecialAction(
     GameState state,
     String ghostId,

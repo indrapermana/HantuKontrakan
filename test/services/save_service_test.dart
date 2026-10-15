@@ -60,6 +60,11 @@ void main() {
       incidentRandomState: 12345,
       completedRepairIds: const {'repair-1'},
       completedMissionIds: const {'place_pocong'},
+      dailyGoalDayKey: '2026-10-15',
+      dailyTenantRoomId: 'room_01',
+      dailyGoalProgress: const {'daily_collect_rent': 1},
+      completedDailyGoalIds: const {'daily_active_management'},
+      dailyChestClaimed: false,
       ghosts: seed.ghosts
           .map(
             (ghost) => ghost.id == 'pocong_01'
@@ -133,6 +138,11 @@ void main() {
     expect(loaded.incidentRandomState, 12345);
     expect(loaded.completedRepairIds, {'repair-1'});
     expect(loaded.completedMissionIds, {'place_pocong'});
+    expect(loaded.dailyGoalDayKey, '2026-10-15');
+    expect(loaded.dailyTenantRoomId, 'room_01');
+    expect(loaded.dailyGoalProgress, {'daily_collect_rent': 1});
+    expect(loaded.completedDailyGoalIds, {'daily_active_management'});
+    expect(loaded.dailyChestClaimed, isFalse);
     expect(loaded.roomById('room_01').repairRequired, isTrue);
     expect(loaded.ghostById('pocong_01').specialActionActive, isTrue);
     expect(loaded.ghostById('pocong_01').eventHappinessModifier, 12);
@@ -244,6 +254,29 @@ void main() {
     expect(migrated.schemaVersion, GameState.currentSchemaVersion);
     expect(migrated.pendingRentMicrocoins, 3250000);
     expect(migrated.pendingRentMicrocoinsByRoom, {'room_01': 3250000});
+  });
+
+  test('version 21 save migrates with no active daily schedule', () async {
+    final version21 = GameState.seeded().toJson()
+      ..['schemaVersion'] = 21
+      ..remove('dailyGoalDayKey')
+      ..remove('dailyTenantRoomId')
+      ..remove('dailyGoalProgress')
+      ..remove('completedDailyGoalIds')
+      ..remove('dailyChestClaimed');
+    SharedPreferences.setMockInitialValues({
+      SharedPreferencesSaveService.saveKey: jsonEncode(version21),
+    });
+
+    final result = await SharedPreferencesSaveService().load();
+    final migrated = (result as SaveLoaded).state;
+
+    expect(migrated.schemaVersion, GameState.currentSchemaVersion);
+    expect(migrated.dailyGoalDayKey, isNull);
+    expect(migrated.dailyTenantRoomId, isNull);
+    expect(migrated.dailyGoalProgress, isEmpty);
+    expect(migrated.completedDailyGoalIds, isEmpty);
+    expect(migrated.dailyChestClaimed, isFalse);
   });
 
   test('version 1 save migrates to current debug state defaults', () async {

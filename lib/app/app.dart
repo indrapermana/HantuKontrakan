@@ -38,6 +38,8 @@ class HantuKontrakanApp extends StatefulWidget {
 class _HantuKontrakanAppState extends State<HantuKontrakanApp>
     with WidgetsBindingObserver {
   late final GameController controller;
+  Timer? _simulationTimer;
+  bool _simulationActive = true;
 
   @override
   void initState() {
@@ -53,17 +55,30 @@ class _HantuKontrakanAppState extends State<HantuKontrakanApp>
           const UnavailablePrivacyConsentService(),
       rewardedAdService:
           widget.rewardedAdService ?? const UnavailableRewardedAdService(),
-    )..initialize();
+    );
+    unawaited(_initializeController());
+  }
+
+  Future<void> _initializeController() async {
+    await controller.initialize();
+    if (!mounted) return;
+    _simulationTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (_simulationActive && controller.isReady) {
+        unawaited(controller.advanceSimulation(10));
+      }
+    });
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
       case AppLifecycleState.resumed:
+        _simulationActive = true;
         unawaited(controller.resumeFromOffline());
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
+        _simulationActive = false;
         unawaited(controller.pauseForOffline());
       case AppLifecycleState.inactive:
         break;
@@ -72,6 +87,7 @@ class _HantuKontrakanAppState extends State<HantuKontrakanApp>
 
   @override
   void dispose() {
+    _simulationTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     controller.dispose();
     super.dispose();

@@ -1057,6 +1057,72 @@ abstract class AppLocalizations {
   /// In id, this message translates to:
   /// **'Kamar {number} membayar {coins} koin.'**
   String roomRentCollected(Object coins, Object number);
+
+  /// No description provided for @chapterOneTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'BAB 1 · KONTRAKAN PERTAMA'**
+  String get chapterOneTitle;
+
+  /// No description provided for @dailyGoalsTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'TUGAS HARI INI'**
+  String get dailyGoalsTitle;
+
+  /// No description provided for @dailyGoalsSubtitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Tiga alasan baru untuk mengecek para penghuni setiap hari.'**
+  String get dailyGoalsSubtitle;
+
+  /// No description provided for @dailyGoalProgress.
+  ///
+  /// In id, this message translates to:
+  /// **'{current} / {target}'**
+  String dailyGoalProgress(int current, int target);
+
+  /// No description provided for @dailyTenantRequest.
+  ///
+  /// In id, this message translates to:
+  /// **'Permintaan penghuni'**
+  String get dailyTenantRequest;
+
+  /// No description provided for @dailyChestTitle.
+  ///
+  /// In id, this message translates to:
+  /// **'Peti hadiah harian'**
+  String get dailyChestTitle;
+
+  /// No description provided for @dailyChestDescription.
+  ///
+  /// In id, this message translates to:
+  /// **'Klaim hadiah dari ketiga tugas harian untuk membuka peti ini.'**
+  String get dailyChestDescription;
+
+  /// No description provided for @dailyChestClaim.
+  ///
+  /// In id, this message translates to:
+  /// **'Buka peti'**
+  String get dailyChestClaim;
+
+  /// No description provided for @dailyChestLocked.
+  ///
+  /// In id, this message translates to:
+  /// **'Selesaikan semua tugas'**
+  String get dailyChestLocked;
+
+  /// No description provided for @dailyChestClaimed.
+  ///
+  /// In id, this message translates to:
+  /// **'Sudah dibuka hari ini'**
+  String get dailyChestClaimed;
+
+  /// No description provided for @dailyScheduleLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Jadwal: {dayKey}'**
+  String dailyScheduleLabel(String dayKey);
 }
 
 class _AppLocalizationsDelegate

@@ -922,3 +922,40 @@ Status: locally verified on 2026-10-15.
 - HK-030-D is the next unfinished ticket. No recurring contracts, tenant
   requests, daily chest state, portfolio progression, or audio redesign was
   added in HK-030-C.
+
+### HK-030-D — Repeatable session goals
+
+Status: locally verified on 2026-10-15.
+
+- Reframed the original ten ordered missions as localized Chapter 1 content
+  without changing their prerequisites, rewards, or exactly-once claims.
+- Added three daily actions: collect rent twice, actively manage the property
+  for three minutes, and collect from one deterministic unlocked tenant room.
+  The tenant target rotates by local day across occupied unlocked rooms, with
+  an unlocked-room fallback during onboarding.
+- Added schema-v22 persistence for the local day key, tenant target, bounded
+  progress, claimed task IDs, and daily chest state. Version-21 saves migrate
+  with no active schedule and receive one on controller initialization.
+- Daily refresh is a pure-Dart command: the same day is identity-preserving;
+  a later valid day deterministically resets progress, claims, and chest state.
+  Progress is derived only from successful simulation commands, so duplicate
+  rent claims and offline time cannot inflate it.
+- Added localized progress bars, compact status feedback, task rewards, and an
+  exactly-once daily chest. All rewards are ordinary coins/XP and no task or
+  chest requires advertising, locked rooms, or moving a valid tenant layout.
+- Added a lifecycle-aware foreground ticker that advances the existing pure
+  simulation by ten deterministic seconds. It pauses with the app and makes
+  active rent generation and the management-time task function in normal play,
+  not only through the debug control.
+- Validation evidence: formatting completed; `flutter analyze` reported no
+  issues; all 195 `flutter test` tests passed; Android debug build succeeded;
+  `git diff --check` passed. Coverage includes local-day rollover, chunking,
+  save/reload, v21 migration, duplicate claims, lifecycle pause, localization,
+  and the three-task/Chapter 1 widget flow.
+- A physical-iPhone run compiled, signed, installed, launched, exercised the
+  home/collection/daily-goals/settings sequence, and captured the daily panel
+  with live `1/2` rent and `10/180` active-time progress. Its final assertion
+  incorrectly included screenshot-transfer latency; after correcting that
+  harness issue, the retry could not rediscover the Dart VM service over Wi-Fi.
+- HK-030-E is the next unfinished ticket. This ticket adds no owned furniture,
+  second property, portfolio economy, crystal sinks, or audio redesign.

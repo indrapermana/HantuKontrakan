@@ -579,4 +579,43 @@ class AppLocalizationsId extends AppLocalizations {
   String roomRentCollected(Object coins, Object number) {
     return 'Kamar $number membayar $coins koin.';
   }
+
+  @override
+  String get chapterOneTitle => 'BAB 1 · KONTRAKAN PERTAMA';
+
+  @override
+  String get dailyGoalsTitle => 'TUGAS HARI INI';
+
+  @override
+  String get dailyGoalsSubtitle =>
+      'Tiga alasan baru untuk mengecek para penghuni setiap hari.';
+
+  @override
+  String dailyGoalProgress(int current, int target) {
+    return '$current / $target';
+  }
+
+  @override
+  String get dailyTenantRequest => 'Permintaan penghuni';
+
+  @override
+  String get dailyChestTitle => 'Peti hadiah harian';
+
+  @override
+  String get dailyChestDescription =>
+      'Klaim hadiah dari ketiga tugas harian untuk membuka peti ini.';
+
+  @override
+  String get dailyChestClaim => 'Buka peti';
+
+  @override
+  String get dailyChestLocked => 'Selesaikan semua tugas';
+
+  @override
+  String get dailyChestClaimed => 'Sudah dibuka hari ini';
+
+  @override
+  String dailyScheduleLabel(String dayKey) {
+    return 'Jadwal: $dayKey';
+  }
 }

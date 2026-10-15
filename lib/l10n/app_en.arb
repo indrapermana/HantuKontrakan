@@ -159,5 +159,16 @@
   "roomRentBubbleLabel": "Collect {coins} coins from room {number}",
   "rentCollectedTitle": "Rent collected!",
   "allRentCollected": "You collected {coins} coins from all ready rooms.",
-  "roomRentCollected": "Room {number} paid {coins} coins."
+  "roomRentCollected": "Room {number} paid {coins} coins.",
+  "chapterOneTitle": "CHAPTER 1 · FIRST KONTRAKAN",
+  "dailyGoalsTitle": "TODAY'S TASKS",
+  "dailyGoalsSubtitle": "Three fresh reasons to check on your tenants every day.",
+  "dailyGoalProgress": "{current} / {target}",
+  "dailyTenantRequest": "Tenant request",
+  "dailyChestTitle": "Daily reward chest",
+  "dailyChestDescription": "Claim all three daily task rewards to open this chest.",
+  "dailyChestClaim": "Open chest",
+  "dailyChestLocked": "Complete all tasks",
+  "dailyChestClaimed": "Opened today",
+  "dailyScheduleLabel": "Schedule: {dayKey}"
 }

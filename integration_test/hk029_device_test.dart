@@ -46,11 +46,27 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
     expect(saves.storedState?.walletCoins, 202);
     expect(find.byKey(const Key('rent-collected-panel')), findsOneWidget);
+    stopwatch.stop();
     final collectionScreenshot = await binding.takeScreenshot(
       'iphone_rent_collected',
     );
     expect(collectionScreenshot, isNotEmpty);
+    stopwatch.start();
     await tester.tap(find.text('Close'));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    await tester.tap(find.byKey(const Key('missions-button')));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text("TODAY'S TASKS"), findsOneWidget);
+    expect(
+      find.byKey(const Key('daily-goal-daily_collect_rent')),
+      findsOneWidget,
+    );
+    stopwatch.stop();
+    final goalsScreenshot = await binding.takeScreenshot('iphone_daily_goals');
+    expect(goalsScreenshot, isNotEmpty);
+    stopwatch.start();
+    await tester.tap(find.text('Continue'));
     await tester.pump(const Duration(milliseconds: 200));
 
     await tester.tap(find.byKey(const Key('settings-button')));
@@ -66,5 +82,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     final settingsScreenshot = await binding.takeScreenshot('iphone_settings');
     expect(settingsScreenshot, isNotEmpty);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 }

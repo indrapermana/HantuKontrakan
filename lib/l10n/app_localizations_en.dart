@@ -577,4 +577,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String roomRentCollected(Object coins, Object number) {
     return 'Room $number paid $coins coins.';
   }
+
+  @override
+  String get chapterOneTitle => 'CHAPTER 1 · FIRST KONTRAKAN';
+
+  @override
+  String get dailyGoalsTitle => 'TODAY\'S TASKS';
+
+  @override
+  String get dailyGoalsSubtitle =>
+      'Three fresh reasons to check on your tenants every day.';
+
+  @override
+  String dailyGoalProgress(int current, int target) {
+    return '$current / $target';
+  }
+
+  @override
+  String get dailyTenantRequest => 'Tenant request';
+
+  @override
+  String get dailyChestTitle => 'Daily reward chest';
+
+  @override
+  String get dailyChestDescription =>
+      'Claim all three daily task rewards to open this chest.';
+
+  @override
+  String get dailyChestClaim => 'Open chest';
+
+  @override
+  String get dailyChestLocked => 'Complete all tasks';
+
+  @override
+  String get dailyChestClaimed => 'Opened today';
+
+  @override
+  String dailyScheduleLabel(String dayKey) {
+    return 'Schedule: $dayKey';
+  }
 }

@@ -12,9 +12,11 @@ import '../simulation/commands/game_command.dart';
 import '../simulation/constants/game_balance.dart';
 import '../simulation/game_state_controller.dart';
 import '../simulation/models/game_state.dart';
+import '../simulation/models/daily_goal_definition.dart';
 import '../simulation/models/room.dart';
 import '../simulation/models/tutorial_step.dart';
 import '../simulation/systems/game_rules.dart';
+import '../simulation/systems/daily_goal_system.dart';
 import '../simulation/systems/happiness_system.dart';
 import '../simulation/systems/repair_system.dart';
 import '../simulation/systems/rewarded_rent_system.dart';
@@ -97,6 +99,8 @@ class GameController extends ChangeNotifier {
         _pendingRewardOfferCoins,
       );
   int get pendingRewardOfferCoins => _pendingRewardOfferCoins;
+  List<DailyGoalDefinition> get dailyGoals =>
+      DailyGoalSystem.definitions(state);
 
   int takePendingOfflineEarningsCoins() {
     return takePendingOfflineEarnings().totalCoins;
@@ -137,7 +141,12 @@ class GameController extends ChangeNotifier {
       beforeResume,
       state,
     );
-    if (resumed) await _saveService.save(state);
+    final dailyGoalsRefreshed = _domainController.dispatch(
+      EnsureDailyGoals(dayKey: _localDayKey(_clock.now())),
+    );
+    if ((resumed || dailyGoalsRefreshed) && _loadResult is! SaveRejected) {
+      await _saveService.save(state);
+    }
     _isReady = true;
     _syncErrorReportingConsent();
     notifyListeners();
@@ -167,6 +176,14 @@ class GameController extends ChangeNotifier {
 
   Future<bool> claimMissionReward(String missionId) =>
       _dispatch(ClaimMissionReward(missionId: missionId));
+
+  Future<bool> refreshDailyGoals() =>
+      _dispatch(EnsureDailyGoals(dayKey: _localDayKey(_clock.now())));
+
+  Future<bool> claimDailyGoal(String goalId) =>
+      _dispatch(ClaimDailyGoal(goalId: goalId));
+
+  Future<bool> claimDailyChest() => _dispatch(const ClaimDailyChest());
 
   Future<bool> setLanguageCode(String languageCode) =>
       _dispatch(SetLanguageCode(languageCode: languageCode));
@@ -410,6 +427,7 @@ class GameController extends ChangeNotifier {
   Future<void> resetState() async {
     _randomSource.reset();
     await _dispatch(const ResetGame());
+    await refreshDailyGoals();
   }
 
   Future<void> setGhostSpecialAction(String ghostId, bool active) async {

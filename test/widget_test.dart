@@ -234,8 +234,17 @@ void main() {
 
     await tester.tap(find.byKey(const Key('missions-button')));
     await tester.pump(const Duration(milliseconds: 300));
+    await tester.scrollUntilVisible(
+      find.text('First Tenant'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('First Tenant'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('claim-mission-place_pocong')));
+    tester
+        .widget<GamePrimaryButton>(
+          find.byKey(const Key('claim-mission-place_pocong')),
+        )
+        .onPressed!();
     await tester.pump();
 
     expect(find.text('225'), findsOneWidget);
@@ -250,6 +259,55 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  testWidgets('missions show three daily actions and Chapter 1', (
+    tester,
+  ) async {
+    final saves = MemorySaveService(
+      initialResult: SaveLoaded(GameState.seeded()),
+    );
+    await tester.pumpWidget(
+      HantuKontrakanApp(saveService: saves, locale: const Locale('en')),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    await tester.tap(find.byKey(const Key('missions-button')));
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text("TODAY'S TASKS"), findsOneWidget);
+    expect(
+      find.byKey(const Key('daily-goal-daily_collect_rent')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('daily-goal-daily_active_management')),
+      findsOneWidget,
+    );
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('daily-goal-daily_tenant_request')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.byKey(const Key('daily-goal-daily_tenant_request')),
+      findsOneWidget,
+    );
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('daily-reward-chest')),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.byKey(const Key('daily-reward-chest')), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('CHAPTER 1 · FIRST KONTRAKAN'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('CHAPTER 1 · FIRST KONTRAKAN'), findsOneWidget);
+    expect(saves.storedState?.dailyGoalDayKey, isNotNull);
   });
 
   testWidgets('app lifecycle persists and consumes one offline snapshot', (
