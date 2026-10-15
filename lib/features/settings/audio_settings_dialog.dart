@@ -18,6 +18,8 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
   late bool soundMuted;
   late double musicVolume;
   late double soundVolume;
+  late bool hapticsEnabled;
+  late bool reducedMotionEnabled;
   late bool analyticsConsentGranted;
   late bool errorReportingConsentGranted;
   bool privacyOptionsRequired = false;
@@ -30,6 +32,8 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
     soundMuted = state.soundMuted;
     musicVolume = state.musicVolume;
     soundVolume = state.soundVolume;
+    hapticsEnabled = state.hapticsEnabled;
+    reducedMotionEnabled = state.reducedMotionEnabled;
     analyticsConsentGranted = state.analyticsConsentGranted;
     errorReportingConsentGranted = state.errorReportingConsentGranted;
     _loadPrivacyOptionsStatus();
@@ -45,6 +49,11 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
     soundMuted: soundMuted,
     musicVolume: musicVolume,
     soundVolume: soundVolume,
+  );
+
+  Future<void> _saveFeedback() => widget.controller.setFeedbackPreferences(
+    hapticsEnabled: hapticsEnabled,
+    reducedMotionEnabled: reducedMotionEnabled,
   );
 
   @override
@@ -152,6 +161,26 @@ class _AudioSettingsDialogState extends State<AudioSettingsDialog> {
                     child: Text(strings.adPrivacyOptionsLabel),
                   ),
               ],
+            ),
+            SwitchListTile(
+              key: const Key('haptics-enabled'),
+              title: Text(strings.hapticsLabel),
+              subtitle: Text(strings.hapticsDescription),
+              value: hapticsEnabled,
+              onChanged: (value) {
+                setState(() => hapticsEnabled = value);
+                _saveFeedback();
+              },
+            ),
+            SwitchListTile(
+              key: const Key('reduced-motion-enabled'),
+              title: Text(strings.reducedMotionLabel),
+              subtitle: Text(strings.reducedMotionDescription),
+              value: reducedMotionEnabled,
+              onChanged: (value) {
+                setState(() => reducedMotionEnabled = value);
+                _saveFeedback();
+              },
             ),
           ],
         ),

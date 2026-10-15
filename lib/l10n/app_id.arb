@@ -227,6 +227,10 @@
   "ghostStoryComplete": "Kisah dikenang",
   "ghostStoryLocked": "Tempatkan hantu ini untuk membuka kisahnya",
   "rememberStory": "Kenang kisah",
+  "hapticsLabel": "Umpan balik getaran",
+  "hapticsDescription": "Getaran lembut untuk aksi penting",
+  "reducedMotionLabel": "Kurangi gerakan",
+  "reducedMotionDescription": "Gunakan umpan balik tenang tanpa partikel terbang",
   "ghostCollectionProgress": "Kisah {complete}/{total}",
   "@ghostCollectionProgress": {"placeholders": {"complete": {"type": "int"}, "total": {"type": "int"}}}
 }

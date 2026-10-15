@@ -308,6 +308,21 @@ abstract final class GameRules {
     );
   }
 
+  static GameState setFeedbackPreferences(
+    GameState state, {
+    required bool hapticsEnabled,
+    required bool reducedMotionEnabled,
+  }) {
+    if (state.hapticsEnabled == hapticsEnabled &&
+        state.reducedMotionEnabled == reducedMotionEnabled) {
+      return state;
+    }
+    return state.copyWith(
+      hapticsEnabled: hapticsEnabled,
+      reducedMotionEnabled: reducedMotionEnabled,
+    );
+  }
+
   static GameState upgradeRoom(
     GameState state,
     String roomId,

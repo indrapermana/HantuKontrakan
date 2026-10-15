@@ -992,3 +992,45 @@ Status: locally verified on 2026-10-15.
   `git diff --check` passed.
 - HK-030-F is the next unfinished ticket. HK-030-E does not replace music,
   ambience, effects, haptics, or reduced-motion behavior.
+
+### HK-030-F — Audio identity and game feel
+
+Status: implementation and technical validation complete on 2026-10-15;
+subjective 20-minute audio acceptance remains pending.
+
+- Evaluated both supplied packs rather than treating their README files as
+  instructions. V2 is the stronger foundation: three materially distinct
+  16.55–20.87 second themes and 34 purpose-specific effects replace the first
+  pack's smaller generic vocabulary.
+- Updated the checked-in deterministic audio builder and generated a
+  154.11-second mono PCM16 32kHz horror-comedy night suite from nine varied
+  movements across all three V2 themes. Sample peaks stay below full scale and
+  the manifest records the source, method, duration, and expanded sound set.
+- Expanded the runtime adapter to independent main, tension, ambience, and
+  effect players. Cricket or breeze ambience occurs at randomized 24–51 second
+  intervals; active incidents or chaos 70+ add a quiet mystery tension stem.
+  Every player pauses, resumes, updates volume, and disposes with the
+  application lifecycle.
+- Added distinct rent, furniture, upgrade, unlock, reward, repair, positive and
+  negative incident, UI, and happiness-sensitive per-character tenant cues.
+  Cosmetic adapter failures remain isolated after state and save completion.
+- Added schema-v24 persisted haptic and reduced-motion preferences with v23
+  migration. Production uses native haptics behind an injectable adapter;
+  reduced motion removes particle travel and respects the platform animation
+  preference while retaining color-independent icon feedback.
+- Added controller, migration, localization, settings, asset-duration,
+  no-short-track, scene-transition, haptic-gating, and visual-feedback tests.
+  A dedicated physical-device flow uses the real audio plugin and covers rent,
+  incident tension/resolution, settings, lifecycle pause/resume, screenshot,
+  and clean teardown.
+- Physical iPhone evidence: the app compiled, signed, installed, launched, the
+  audio/feedback lifecycle scenario passed, and no native audio exception or
+  lingering playback callback remained. The same real-plugin flow was rerun
+  after the V2 replacement and passed in 13 seconds. Formatting was clean,
+  `flutter analyze` found no issues, all 208 tests passed, the Android debug APK
+  rebuilt, and `git diff --check` passed. Automated checks cannot judge whether
+  the procedurally synthesized music is premium or pleasant for a full 20
+  minutes.
+- Final ticket acceptance therefore requires a human 20-minute listen on a
+  target phone, checking repetition, music/effect balance, speaker distortion,
+  incident tension, mute/volume controls, and personal horror-comedy fit.

@@ -111,6 +111,15 @@ class GameStateController {
           musicVolume: musicVolume,
           soundVolume: soundVolume,
         ),
+      SetFeedbackPreferences(
+        :final hapticsEnabled,
+        :final reducedMotionEnabled,
+      ) =>
+        GameRules.setFeedbackPreferences(
+          _state,
+          hapticsEnabled: hapticsEnabled,
+          reducedMotionEnabled: reducedMotionEnabled,
+        ),
       ResolveIncident(
         :final incidentId,
         :final choiceId,

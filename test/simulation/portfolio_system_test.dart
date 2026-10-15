@@ -154,9 +154,20 @@ void main() {
       ..remove('ownedFurnitureIds')
       ..remove('completedGhostStoryIds');
     final migrated = GameState.fromJson(legacy);
-    expect(migrated.schemaVersion, 23);
+    expect(migrated.schemaVersion, 24);
     expect(migrated.activePropertyId, PropertyDefinitions.firstPropertyId);
     expect(migrated.propertyRoomsById, hasLength(1));
     expect(migrated.ownedFurnitureIds, contains('bed'));
+  });
+
+  test('schema 23 adds accessible feedback defaults', () {
+    final legacy = <String, Object?>{...GameState.seeded().toJson()}
+      ..['schemaVersion'] = 23
+      ..remove('hapticsEnabled')
+      ..remove('reducedMotionEnabled');
+    final migrated = GameState.fromJson(legacy);
+    expect(migrated.schemaVersion, 24);
+    expect(migrated.hapticsEnabled, isTrue);
+    expect(migrated.reducedMotionEnabled, isFalse);
   });
 }

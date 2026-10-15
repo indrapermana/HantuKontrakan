@@ -679,6 +679,19 @@ class AppLocalizationsId extends AppLocalizations {
   String get rememberStory => 'Kenang kisah';
 
   @override
+  String get hapticsLabel => 'Umpan balik getaran';
+
+  @override
+  String get hapticsDescription => 'Getaran lembut untuk aksi penting';
+
+  @override
+  String get reducedMotionLabel => 'Kurangi gerakan';
+
+  @override
+  String get reducedMotionDescription =>
+      'Gunakan umpan balik tenang tanpa partikel terbang';
+
+  @override
   String ghostCollectionProgress(int complete, int total) {
     return 'Kisah $complete/$total';
   }

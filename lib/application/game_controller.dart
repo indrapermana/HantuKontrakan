@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../services/analytics_service.dart';
 import '../services/audio_service.dart';
 import '../services/error_reporting_service.dart';
+import '../services/game_feedback_service.dart';
 import '../services/privacy_consent_service.dart';
 import '../services/rewarded_ad_service.dart';
 import '../services/save_service.dart';
@@ -13,6 +14,7 @@ import '../simulation/constants/game_balance.dart';
 import '../simulation/game_state_controller.dart';
 import '../simulation/models/game_state.dart';
 import '../simulation/models/daily_goal_definition.dart';
+import '../simulation/models/ghost.dart';
 import '../simulation/models/room.dart';
 import '../simulation/models/tutorial_step.dart';
 import '../simulation/systems/game_rules.dart';
@@ -32,6 +34,7 @@ class GameController extends ChangeNotifier {
     PrivacyConsentService privacyConsentService =
         const UnavailablePrivacyConsentService(),
     RewardedAdService rewardedAdService = const UnavailableRewardedAdService(),
+    GameFeedbackService feedbackService = const NoopGameFeedbackService(),
     GameClock clock = const SystemGameClock(),
     int randomSeed = GameBalance.defaultRandomSeed,
   }) : _saveService = saveService,
@@ -40,6 +43,7 @@ class GameController extends ChangeNotifier {
        _errorReportingService = errorReportingService,
        _privacyConsentService = privacyConsentService,
        _rewardedAdService = rewardedAdService,
+       _feedbackService = feedbackService,
        _clock = clock,
        _randomSource = SeededRandomSource(randomSeed);
 
@@ -49,6 +53,7 @@ class GameController extends ChangeNotifier {
   final ErrorReportingService _errorReportingService;
   final PrivacyConsentService _privacyConsentService;
   final RewardedAdService _rewardedAdService;
+  final GameFeedbackService _feedbackService;
   final GameClock _clock;
   final SeededRandomSource _randomSource;
   int _rentClaimSequence = 0;
@@ -57,6 +62,8 @@ class GameController extends ChangeNotifier {
   int _pendingOfflineEarningsCoins = 0;
   Map<String, int> _pendingOfflineEarningsCoinsByRoom = const {};
   int _pendingRewardOfferCoins = 0;
+  int _feedbackSequence = 0;
+  GameFeedbackSignal? _feedbackSignal;
   Future<void> _lifecycleOperation = Future<void>.value();
   GameStateController _domainController = GameStateController(
     GameState.seeded(),
@@ -99,6 +106,7 @@ class GameController extends ChangeNotifier {
         _pendingRewardOfferCoins,
       );
   int get pendingRewardOfferCoins => _pendingRewardOfferCoins;
+  GameFeedbackSignal? get feedbackSignal => _feedbackSignal;
   List<DailyGoalDefinition> get dailyGoals =>
       DailyGoalSystem.definitions(state);
 
@@ -152,6 +160,7 @@ class GameController extends ChangeNotifier {
     notifyListeners();
     unawaited(_initializePrivacy());
     await _runAudio(() => _audioService.initialize(_audioPreferences));
+    await _syncAudioScene();
     if (resumed) {
       await _recordTransition(
         ResumeFromOffline(timestampMillis: _clock.now().millisecondsSinceEpoch),
@@ -233,6 +242,16 @@ class GameController extends ChangeNotifier {
     }
     return changed;
   }
+
+  Future<bool> setFeedbackPreferences({
+    required bool hapticsEnabled,
+    required bool reducedMotionEnabled,
+  }) => _dispatch(
+    SetFeedbackPreferences(
+      hapticsEnabled: hapticsEnabled,
+      reducedMotionEnabled: reducedMotionEnabled,
+    ),
+  );
 
   Future<void> moveGhost(
     String ghostId,
@@ -453,6 +472,8 @@ class GameController extends ChangeNotifier {
     await _saveService.save(state);
     await _recordTransition(command, before, state);
     await _playTransition(command, before, state);
+    await _syncAudioScene();
+    await _emitFeedback(command, before, state);
     return true;
   }
 
@@ -470,7 +491,7 @@ class GameController extends ChangeNotifier {
   ) async {
     AudioCue? cue;
     if (before.activeIncidentId == null && after.activeIncidentId != null) {
-      cue = AudioCue.incident;
+      cue = AudioCue.incidentAlert;
     } else {
       cue = switch (command) {
         CollectAllRent() ||
@@ -479,14 +500,90 @@ class GameController extends ChangeNotifier {
         GrantRewardedRentBonus() => AudioCue.coin,
         UpgradeRoom() => AudioCue.upgrade,
         UnlockRoom() => AudioCue.unlock,
+        EquipFurniture() || PurchaseFurniture() => AudioCue.furniture,
+        ClaimMissionReward() ||
+        ClaimDailyGoal() ||
+        ClaimDailyChest() ||
+        UnlockSecondProperty() ||
+        CompleteGhostStory() => AudioCue.reward,
+        SwitchProperty() => AudioCue.uiClick,
         RepairRoom() => AudioCue.repair,
-        PlaceGhost() || MoveGhost() => AudioCue.ghost,
-        ResolveIncident() || ResolveComplaint() => AudioCue.incident,
+        PlaceGhost(:final ghostId) ||
+        MoveGhost(:final ghostId) => _ghostReactionCue(after, ghostId),
+        ResolveIncident() || ResolveComplaint() =>
+          after.chaos <= before.chaos && after.reputation >= before.reputation
+              ? AudioCue.incidentGood
+              : AudioCue.incidentBad,
         _ => null,
       };
     }
     if (cue != null && !state.soundMuted) {
       await _runAudio(() => _audioService.play(cue!));
+    }
+  }
+
+  AudioCue _ghostReactionCue(GameState state, String ghostId) {
+    final happiness = HappinessSystem.happinessFor(state, ghostId);
+    if (happiness < 40) return AudioCue.ghostAngry;
+    final happy = happiness >= 80;
+    return switch (state.ghostById(ghostId).kind) {
+      GhostKind.pocong => happy ? AudioCue.pocongHappy : AudioCue.pocong,
+      GhostKind.kuntilanak =>
+        happy ? AudioCue.kuntilanakHappy : AudioCue.kuntilanak,
+      GhostKind.tuyul => happy ? AudioCue.tuyulHappy : AudioCue.tuyul,
+      GhostKind.genderuwo =>
+        happy ? AudioCue.genderuwoHappy : AudioCue.genderuwo,
+    };
+  }
+
+  Future<void> _syncAudioScene() => _runAudio(
+    () => _audioService.setScene(
+      state.activeIncidentId != null || state.chaos >= 70
+          ? AudioScene.tension
+          : AudioScene.calm,
+    ),
+  );
+
+  Future<void> _emitFeedback(
+    GameCommand command,
+    GameState before,
+    GameState after,
+  ) async {
+    final kind =
+        before.activeIncidentId == null && after.activeIncidentId != null
+        ? GameFeedbackKind.warning
+        : switch (command) {
+            CollectAllRent() ||
+            CollectRoomRent() ||
+            GrantRewardedRentBonus() => GameFeedbackKind.coin,
+            UpgradeRoom() ||
+            EquipFurniture() ||
+            PurchaseFurniture() => GameFeedbackKind.upgrade,
+            UnlockRoom() || UnlockSecondProperty() => GameFeedbackKind.unlock,
+            ClaimMissionReward() ||
+            ClaimDailyGoal() ||
+            ClaimDailyChest() ||
+            CompleteGhostStory() => GameFeedbackKind.reward,
+            PlaceGhost() || MoveGhost() => GameFeedbackKind.tenant,
+            ResolveIncident() || ResolveComplaint() => GameFeedbackKind.reward,
+            _ => null,
+          };
+    if (kind == null) return;
+    _feedbackSignal = GameFeedbackSignal(
+      sequence: ++_feedbackSequence,
+      kind: kind,
+    );
+    notifyListeners();
+    if (!after.hapticsEnabled) return;
+    final haptic = kind == GameFeedbackKind.warning
+        ? HapticCue.warning
+        : kind == GameFeedbackKind.tenant
+        ? HapticCue.selection
+        : HapticCue.success;
+    try {
+      await _feedbackService.haptic(haptic);
+    } on Object {
+      // Haptics are cosmetic and must never interrupt deterministic gameplay.
     }
   }
 

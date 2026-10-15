@@ -45,6 +45,7 @@ void main() {
 
     for (final path in <String>[
       GameAssets.backgroundMusic,
+      GameAssets.tensionMusic,
       ...GameAssets.audioEffects.values,
     ]) {
       final data = await rootBundle.load('assets/$path');
@@ -57,8 +58,10 @@ void main() {
       'assets/${GameAssets.backgroundMusic}',
     )).buffer.asByteData();
     expect(music.getUint16(22, Endian.little), 1);
-    expect(music.getUint32(24, Endian.little), 44100);
+    expect(music.getUint32(24, Endian.little), 32000);
     expect(music.getUint16(34, Endian.little), 16);
+    final dataLength = music.getUint32(40, Endian.little);
+    expect(dataLength / (32000 * 2), greaterThanOrEqualTo(150));
     for (var offset = 44; offset < 76; offset += 2) {
       expect(music.getInt16(offset, Endian.little).abs(), lessThanOrEqualTo(1));
     }
@@ -82,6 +85,14 @@ void main() {
       expect(atlases['rowOrder'], ['idle', 'happy', 'angry', 'special']);
       expect(manifest['excludedSheetConcepts'], containsAll(['Rp', 'cash']));
       expect(manifest['sourceNotes'], isA<Map<String, Object?>>());
+      final audio = manifest['audio']! as Map<String, Object?>;
+      final suite = audio['generatedSuite']! as Map<String, Object?>;
+      expect(suite['durationSeconds'], greaterThanOrEqualTo(150));
+      expect(audio['effects'], isA<List<Object?>>());
+      expect(
+        (audio['effects']! as List<Object?>).length,
+        greaterThanOrEqualTo(30),
+      );
     },
   );
 }

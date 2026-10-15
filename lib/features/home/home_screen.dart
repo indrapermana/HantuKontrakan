@@ -18,6 +18,7 @@ import '../missions/mission_dialog.dart';
 import '../settings/audio_settings_dialog.dart';
 import '../tutorial/tutorial_panel.dart';
 import 'detail_sheets.dart';
+import 'game_feedback_overlay.dart';
 import 'home_game_shell.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -85,6 +86,12 @@ class HomeScreen extends StatelessWidget {
                     lockedLabel: strings.roomCanvasLocked,
                   ),
                 ),
+              ),
+              GameFeedbackOverlay(
+                signal: controller.feedbackSignal,
+                reducedMotion:
+                    state.reducedMotionEnabled ||
+                    MediaQuery.disableAnimationsOf(context),
               ),
               SafeArea(
                 bottom: false,

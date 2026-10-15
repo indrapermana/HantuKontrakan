@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'app/app.dart';
 import 'services/audio_service.dart';
 import 'services/error_reporting_service.dart';
+import 'services/game_feedback_service.dart';
 import 'services/privacy_consent_service.dart';
 import 'services/rewarded_ad_service.dart';
 import 'services/save_service.dart';
@@ -45,6 +46,7 @@ Future<void> main() async {
     HantuKontrakanApp(
       saveService: SharedPreferencesSaveService(),
       audioService: AudioplayersAudioService(),
+      feedbackService: const FlutterGameFeedbackService(),
       errorReportingService: errorReporting,
       privacyConsentService: privacyConsent,
       rewardedAdService: GoogleTestRewardedAdService(

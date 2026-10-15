@@ -4,6 +4,7 @@ import 'package:hantu_kontrakan/application/simulation_runtime.dart';
 import 'package:hantu_kontrakan/services/analytics_service.dart';
 import 'package:hantu_kontrakan/services/audio_service.dart';
 import 'package:hantu_kontrakan/services/error_reporting_service.dart';
+import 'package:hantu_kontrakan/services/game_feedback_service.dart';
 import 'package:hantu_kontrakan/services/privacy_consent_service.dart';
 import 'package:hantu_kontrakan/services/rewarded_ad_service.dart';
 import 'package:hantu_kontrakan/services/save_service.dart';
@@ -280,6 +281,7 @@ void main() {
       await controller.initialize();
       expect(audio.initialized, hasLength(1));
       expect(audio.initialized.single.musicVolume, 0.35);
+      expect(audio.scenes, [AudioScene.calm]);
 
       expect(
         await controller.setAudioPreferences(
@@ -318,6 +320,97 @@ void main() {
       expect(reloadedAudio.initialized.single.musicMuted, isTrue);
       expect(reloadedAudio.initialized.single.soundMuted, isTrue);
       expect(reloadedAudio.initialized.single.soundVolume, 0.6);
+    },
+  );
+
+  test(
+    'feedback preferences gate haptics and persist reduced motion',
+    () async {
+      final feedback = _RecordingFeedbackService();
+      final saves = MemorySaveService(
+        initialResult: SaveLoaded(
+          GameState.seeded().copyWith(pendingRentMicrocoins: 2000000),
+        ),
+      );
+      final controller = GameController(
+        saveService: saves,
+        feedbackService: feedback,
+      );
+      await controller.initialize();
+
+      await controller.collectAllRent(claimId: 'feedback-rent');
+      expect(controller.feedbackSignal?.kind, GameFeedbackKind.coin);
+      expect(feedback.cues, [HapticCue.success]);
+
+      await controller.setFeedbackPreferences(
+        hapticsEnabled: false,
+        reducedMotionEnabled: true,
+      );
+      await controller.upgradeRoom('room_01', RoomAttribute.comfort);
+      expect(controller.feedbackSignal?.kind, GameFeedbackKind.upgrade);
+      expect(feedback.cues, [HapticCue.success]);
+      expect(saves.storedState?.hapticsEnabled, isFalse);
+      expect(saves.storedState?.reducedMotionEnabled, isTrue);
+    },
+  );
+
+  test(
+    'active incidents select tension audio and resolution returns calm',
+    () async {
+      final audio = _RecordingAudioService();
+      final controller = GameController(
+        saveService: MemorySaveService(
+          initialResult: SaveLoaded(
+            GameState.seeded().copyWith(activeIncidentId: 'electricity_outage'),
+          ),
+        ),
+        audioService: audio,
+      );
+      await controller.initialize();
+      expect(audio.scenes, [AudioScene.tension]);
+
+      await controller.resolveIncident(
+        'electricity_outage',
+        'buy_emergency_lights',
+        resolutionId: 'audio-scene-resolution',
+      );
+      expect(audio.scenes.last, AudioScene.calm);
+      expect(audio.cues.last, AudioCue.incidentGood);
+    },
+  );
+
+  test(
+    'V2 audio distinguishes negative incidents and ghost identity',
+    () async {
+      final audio = _RecordingAudioService();
+      final seeded = GameState.seeded();
+      final controller = GameController(
+        saveService: MemorySaveService(
+          initialResult: SaveLoaded(
+            seeded.copyWith(
+              activeIncidentId: 'tuyul_missing_sandals',
+              ghosts: [
+                for (final ghost in seeded.ghosts)
+                  ghost.id == 'pocong_01'
+                      ? ghost.copyWith(eventHappinessModifier: 50)
+                      : ghost,
+              ],
+            ),
+          ),
+        ),
+        audioService: audio,
+      );
+      await controller.initialize();
+
+      await controller.resolveIncident(
+        'tuyul_missing_sandals',
+        'search_every_room',
+        resolutionId: 'audio-bad-resolution',
+      );
+      expect(audio.cues.last, AudioCue.incidentBad);
+
+      await controller.moveGhost('pocong_01', 'room_02', allowSwap: true);
+      expect(audio.cues.last, AudioCue.pocong);
     },
   );
 
@@ -697,6 +790,7 @@ class _RecordingAudioService implements AudioService {
   final List<AudioPreferences> initialized = [];
   final List<AudioPreferences> updated = [];
   final List<AudioCue> cues = [];
+  final List<AudioScene> scenes = [];
   int pauseCount = 0;
   int resumeCount = 0;
 
@@ -720,5 +814,15 @@ class _RecordingAudioService implements AudioService {
   Future<void> play(AudioCue cue) async => cues.add(cue);
 
   @override
+  Future<void> setScene(AudioScene scene) async => scenes.add(scene);
+
+  @override
   Future<void> dispose() async {}
+}
+
+class _RecordingFeedbackService implements GameFeedbackService {
+  final List<HapticCue> cues = [];
+
+  @override
+  Future<void> haptic(HapticCue cue) async => cues.add(cue);
 }

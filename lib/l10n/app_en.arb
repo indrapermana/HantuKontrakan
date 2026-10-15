@@ -191,6 +191,10 @@
   "ghostStoryComplete": "Story remembered",
   "ghostStoryLocked": "House this ghost to unlock their story",
   "rememberStory": "Remember story",
+  "hapticsLabel": "Haptic feedback",
+  "hapticsDescription": "Gentle vibration for important actions",
+  "reducedMotionLabel": "Reduce motion",
+  "reducedMotionDescription": "Use calm feedback without flying particles",
   "ghostCollectionProgress": "Stories {complete}/{total}",
   "@ghostCollectionProgress": {"placeholders": {"complete": {"type": "int"}, "total": {"type": "int"}}}
 }

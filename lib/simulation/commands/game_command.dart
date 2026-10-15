@@ -182,6 +182,16 @@ final class SetAudioPreferences extends GameCommand {
   final double soundVolume;
 }
 
+final class SetFeedbackPreferences extends GameCommand {
+  const SetFeedbackPreferences({
+    required this.hapticsEnabled,
+    required this.reducedMotionEnabled,
+  });
+
+  final bool hapticsEnabled;
+  final bool reducedMotionEnabled;
+}
+
 final class ResolveIncident extends GameCommand {
   const ResolveIncident({
     required this.incidentId,

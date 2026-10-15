@@ -23,6 +23,8 @@ class GameState {
     this.soundMuted = false,
     this.musicVolume = 0.35,
     this.soundVolume = 0.7,
+    this.hapticsEnabled = true,
+    this.reducedMotionEnabled = false,
     this.reputation = GameBalance.initialReputation,
     int pendingRentMicrocoins = 0,
     Map<String, int>? pendingRentMicrocoinsByRoom,
@@ -186,7 +188,7 @@ class GameState {
     _validateOccupancy();
   }
 
-  static const int currentSchemaVersion = 23;
+  static const int currentSchemaVersion = 24;
   static const Object _notProvided = Object();
   final int schemaVersion;
   final int walletCoins;
@@ -202,6 +204,8 @@ class GameState {
   final bool soundMuted;
   final double musicVolume;
   final double soundVolume;
+  final bool hapticsEnabled;
+  final bool reducedMotionEnabled;
   final int reputation;
   final int pendingRentMicrocoins;
   final Map<String, int> pendingRentMicrocoinsByRoom;
@@ -362,6 +366,8 @@ class GameState {
     bool? soundMuted,
     double? musicVolume,
     double? soundVolume,
+    bool? hapticsEnabled,
+    bool? reducedMotionEnabled,
     int? reputation,
     int? pendingRentMicrocoins,
     Map<String, int>? pendingRentMicrocoinsByRoom,
@@ -431,6 +437,8 @@ class GameState {
       soundMuted: soundMuted ?? this.soundMuted,
       musicVolume: musicVolume ?? this.musicVolume,
       soundVolume: soundVolume ?? this.soundVolume,
+      hapticsEnabled: hapticsEnabled ?? this.hapticsEnabled,
+      reducedMotionEnabled: reducedMotionEnabled ?? this.reducedMotionEnabled,
       reputation: reputation ?? this.reputation,
       pendingRentMicrocoins:
           pendingRentMicrocoins ??
@@ -529,6 +537,8 @@ class GameState {
     'soundMuted': soundMuted,
     'musicVolume': musicVolume,
     'soundVolume': soundVolume,
+    'hapticsEnabled': hapticsEnabled,
+    'reducedMotionEnabled': reducedMotionEnabled,
     'reputation': reputation,
     'pendingRentMicrocoins': pendingRentMicrocoins,
     'pendingRentMicrocoinsByRoom': pendingRentMicrocoinsByRoom,
@@ -605,7 +615,8 @@ class GameState {
       20 => GameState._fromVersion20Json(json),
       21 => GameState._fromVersion21Json(json),
       22 => GameState._fromVersion22Json(json),
-      currentSchemaVersion => GameState._fromVersion23Json(json),
+      23 => GameState._fromVersion23Json(json),
+      currentSchemaVersion => GameState._fromVersion24Json(json),
       _ => throw UnsupportedSaveVersion(schemaVersion),
     };
     if (schemaVersion < 14) {
@@ -901,6 +912,12 @@ class GameState {
           .toSet(),
     );
   }
+
+  factory GameState._fromVersion24Json(Map<String, Object?> json) =>
+      GameState._fromVersion23Json(json).copyWith(
+        hapticsEnabled: json['hapticsEnabled']! as bool,
+        reducedMotionEnabled: json['reducedMotionEnabled']! as bool,
+      );
 
   static Map<String, int> _normalizeRoomRent(
     int total,

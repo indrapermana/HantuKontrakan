@@ -1232,6 +1232,30 @@ abstract class AppLocalizations {
   /// **'Kenang kisah'**
   String get rememberStory;
 
+  /// No description provided for @hapticsLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Umpan balik getaran'**
+  String get hapticsLabel;
+
+  /// No description provided for @hapticsDescription.
+  ///
+  /// In id, this message translates to:
+  /// **'Getaran lembut untuk aksi penting'**
+  String get hapticsDescription;
+
+  /// No description provided for @reducedMotionLabel.
+  ///
+  /// In id, this message translates to:
+  /// **'Kurangi gerakan'**
+  String get reducedMotionLabel;
+
+  /// No description provided for @reducedMotionDescription.
+  ///
+  /// In id, this message translates to:
+  /// **'Gunakan umpan balik tenang tanpa partikel terbang'**
+  String get reducedMotionDescription;
+
   /// No description provided for @ghostCollectionProgress.
   ///
   /// In id, this message translates to:

@@ -444,3 +444,36 @@ Date: 2026-10-14
 - Flutter owns the localized portfolio, workshop, tier, and story presentation.
   Flame renders whichever deterministic room set is active and does not own
   unlock, purchase, income, or persistence logic.
+
+### HK-030-F audio and game-feel decisions
+
+- The user-supplied V2 pack supersedes the first pack as the authorized audio
+  foundation. It provides three materially distinct 16.55–20.87 second themes
+  and 34 purpose-specific effects, but its README still identifies procedural
+  synthesis, so the files are not presented as final premium audio without a
+  human listening review.
+- `tool/build_audio_suite.dart` reproducibly creates a 154.11-second main loop
+  from nine rotating playful, busy, and mystery movements, varied loop offsets,
+  two-second crossfades, and a quiet loop boundary. V2's 32kHz mono PCM16 format
+  is retained and the generated asset is documented in the asset manifest.
+- Runtime audio adds randomized 24–51 second cricket or breeze ambience and a
+  low-volume mystery tension layer only during active incidents or chaos 70+.
+  The main,
+  tension, ambience, and effects players all share persisted mute/volume and
+  lifecycle pause/resume behavior.
+- Command feedback uses distinct rent, furniture, upgrade, unlock, reward,
+  repair, UI, positive/negative incident, and happiness-dependent Pocong,
+  Kuntilanak, Tuyul, and Genderuwo cues. Audio selection is presentation-only
+  and runs after the deterministic state transition is saved.
+- Schema v24 persists optional haptics and reduced motion. Haptics are injected
+  behind a failure-safe Flutter service; tests use a no-op adapter and the
+  production entry point explicitly enables native feedback.
+- Flutter renders short color-independent icon and particle bursts. Reduced
+  motion removes flying particles and movement while retaining a brief static
+  icon, and the platform's system animation preference also enables this path.
+- Audio, haptic, and visual feedback failures are cosmetic and cannot roll back
+  saves, block rent, or change simulation rules. Pure-Dart simulation remains
+  free of Flutter, Flame, audio, and platform-feedback imports.
+- Automated duration, format, no-clipping, lifecycle, migration, and physical
+  iPhone checks are evidence of technical behavior, not a substitute for a
+  human 20-minute listening and loudness/taste sign-off.

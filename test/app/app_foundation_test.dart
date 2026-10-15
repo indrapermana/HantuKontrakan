@@ -99,9 +99,19 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('sound-muted')));
     await tester.pump();
+    tester
+        .widget<SwitchListTile>(find.byKey(const Key('haptics-enabled')))
+        .onChanged!(false);
+    await tester.pump();
+    tester
+        .widget<SwitchListTile>(find.byKey(const Key('reduced-motion-enabled')))
+        .onChanged!(true);
+    await tester.pump();
 
     expect(saves.storedState?.musicMuted, isTrue);
     expect(saves.storedState?.soundMuted, isTrue);
+    expect(saves.storedState?.hapticsEnabled, isFalse);
+    expect(saves.storedState?.reducedMotionEnabled, isTrue);
   });
 
   test('platform manifests declare portrait-only presentation', () {

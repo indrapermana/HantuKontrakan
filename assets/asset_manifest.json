@@ -4,7 +4,7 @@
   "createdOn": "2026-10-14",
   "sourceNotes": {
     "images": "Derived with the built-in OpenAI image generation tool from user-supplied composite sheets dated 2026-10-14. Original composites remain outside the repository.",
-    "audio": "Selected unchanged from the user-supplied HANTU_KONTRAKAN_AUDIO_ASSET_PACK.zip, whose README describes the files as original synthesized prototype assets."
+    "audio": "Selected from the user-supplied HANTU_KONTRAKAN_AUDIO_PACK_V2.zip. Its README describes original procedural synthesis without sampled third-party recordings or melodies; this provenance still requires normal platform compliance and human listening review."
   },
   "ghostAtlases": {
     "layout": {"columns": 4, "rows": 4, "pixelSize": [1448, 1084], "cellSize": [362, 271]},
@@ -24,14 +24,53 @@
     {"file": "images/ui/settings.png", "pixelSize": [128, 128], "containsText": false, "sourceDirection": "image #1"}
   ],
   "audio": {
-    "music": ["audio/music/cozy_night_loop.wav"],
+    "music": [
+      "audio/music/cozy_night_loop.wav",
+      "audio/music/haunted_hustle_loop.wav",
+      "audio/music/malam_jumat_mischief.wav",
+      "audio/music/horror_comedy_night_suite.wav"
+    ],
+    "generatedSuite": {
+      "file": "audio/music/horror_comedy_night_suite.wav",
+      "durationSeconds": 154.11,
+      "builder": "tool/build_audio_suite.dart",
+      "method": "nine rotating movements across playful, busy, and mystery V2 themes with varied loop offsets and two-second linear crossfades"
+    },
     "effects": [
-      "audio/sfx/coin_collect.wav",
-      "audio/sfx/room_upgrade.wav",
-      "audio/sfx/room_unlock.wav",
-      "audio/sfx/event_alert.wav",
-      "audio/sfx/repair.wav",
-      "audio/sfx/ghost_appear.wav"
+      "audio/sfx/ambient_cricket_chirp.wav",
+      "audio/sfx/ambient_spooky_breeze.wav",
+      "audio/sfx/chaos_calm.wav",
+      "audio/sfx/chaos_rising.wav",
+      "audio/sfx/coin_single_sparkle.wav",
+      "audio/sfx/coins_handful.wav",
+      "audio/sfx/furniture_drop_bounce.wav",
+      "audio/sfx/ghost_genderuwo_chuckle.wav",
+      "audio/sfx/ghost_genderuwo_step.wav",
+      "audio/sfx/ghost_general_angry.wav",
+      "audio/sfx/ghost_general_surprised.wav",
+      "audio/sfx/ghost_kuntilanak_complaint.wav",
+      "audio/sfx/ghost_kuntilanak_giggle.wav",
+      "audio/sfx/ghost_pocong_happy.wav",
+      "audio/sfx/ghost_pocong_hop.wav",
+      "audio/sfx/ghost_tuyul_prank.wav",
+      "audio/sfx/ghost_tuyul_sneak.wav",
+      "audio/sfx/incident_alert_comedy.wav",
+      "audio/sfx/incident_choice_bad.wav",
+      "audio/sfx/incident_choice_good.wav",
+      "audio/sfx/incident_knock_knock.wav",
+      "audio/sfx/level_up.wav",
+      "audio/sfx/mission_complete.wav",
+      "audio/sfx/purchase_insufficient.wav",
+      "audio/sfx/purchase_success.wav",
+      "audio/sfx/rent_collect_jingle.wav",
+      "audio/sfx/repair_tap_tap.wav",
+      "audio/sfx/reward_big_fanfare.wav",
+      "audio/sfx/room_unlock_magic.wav",
+      "audio/sfx/ui_cancel_wobble.wav",
+      "audio/sfx/ui_confirm_pop.wav",
+      "audio/sfx/ui_tab_switch.wav",
+      "audio/sfx/ui_tap_bubble.wav",
+      "audio/sfx/upgrade_hammer_pop.wav"
     ]
   },
   "excludedSheetConcepts": ["Rp", "cash", "premium gem", "energy"]

@@ -7,6 +7,7 @@ import '../application/game_controller.dart';
 import '../l10n/app_localizations.dart';
 import '../services/audio_service.dart';
 import '../services/error_reporting_service.dart';
+import '../services/game_feedback_service.dart';
 import '../services/privacy_consent_service.dart';
 import '../services/rewarded_ad_service.dart';
 import '../services/save_service.dart';
@@ -20,6 +21,7 @@ class HantuKontrakanApp extends StatefulWidget {
     this.errorReportingService,
     this.privacyConsentService,
     this.rewardedAdService,
+    this.feedbackService,
     this.locale,
     super.key,
   });
@@ -29,6 +31,7 @@ class HantuKontrakanApp extends StatefulWidget {
   final ErrorReportingService? errorReportingService;
   final PrivacyConsentService? privacyConsentService;
   final RewardedAdService? rewardedAdService;
+  final GameFeedbackService? feedbackService;
   final Locale? locale;
 
   @override
@@ -55,6 +58,8 @@ class _HantuKontrakanAppState extends State<HantuKontrakanApp>
           const UnavailablePrivacyConsentService(),
       rewardedAdService:
           widget.rewardedAdService ?? const UnavailableRewardedAdService(),
+      feedbackService:
+          widget.feedbackService ?? const NoopGameFeedbackService(),
     );
     unawaited(_initializeController());
   }

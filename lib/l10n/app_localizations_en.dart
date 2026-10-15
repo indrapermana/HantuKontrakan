@@ -677,6 +677,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rememberStory => 'Remember story';
 
   @override
+  String get hapticsLabel => 'Haptic feedback';
+
+  @override
+  String get hapticsDescription => 'Gentle vibration for important actions';
+
+  @override
+  String get reducedMotionLabel => 'Reduce motion';
+
+  @override
+  String get reducedMotionDescription =>
+      'Use calm feedback without flying particles';
+
+  @override
   String ghostCollectionProgress(int complete, int total) {
     return 'Stories $complete/$total';
   }
