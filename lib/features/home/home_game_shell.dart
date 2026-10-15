@@ -17,7 +17,6 @@ class HomeGameHud extends StatelessWidget {
     required this.coinSemanticsLabel,
     required this.crystalLabel,
     required this.crystalSemanticsLabel,
-    required this.happinessLabel,
     required this.settingsTooltip,
     required this.languageTooltip,
     required this.onLevel,
@@ -34,7 +33,6 @@ class HomeGameHud extends StatelessWidget {
   final String coinSemanticsLabel;
   final String crystalLabel;
   final String crystalSemanticsLabel;
-  final String happinessLabel;
   final String settingsTooltip;
   final String languageTooltip;
   final VoidCallback onLevel;
@@ -53,80 +51,47 @@ class HomeGameHud extends StatelessWidget {
       ],
     ),
     child: Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 9),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+      child: Row(
         children: [
-          Row(
-            children: [
-              _LevelBadge(
-                label: levelLabel,
-                progress: experienceProgress,
-                onPressed: onLevel,
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: _ResourceChip(
-                  key: const Key('wallet-coins'),
-                  imageAsset: GameAssets.spiritCoin,
-                  label: coinLabel,
-                  semanticsLabel: coinSemanticsLabel,
-                  onPressed: onCoins,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: _ResourceChip(
-                  key: const Key('mystical-crystals'),
-                  icon: Icons.diamond_rounded,
-                  iconColor: const Color(0xFFB96CFF),
-                  label: crystalLabel,
-                  semanticsLabel: crystalSemanticsLabel,
-                  onPressed: onCrystals,
-                ),
-              ),
-              const SizedBox(width: 4),
-              _HudIconButton(
-                key: const Key('language-button'),
-                tooltip: languageTooltip,
-                onPressed: onLanguage,
-                icon: const Icon(Icons.language_rounded),
-              ),
-              _HudIconButton(
-                key: const Key('settings-button'),
-                tooltip: settingsTooltip,
-                onPressed: onSettings,
-                icon: Image.asset(
-                  GameAssets.settingsIcon,
-                  width: 25,
-                  height: 25,
-                ),
-              ),
-            ],
+          _LevelBadge(
+            label: levelLabel,
+            progress: experienceProgress,
+            onPressed: onLevel,
           ),
-          const SizedBox(height: 5),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: _wood.withValues(alpha: 0.88),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: _woodLight),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
-                child: Text(
-                  happinessLabel,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: _parchment,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _ResourceChip(
+              key: const Key('wallet-coins'),
+              imageAsset: GameAssets.spiritCoin,
+              label: coinLabel,
+              semanticsLabel: coinSemanticsLabel,
+              onPressed: onCoins,
             ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: _ResourceChip(
+              key: const Key('mystical-crystals'),
+              icon: Icons.diamond_rounded,
+              iconColor: const Color(0xFFB96CFF),
+              label: crystalLabel,
+              semanticsLabel: crystalSemanticsLabel,
+              onPressed: onCrystals,
+            ),
+          ),
+          const SizedBox(width: 4),
+          _HudIconButton(
+            key: const Key('language-button'),
+            tooltip: languageTooltip,
+            onPressed: onLanguage,
+            icon: const Icon(Icons.language_rounded),
+          ),
+          _HudIconButton(
+            key: const Key('settings-button'),
+            tooltip: settingsTooltip,
+            onPressed: onSettings,
+            icon: Image.asset(GameAssets.settingsIcon, width: 25, height: 25),
           ),
         ],
       ),
@@ -187,7 +152,7 @@ class WorldActionOverlay extends StatelessWidget {
       if (hasComplaint)
         Positioned(
           left: 12,
-          bottom: 146,
+          bottom: 190,
           child: _WorldMarker(
             key: const Key('complaint-button'),
             icon: Icons.campaign_rounded,
@@ -199,7 +164,7 @@ class WorldActionOverlay extends StatelessWidget {
       else
         Positioned(
           left: 12,
-          bottom: 146,
+          bottom: 190,
           child: SizedBox(
             width: 1,
             height: 1,
@@ -213,7 +178,7 @@ class WorldActionOverlay extends StatelessWidget {
       if (incidentLabel != null && onIncident != null)
         Positioned(
           left: 12,
-          bottom: 208,
+          bottom: 250,
           child: _WorldMarker(
             key: const Key('incident-button'),
             icon: Icons.crisis_alert_rounded,

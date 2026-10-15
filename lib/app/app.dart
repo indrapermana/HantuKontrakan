@@ -23,6 +23,7 @@ class HantuKontrakanApp extends StatefulWidget {
     this.rewardedAdService,
     this.feedbackService,
     this.locale,
+    this.showDebugTools = false,
     super.key,
   });
 
@@ -33,6 +34,7 @@ class HantuKontrakanApp extends StatefulWidget {
   final RewardedAdService? rewardedAdService;
   final GameFeedbackService? feedbackService;
   final Locale? locale;
+  final bool showDebugTools;
 
   @override
   State<HantuKontrakanApp> createState() => _HantuKontrakanAppState();
@@ -103,7 +105,10 @@ class _HantuKontrakanAppState extends State<HantuKontrakanApp>
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
-        final router = AppRouter(controller: controller);
+        final router = AppRouter(
+          controller: controller,
+          showDebugTools: widget.showDebugTools,
+        );
         final savedLanguage = controller.isReady
             ? controller.state.languageCode
             : null;

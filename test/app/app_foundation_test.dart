@@ -8,9 +8,17 @@ import 'package:hantu_kontrakan/services/save_service.dart';
 import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 
 void main() {
-  Future<void> pumpApp(WidgetTester tester, {Locale? locale}) async {
+  Future<void> pumpApp(
+    WidgetTester tester, {
+    Locale? locale,
+    bool showDebugTools = false,
+  }) async {
     await tester.pumpWidget(
-      HantuKontrakanApp(saveService: MemorySaveService(), locale: locale),
+      HantuKontrakanApp(
+        saveService: MemorySaveService(),
+        locale: locale,
+        showDebugTools: showDebugTools,
+      ),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
@@ -169,7 +177,7 @@ void main() {
   testWidgets('debug HUD exposes state and supports tick and reset', (
     tester,
   ) async {
-    await pumpApp(tester, locale: const Locale('id'));
+    await pumpApp(tester, locale: const Locale('id'), showDebugTools: true);
 
     expect(find.byKey(const Key('debug-hud')), findsOneWidget);
     expect(find.textContaining('Coins 200  Chaos 40  Tick 0'), findsOneWidget);

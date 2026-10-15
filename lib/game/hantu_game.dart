@@ -18,11 +18,7 @@ class HantuGame extends FlameGame {
     required this.roomLabelFor,
     required this.happinessLabelFor,
     required this.lockedLabel,
-  }) : super(
-         camera: CameraComponent.withFixedResolution(width: 360, height: 360),
-       ) {
-    _frameCutawayWorld();
-  }
+  }) : super(camera: CameraComponent());
 
   final GameState state;
   final void Function(String roomId) onRoomTap;
@@ -33,6 +29,12 @@ class HantuGame extends FlameGame {
 
   @override
   ui.Color backgroundColor() => const ui.Color(0xFF111631);
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    _frameCutawayWorld(viewportSize: size);
+  }
 
   @override
   Future<void> onLoad() async {
@@ -67,9 +69,11 @@ class HantuGame extends FlameGame {
     );
   }
 
-  void _frameCutawayWorld() {
+  void _frameCutawayWorld({Vector2? viewportSize}) {
+    final width = viewportSize?.x ?? 360;
     camera.viewfinder
       ..anchor = Anchor.center
-      ..position = Vector2(180, 180);
+      ..position = Vector2(180, 260)
+      ..zoom = (width / 330).clamp(0.85, 1.45);
   }
 }

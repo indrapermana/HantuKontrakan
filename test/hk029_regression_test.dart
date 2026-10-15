@@ -37,7 +37,14 @@ void main() {
         find.byKey(const Key('full-screen-game')),
       );
       expect(gameSize.width, size.width);
-      expect(gameSize.height, size.height);
+      expect(gameSize.height, greaterThan(size.height * 0.75));
+      expect(gameSize.height, lessThan(size.height * 0.9));
+      final stageRect = tester.getRect(
+        find.byKey(const Key('portrait-world-stage')),
+      );
+      expect(stageRect.top, 62);
+      expect(stageRect.bottom, size.height - 76);
+      expect(find.byKey(const Key('portrait-world-backdrop')), findsOneWidget);
       expect(tester.takeException(), isNull, reason: 'home at $size');
 
       await tester.tap(find.byKey(const Key('settings-button')));

@@ -1,5 +1,4 @@
 import 'package:flame/game.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../application/game_controller.dart';
@@ -27,9 +26,14 @@ import 'game_feedback_overlay.dart';
 import 'home_game_shell.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({required this.controller, super.key});
+  const HomeScreen({
+    required this.controller,
+    this.showDebugTools = false,
+    super.key,
+  });
 
   final GameController controller;
+  final bool showDebugTools;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +58,6 @@ class HomeScreen extends StatelessWidget {
         final activeIncident = state.activeIncidentId == null
             ? null
             : IncidentDefinitions.byId(state.activeIncidentId!);
-        final pocongHappiness = controller.happinessFor('pocong_01');
         final currentLevel = ProgressionDefinitions.byLevel(state.playerLevel);
         final nextLevel =
             state.playerLevel >= ProgressionDefinitions.levels.length
@@ -73,30 +76,48 @@ class HomeScreen extends StatelessWidget {
               (goal) => DailyGoalSystem.isClaimable(state, goal),
             ) ||
             DailyGoalSystem.isChestClaimable(state);
+        final media = MediaQuery.of(context);
+        const hudHeight = 62.0;
+        const navigationHeight = 76.0;
+        final worldTop = media.padding.top + hudHeight;
+        final worldBottom = media.padding.bottom + navigationHeight;
         return Scaffold(
           backgroundColor: const Color(0xFF111631),
           resizeToAvoidBottomInset: false,
           body: Stack(
             fit: StackFit.expand,
             children: [
-              SizedBox.expand(
-                key: const Key('full-screen-game'),
-                child: GameWidget(
-                  key: ValueKey(controller.revision),
-                  loadingBuilder: (context) => const ColoredBox(
-                    key: Key('game-loading'),
-                    color: Color(0xFF111631),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  game: HantuGame(
-                    state: state,
-                    onRoomTap: (roomId) => _showRoomDetails(context, roomId),
-                    onGhostTap: (ghostId) =>
-                        _showGhostProfile(context, ghostId),
-                    roomLabelFor: (roomId) =>
-                        strings.roomTitle(_roomNumber(roomId)),
-                    happinessLabelFor: strings.roomCanvasHappiness,
-                    lockedLabel: strings.roomCanvasLocked,
+              const Positioned.fill(
+                child: ColoredBox(
+                  key: Key('portrait-world-backdrop'),
+                  color: Color(0xFF111631),
+                ),
+              ),
+              Positioned(
+                key: const Key('portrait-world-stage'),
+                top: worldTop,
+                right: 0,
+                bottom: worldBottom,
+                left: 0,
+                child: SizedBox.expand(
+                  key: const Key('full-screen-game'),
+                  child: GameWidget(
+                    key: ValueKey(controller.revision),
+                    loadingBuilder: (context) => const ColoredBox(
+                      key: Key('game-loading'),
+                      color: Color(0xFF111631),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    game: HantuGame(
+                      state: state,
+                      onRoomTap: (roomId) => _showRoomDetails(context, roomId),
+                      onGhostTap: (ghostId) =>
+                          _showGhostProfile(context, ghostId),
+                      roomLabelFor: (roomId) =>
+                          strings.roomTitle(_roomNumber(roomId)),
+                      happinessLabelFor: strings.roomCanvasHappiness,
+                      lockedLabel: strings.roomCanvasLocked,
+                    ),
                   ),
                 ),
               ),
@@ -119,10 +140,6 @@ class HomeScreen extends StatelessWidget {
                     crystalSemanticsLabel: strings.mysticalCrystals(
                       state.mysticalCrystals,
                     ),
-                    happinessLabel: strings.ghostHappinessSummary(
-                      'Pocong',
-                      pocongHappiness,
-                    ),
                     settingsTooltip: strings.settingsTitle,
                     languageTooltip: strings.languageTitle,
                     onLevel: () => _showLevelProgress(context),
@@ -137,7 +154,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              if (kDebugMode)
+              if (showDebugTools)
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 92),
@@ -150,7 +167,7 @@ class HomeScreen extends StatelessWidget {
               SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: EdgeInsets.only(top: kDebugMode ? 142 : 94),
+                  padding: EdgeInsets.only(top: showDebugTools ? 142 : 74),
                   child: Align(
                     alignment: Alignment.topCenter,
                     child: TutorialPanel(
@@ -164,11 +181,17 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              RoomRentBubbleOverlay(
-                coinsByRoom: controller.pendingRentCoinsByRoom,
-                labelFor: (roomId, coins) =>
-                    strings.roomRentBubbleLabel(coins, _roomNumber(roomId)),
-                onCollect: (roomId) => _collectRoomRent(context, roomId),
+              Positioned(
+                top: worldTop,
+                right: 0,
+                bottom: worldBottom,
+                left: 0,
+                child: RoomRentBubbleOverlay(
+                  coinsByRoom: controller.pendingRentCoinsByRoom,
+                  labelFor: (roomId, coins) =>
+                      strings.roomRentBubbleLabel(coins, _roomNumber(roomId)),
+                  onCollect: (roomId) => _collectRoomRent(context, roomId),
+                ),
               ),
               WorldActionOverlay(
                 collectLabel: strings.collectAllRent(

@@ -1063,3 +1063,47 @@ Status: locally verified on 2026-10-15.
 - HK-030-G2 is next. Portrait world composition, room/lock visual redesign,
   profile simplification, navigation onboarding, and commercial audio remain
   deliberately outside G1.
+
+### HK-030-G2 — Portrait world and in-world status
+
+Status: locally and physically verified on 2026-10-15.
+
+- Replaced the square fixed-resolution camera with a responsive camera framed
+  from viewport width. The cutaway keeps its source aspect ratio, receives only
+  bounded camera zoom, and stays centered on stable world coordinates.
+- Reserved one continuous portrait world stage between the safe-area HUD and
+  bottom navigation. The building now dominates that playable region instead
+  of being centered inside a square surrounded by unexplained empty bands.
+- Expanded the Flame backdrop to a portrait night scene with moon, haze,
+  ground, and subtle building glow. These layers fill the stage without
+  stretching or regenerating the supplied cutaway artwork.
+- Replaced raw room/happiness text and full-room lock rectangles with a shared
+  dark-wood/gold plate language. Unlocked rooms use compact room and
+  color-independent happiness plates; locked rooms use a fitted interior shade,
+  vector lock, and localized lock plate.
+- Follow-up iPhone inspection realigned the room component bounds to the actual
+  cutaway interiors: upper-room lock shades now cover the rooms instead of the
+  roof, while lower-room happiness plates remain below the tenant sprites.
+- Removed the ambiguous global `Pocong 73`-style HUD strip. Happiness is now
+  contextual to the occupied room, while ghost details retain the complete
+  numeric breakdown.
+- Debug controls are now opt-in through an explicit app flag instead of being
+  shown in every debug build, so ordinary device testing reflects the player
+  composition. The dedicated debug-HUD test enables the flag directly.
+- Shifted complaint/incident markers away from Collect All so the primary
+  world actions no longer visually collide on the portrait stage.
+- Compact 360x640 and large 430x932 tests verify that the stage spans the full
+  width, occupies the space between HUD/navigation, has an intentional
+  backdrop, and produces no layout exception. Flame tests verify responsive
+  camera framing and all four room/ghost selection targets.
+- A wired iPhone run compiled, signed, installed, launched, completed the
+  offline home/collection/goals/settings flow, and captured the redesigned
+  home composition. The screenshot confirms a dominant un-stretched building,
+  continuous night backdrop, readable room states, preserved rent action, and
+  no developer controls in the normal player composition. A transient Dart VM
+  discovery delay affected one recapture attempt; the subsequent retry passed.
+- Final verification passed: formatting, `flutter analyze`, all 210 Flutter
+  tests, Android debug APK build, `git diff --check`, and the physical-iPhone
+  integration flow.
+- HK-030-G3 is next. Navigation purpose, profile information density, and
+  first-use guidance were not expanded in this presentation-only ticket.

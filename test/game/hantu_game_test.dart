@@ -6,7 +6,7 @@ import 'package:hantu_kontrakan/simulation/models/game_state.dart';
 import 'package:hantu_kontrakan/simulation/systems/happiness_system.dart';
 
 void main() {
-  test('camera centers the complete 360x360 cutaway world', () {
+  test('camera frames the portrait world responsively from viewport width', () {
     final game = HantuGame(
       state: GameState.seeded(),
       onRoomTap: (_) {},
@@ -15,10 +15,12 @@ void main() {
       happinessLabelFor: (value) => '$value',
       lockedLabel: 'locked',
     );
+    game.onGameResize(Vector2(390, 650));
 
     expect(game.camera.viewfinder.anchor, Anchor.center);
     expect(game.camera.viewfinder.position.x, 180);
-    expect(game.camera.viewfinder.position.y, 180);
+    expect(game.camera.viewfinder.position.y, 260);
+    expect(game.camera.viewfinder.zoom, closeTo(390 / 330, 0.001));
   });
 
   test('2x2 cutaway creates four selectable room IDs at fixed positions', () {
@@ -54,10 +56,10 @@ void main() {
           room.roomId: (room.position.x, room.position.y),
       },
       {
-        'room_03': (8.0, 34.0),
-        'room_04': (182.0, 34.0),
-        'room_01': (8.0, 168.0),
-        'room_02': (182.0, 168.0),
+        'room_03': (8.0, 190.0),
+        'room_04': (182.0, 190.0),
+        'room_01': (8.0, 270.0),
+        'room_02': (182.0, 270.0),
       },
     );
 

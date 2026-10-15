@@ -496,3 +496,26 @@ Date: 2026-10-14
 - This correction milestone does not alter save schema, balance, deterministic
   rules, or Flame ownership. Portrait composition and status art belong to
   G2; navigation/profile redesign to G3; commercial audio replacement to G4.
+
+### HK-030-G2 portrait-world decisions
+
+- The supplied 4:3 cutaway remains unmodified and un-stretched. A bounded
+  width-derived camera zoom may crop a small amount of exterior edge scenery,
+  while all four room interaction rectangles remain inside the stage.
+- Flutter reserves the safe-area space between the compact HUD and bottom
+  navigation; Flame owns the continuous portrait night scene inside it. This
+  keeps platform-safe layout separate from world rendering.
+- The world coordinate space is 360x520. The original 360x270 cutaway is
+  centered vertically within atmospheric sky and ground rather than scaled to
+  an incompatible portrait aspect ratio.
+- Room state is rendered in place: dark-wood/gold plates for identity, a
+  green/amber/red dot plus localized value for happiness, and an interior-fit
+  shade/lock plate for locked rooms. Color is never the only state cue.
+- Global Pocong happiness was removed from the HUD because it looked like an
+  unexplained currency/property stat and duplicated room state. Detailed
+  happiness remains available from room and ghost panels.
+- Debug controls require explicit app construction with `showDebugTools`.
+  Build mode alone must not place internal counters and simulation controls in
+  screenshots or ordinary developer playtests.
+- No save, economy, mission, assignment, audio, or monetization rule changed.
+  G2 changes only camera/layout and presentation adapters.

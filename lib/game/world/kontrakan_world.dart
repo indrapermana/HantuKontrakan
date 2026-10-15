@@ -65,7 +65,7 @@ class KontrakanWorld extends PositionComponent {
           ? null
           : happinessLabelFor(happinessFor(ghost.id)),
       lockedLabel: lockedLabel,
-      position: Vector2(8 + (layout.column * 174), 34 + (layout.row * 134)),
+      position: Vector2(8 + (layout.column * 174), 190 + (layout.row * 80)),
       ghostAtlas: ghost == null ? null : ghostAtlases[ghost.kind],
       usesCutawayArt: cutawayImage != null,
       locked: !room.unlocked,
@@ -95,13 +95,15 @@ class _RoomLayout {
 }
 
 class _Backdrop extends PositionComponent {
-  _Backdrop(this.cutawayImage) : super(size: Vector2(360, 360));
+  _Backdrop(this.cutawayImage) : super(size: Vector2(360, 520));
 
   final Image? cutawayImage;
 
   final Paint _sky = Paint()..color = const Color(0xFF17183B);
   final Paint _moon = Paint()..color = const Color(0xFFFFE6A7);
   final Paint _ground = Paint()..color = const Color(0xFF29233F);
+  final Paint _haze = Paint()..color = const Color(0x303F4370);
+  final Paint _windowGlow = Paint()..color = const Color(0x18FFD98A);
 
   @override
   Future<void> onLoad() async {
@@ -111,7 +113,7 @@ class _Backdrop extends PositionComponent {
       add(
         SpriteComponent(
           sprite: Sprite(image),
-          position: Vector2(0, 45),
+          position: Vector2(0, 135),
           size: Vector2(360, 270),
         ),
       );
@@ -121,10 +123,12 @@ class _Backdrop extends PositionComponent {
   @override
   void render(Canvas canvas) {
     canvas.drawRect(size.toRect(), _sky);
-    if (cutawayImage == null) {
-      canvas.drawCircle(const Offset(300, 48), 25, _moon);
-    }
-    canvas.drawRect(const Rect.fromLTWH(0, 304, 360, 56), _ground);
+    canvas.drawCircle(const Offset(302, 69), 29, _moon);
+    canvas.drawCircle(const Offset(292, 62), 28, _sky);
+    canvas.drawOval(const Rect.fromLTWH(-55, 91, 245, 45), _haze);
+    canvas.drawOval(const Rect.fromLTWH(145, 108, 280, 51), _haze);
+    canvas.drawRect(const Rect.fromLTWH(0, 405, 360, 115), _ground);
+    canvas.drawOval(const Rect.fromLTWH(-40, 385, 440, 55), _windowGlow);
     super.render(canvas);
   }
 }
